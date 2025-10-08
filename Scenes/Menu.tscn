@@ -9,22 +9,27 @@ layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 1.0000002
-offset_right = 1.0
-offset_bottom = -277.98602
+offset_left = -3.9999995
+offset_top = 241.00002
+offset_right = 301.61896
+offset_bottom = -46.260254
 grow_horizontal = 2
 grow_vertical = 2
-scale = Vector2(1.0080477, 1.4017308)
+scale = Vector2(0.719, 0.7)
 script = ExtResource("1_t0j7j")
 
 [node name="Meaner" type="Sprite2D" parent="."]
 top_level = true
-position = Vector2(355.85245, 79.811935)
+position = Vector2(355.85245, 128.81194)
 scale = Vector2(0.38906035, 0.2993065)
 texture = ExtResource("2_syfuq")
 
 [node name="Canyou" type="Sprite2D" parent="."]
 top_level = true
-position = Vector2(351.13263, 881.7234)
-scale = Vector2(0.9388165, 0.5769357)
+position = Vector2(361.30624, 833.8926)
+scale = Vector2(0.91695505, 0.65581036)
 texture = ExtResource("3_s2c3o")
+
+[node name="MainMenuBackground" type="Sprite2D" parent="."]
+position = Vector2(343.71466, 471.1384)
+scale = Vector2(0.9205288, 0.7796867)

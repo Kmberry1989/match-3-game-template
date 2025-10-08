@@ -1,8 +1,8 @@
 extends Control
 
-@onready var score_label = $MarginContainer/HBoxContainer/PlayerInfo/HBox/VBox/ScoreContainer/PlayerScoreLabel
+@onready var score_label = $MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame/VBox/ScoreContainer/PlayerScoreLabel
 @onready var opponent_score_label = $MarginContainer/HBoxContainer/OpponentInfo/HBox/VBox/ScoreContainer/OpponentScoreLabel
-@onready var player_name_label = $MarginContainer/HBoxContainer/PlayerInfo/HBox/VBox/PlayerNameLabel
+@onready var player_name_label = $MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame/VBox/PlayerNameLabel
 @onready var opponent_name_label = $MarginContainer/HBoxContainer/OpponentInfo/HBox/VBox/OpponentNameLabel
 
 func _ready():
