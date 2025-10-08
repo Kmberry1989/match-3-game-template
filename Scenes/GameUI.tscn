@@ -1,0 +1,171 @@
+[gd_scene load_steps=8 format=3 uid="uid://dlothci5o3owq"]
+
+[ext_resource type="Script" uid="uid://d13wbq8qr3cqx" path="res://Scripts/GameUI.gd" id="1_abcde"]
+[ext_resource type="Texture2D" uid="uid://byr8w1akrenlh" path="res://Assets/Visuals/avatar_frame_2.png" id="2_co6lq"]
+[ext_resource type="Texture2D" uid="uid://bufill1b8xqxl" path="res://Assets/Visuals/player_avatar.png" id="3_klmno"]
+[ext_resource type="Texture2D" uid="uid://cb8rujtg7rhsf" path="res://Assets/Visuals/score.png" id="4_wjrrg"]
+[ext_resource type="Texture2D" uid="uid://b8os725x8n2sn" path="res://Scripts/back.png" id="5_d8tla"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_tii1l"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_8dgta"]
+
+[node name="GameUI" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -50.0
+offset_top = 4.0
+offset_right = 170.0
+offset_bottom = 7.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_abcde")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 59.0
+offset_top = 835.00006
+offset_right = 529.58813
+offset_bottom = 99.0
+grow_horizontal = 2
+grow_vertical = 2
+scale = Vector2(0.425, 0.5)
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+
+[node name="PlayerInfo" type="PanelContainer" parent="MarginContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="HBox" type="HBoxContainer" parent="MarginContainer/HBoxContainer/PlayerInfo"]
+material = SubResource("ShaderMaterial_tii1l")
+layout_mode = 2
+
+[node name="AvatarFrame" type="TextureRect" parent="MarginContainer/HBoxContainer/PlayerInfo/HBox"]
+layout_mode = 2
+texture = ExtResource("2_co6lq")
+
+[node name="Avatar" type="TextureRect" parent="MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame"]
+show_behind_parent = true
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -70.29414
+offset_top = -63.5
+offset_right = 68.28584
+offset_bottom = 64.5
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("3_klmno")
+
+[node name="VBox" type="VBoxContainer" parent="MarginContainer/HBoxContainer/PlayerInfo/HBox"]
+layout_mode = 2
+
+[node name="PlayerNameLabel" type="Label" parent="MarginContainer/HBoxContainer/PlayerInfo/HBox/VBox"]
+layout_mode = 2
+text = "Player"
+horizontal_alignment = 1
+uppercase = true
+
+[node name="ScoreContainer" type="TextureRect" parent="MarginContainer/HBoxContainer/PlayerInfo/HBox/VBox"]
+layout_mode = 2
+texture = ExtResource("4_wjrrg")
+
+[node name="PlayerScoreLabel" type="Label" parent="MarginContainer/HBoxContainer/PlayerInfo/HBox/VBox/ScoreContainer"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -88.70596
+offset_top = -37.0
+offset_right = -27.705963
+offset_bottom = -14.0
+grow_horizontal = 2
+grow_vertical = 2
+scale = Vector2(3, 3)
+text = "0"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Spacer" type="Control" parent="MarginContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 20.0
+
+[node name="OpponentInfo" type="PanelContainer" parent="MarginContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="HBox" type="HBoxContainer" parent="MarginContainer/HBoxContainer/OpponentInfo"]
+material = SubResource("ShaderMaterial_8dgta")
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="MarginContainer/HBoxContainer/OpponentInfo/HBox"]
+layout_mode = 2
+
+[node name="OpponentNameLabel" type="Label" parent="MarginContainer/HBoxContainer/OpponentInfo/HBox/VBox"]
+layout_mode = 2
+text = "Opponent"
+horizontal_alignment = 1
+uppercase = true
+
+[node name="ScoreContainer" type="TextureRect" parent="MarginContainer/HBoxContainer/OpponentInfo/HBox/VBox"]
+layout_mode = 2
+texture = ExtResource("4_wjrrg")
+
+[node name="OpponentScoreLabel" type="Label" parent="MarginContainer/HBoxContainer/OpponentInfo/HBox/VBox/ScoreContainer"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -14.411804
+offset_top = -35.5
+offset_right = -4.411804
+offset_bottom = -12.5
+grow_horizontal = 2
+grow_vertical = 2
+scale = Vector2(3, 3)
+text = "0"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="AvatarFrame" type="TextureRect" parent="MarginContainer/HBoxContainer/OpponentInfo/HBox"]
+layout_mode = 2
+texture = ExtResource("2_co6lq")
+
+[node name="Avatar" type="TextureRect" parent="MarginContainer/HBoxContainer/OpponentInfo/HBox/AvatarFrame"]
+show_behind_parent = true
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -69.11749
+offset_top = -63.5
+offset_right = 69.47052
+offset_bottom = 64.5
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("3_klmno")
+
+[node name="Back" type="Sprite2D" parent="."]
+show_behind_parent = true
+position = Vector2(320.49997, 475.49994)
+scale = Vector2(0.74320656, 0.68536925)
+texture = ExtResource("5_d8tla")

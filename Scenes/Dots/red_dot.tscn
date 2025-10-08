@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3 uid="uid://bw7ljsc1ks4i0"]
+
+[ext_resource type="PackedScene" uid="uid://d0bsiknlebs18" path="res://Scenes/Dot.tscn" id="2"]
+[ext_resource type="Texture2D" uid="uid://b6odoophj0d1r" path="res://Assets/Dots/kristenavatar.png" id="2_cvlyw"]
+
+[node name="red_dot" instance=ExtResource("2")]
+color = "red"
+
+[node name="Sprite2D" parent="." index="0"]
+scale = Vector2(0.25, 0.25)
+texture = ExtResource("2_cvlyw")
