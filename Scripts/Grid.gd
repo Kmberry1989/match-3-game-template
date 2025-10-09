@@ -48,15 +48,8 @@ var drag_start_position = Vector2.ZERO
 
 # Score variables
 var score = 0
-var opponent_score = 0
-
-var is_multiplayer = false
-var start_time = 0
 
 func _ready():
-	start_time = Time.get_unix_time_from_system()
-	is_multiplayer = (NetworkManager.peer != null and NetworkManager.peer.get_ready_state() == WebSocketPeer.STATE_OPEN)
-
 	state = move
 	setup_timers()
 	randomize()
@@ -65,9 +58,8 @@ func _ready():
 	
 	await get_tree().process_frame
 	update_score_display()
-	_on_opponent_score_updated(0)
 	game_ui.set_player_name(PlayerManager.get_player_name())
-	game_ui.set_opponent_name("Opponent")
+	AudioManager.play_music("game")
 
 	while find_potential_match() == null:
 		for i in range(width):
@@ -79,36 +71,9 @@ func _ready():
 
 	idle_timer.start()
 
-	# Connect to network signals if in a multiplayer game
-	if is_multiplayer:
-		NetworkManager.opponent_score_updated.connect(_on_opponent_score_updated)
-		NetworkManager.server_disconnected.connect(_on_server_disconnected)
-
 func update_score_display():
 	game_ui.set_score(score)
-	# If in a multiplayer game, send score update to opponent
-	if is_multiplayer:
-		NetworkManager.send_score_update(score)
 
-func _on_opponent_score_updated(new_score):
-	opponent_score = new_score
-	game_ui.set_opponent_score(opponent_score)
-
-func _on_server_disconnected():
-	var elapsed_time = Time.get_unix_time_from_system() - start_time
-	PlayerManager.add_time_played(elapsed_time)
-
-	if score > opponent_score:
-		PlayerManager.increment_pvp_wins()
-	else:
-		PlayerManager.increment_pvp_losses()
-	
-	PlayerManager.check_objectives()
-	PlayerManager.save_player_data()
-
-	print("Opponent disconnected. Returning to menu.")
-	get_tree().change_scene_to_file("res://Scenes/Menu.tscn")
-	
 func setup_timers():
 	destroy_timer.connect("timeout", Callable(self, "destroy_matches"))
 	destroy_timer.set_one_shot(true)
@@ -316,14 +281,6 @@ func process_match_animations(dots_in_match):
 		if dot != null and not dot in unique_dots:
 			unique_dots.append(dot)
 
-	# Play sound based on match size
-	if unique_dots.size() >= 5:
-		AudioManager.play_sound("match_fanfare")
-	elif unique_dots.size() == 4:
-		AudioManager.play_sound("match_chime")
-	else:
-		AudioManager.play_sound("match_pop")
-
 	# Sort dots for systematic animation
 	unique_dots.sort_custom(func(a, b): return a.position.x < b.position.x or (a.position.x == b.position.x and a.position.y < b.position.y))
 
@@ -337,13 +294,12 @@ func process_match_animations(dots_in_match):
 			if matched_color == "":
 				matched_color = dot.color
 
-	# Trigger sad animation for other dots
-	if matched_color != "":
-		for i in range(width):
-			for j in range(height):
-				var current_dot = all_dots[i][j]
-				if current_dot != null and not current_dot.matched and current_dot.color == matched_color:
-					current_dot.play_sad_animation()
+	# Trigger surprised animation for all non-matching dots
+	for i in range(width):
+		for j in range(height):
+			var current_dot = all_dots[i][j]
+			if current_dot != null and not current_dot.matched:
+				current_dot.play_surprised_for_a_second()
 
 func destroy_matches():
 	var was_matched = false
@@ -368,6 +324,12 @@ func destroy_matches():
 				all_dots[i][j] = null
 	
 	if points_earned > 0:
+		if match_count >= 5:
+			AudioManager.play_sound("match_fanfare")
+		elif match_count == 4:
+			AudioManager.play_sound("match_chime")
+		else:
+			AudioManager.play_sound("match_pop")
 		score += points_earned
 		update_score_display()
 		
@@ -421,6 +383,12 @@ func refill_columns():
 	after_refill()
 				
 func after_refill():
+	# Synchronize all dots' pulsing animation
+	for i in range(width):
+		for j in range(height):
+			if all_dots[i][j] != null:
+				all_dots[i][j].start_pulsing()
+
 	state = wait
 	await get_tree().create_timer(0.5).timeout
 	
@@ -469,7 +437,6 @@ func _on_idle_timer_timeout():
 	var hint_dot = find_potential_match()
 	if hint_dot != null:
 		hint_dot.play_idle_animation()
-	idle_timer.start()
 
 func find_potential_match():
 	for i in range(width):

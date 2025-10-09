@@ -1,8 +1,7 @@
-[gd_scene load_steps=4 format=3 uid="uid://dbfc8vw1b80dl"]
+[gd_scene load_steps=3 format=3 uid="uid://dbfc8vw1b80dl"]
 
 [ext_resource type="Script" uid="uid://0qx7jujucyji" path="res://Scripts/Menu.gd" id="1_t0j7j"]
-[ext_resource type="Texture2D" uid="uid://cre13hi3ufmte" path="res://Assets/Visuals/meaner.png" id="2_syfuq"]
-[ext_resource type="Texture2D" uid="uid://b6wf5jnedvl8c" path="res://Assets/Visuals/canyou.png" id="3_s2c3o"]
+[ext_resource type="Texture2D" uid="uid://dbpwyrwi6nn1i" path="res://Assets/Visuals/met.png" id="2_6pedr"]
 
 [node name="Menu" type="Control"]
 layout_mode = 3
@@ -10,26 +9,19 @@ anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = -3.9999995
-offset_top = 241.00002
+offset_top = -16.000015
 offset_right = 301.61896
-offset_bottom = -46.260254
+offset_bottom = 425.4287
 grow_horizontal = 2
 grow_vertical = 2
 scale = Vector2(0.719, 0.7)
 script = ExtResource("1_t0j7j")
 
-[node name="Meaner" type="Sprite2D" parent="."]
-top_level = true
-position = Vector2(355.85245, 128.81194)
-scale = Vector2(0.38906035, 0.2993065)
-texture = ExtResource("2_syfuq")
-
-[node name="Canyou" type="Sprite2D" parent="."]
-top_level = true
-position = Vector2(361.30624, 833.8926)
-scale = Vector2(0.91695505, 0.65581036)
-texture = ExtResource("3_s2c3o")
-
 [node name="MainMenuBackground" type="Sprite2D" parent="."]
 position = Vector2(343.71466, 471.1384)
 scale = Vector2(0.9205288, 0.7796867)
+
+[node name="Met" type="Sprite2D" parent="."]
+position = Vector2(500.69525, 277.14288)
+scale = Vector2(0.8724877, 0.8724877)
+texture = ExtResource("2_6pedr")
