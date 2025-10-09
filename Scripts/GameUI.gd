@@ -1,14 +1,16 @@
 extends Control
 
-@onready var score_label = $MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame/VBox/ScoreContainer/PlayerScoreLabel
+@onready var score_label = $MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame/PlayerScoreLabel
 @onready var opponent_score_label = $MarginContainer/HBoxContainer/OpponentInfo/HBox/VBox/ScoreContainer/OpponentScoreLabel
 @onready var player_name_label = $MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame/VBox/PlayerNameLabel
 @onready var opponent_name_label = $MarginContainer/HBoxContainer/OpponentInfo/HBox/VBox/OpponentNameLabel
+@onready var opponent_info = $MarginContainer/HBoxContainer/OpponentInfo
 
 func _ready():
 	set_player_name(PlayerManager.get_player_name())
 	# Opponent name can be set when a match is found
 	set_opponent_name("Opponent")
+	opponent_info.hide()
 
 func set_score(score):
 	score_label.text = "Score: " + str(score)

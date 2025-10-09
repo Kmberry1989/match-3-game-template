@@ -2,12 +2,11 @@
 
 [ext_resource type="Script" uid="uid://d13wbq8qr3cqx" path="res://Scripts/GameUI.gd" id="1_abcde"]
 [ext_resource type="Texture2D" uid="uid://byr8w1akrenlh" path="res://Assets/Visuals/avatar_frame_2.png" id="2_co6lq"]
+[ext_resource type="Texture2D" uid="uid://dq41j2cm7urob" path="res://Assets/Visuals/Whisk_fd8aa714aaed74bab0f4fb87e142dae4eg.png" id="2_d8tla"]
 [ext_resource type="Texture2D" uid="uid://bufill1b8xqxl" path="res://Assets/Visuals/player_avatar.png" id="3_klmno"]
 [ext_resource type="Texture2D" uid="uid://cb8rujtg7rhsf" path="res://Assets/Visuals/score.png" id="4_wjrrg"]
 [ext_resource type="Texture2D" uid="uid://c5q55va2gock1" path="res://Assets/Visuals/container.png" id="5_wjrrg"]
 [ext_resource type="Texture2D" uid="uid://cre13hi3ufmte" path="res://Assets/Visuals/meaner.png" id="6_d8tla"]
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_tii1l"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_8dgta"]
 
@@ -25,15 +24,20 @@ grow_vertical = 2
 script = ExtResource("1_abcde")
 metadata/_edit_vertical_guides_ = [-1033.0]
 
+[node name="WhiskFd8Aa714Aaed74Bab0f4Fb87e142Dae4Eg" type="Sprite2D" parent="."]
+position = Vector2(388.00006, 635.00006)
+scale = Vector2(1.1220057, 1.122006)
+texture = ExtResource("2_d8tla")
+
 [node name="MarginContainer" type="MarginContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 32.0
-offset_top = 733.9999
-offset_right = 250.0
-offset_bottom = 11.999878
+offset_left = 130.0
+offset_top = -6.999998
+offset_right = 396.57147
+offset_bottom = -729.0
 grow_horizontal = 2
 grow_vertical = 2
 scale = Vector2(0.7, 0.823)
@@ -46,12 +50,26 @@ theme_override_constants/margin_bottom = 20
 layout_mode = 2
 alignment = 1
 
+[node name="Container" type="Sprite2D" parent="MarginContainer/HBoxContainer"]
+position = Vector2(383.57147, 74.4458)
+scale = Vector2(1.0577579, 0.6962961)
+texture = ExtResource("5_wjrrg")
+
+[node name="Back" type="Sprite2D" parent="MarginContainer/HBoxContainer/Container"]
+show_behind_parent = true
+position = Vector2(118.8631, 477.03568)
+scale = Vector2(8.950415, 14.778478)
+
 [node name="PlayerInfo" type="PanelContainer" parent="MarginContainer/HBoxContainer"]
 layout_mode = 2
 
 [node name="HBox" type="HBoxContainer" parent="MarginContainer/HBoxContainer/PlayerInfo"]
-material = SubResource("ShaderMaterial_tii1l")
 layout_mode = 2
+
+[node name="ScoreContainer" type="TextureRect" parent="MarginContainer/HBoxContainer/PlayerInfo/HBox"]
+visible = false
+layout_mode = 2
+texture = ExtResource("4_wjrrg")
 
 [node name="AvatarFrame" type="TextureRect" parent="MarginContainer/HBoxContainer/PlayerInfo/HBox"]
 layout_mode = 2
@@ -67,47 +85,36 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -67.85714
-offset_top = -78.697945
+offset_top = -72.62259
 offset_right = 70.72284
-offset_bottom = 49.302063
+offset_bottom = 55.37741
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("3_klmno")
 
+[node name="PlayerScoreLabel" type="Label" parent="MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame"]
+layout_mode = 0
+offset_left = 469.99994
+offset_top = 26.345074
+offset_right = 651.0
+offset_bottom = 49.345074
+scale = Vector2(2.5, 2.5)
+text = "0"
+horizontal_alignment = 1
+vertical_alignment = 1
+
 [node name="VBox" type="VBoxContainer" parent="MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame"]
 layout_mode = 0
-offset_left = 153.99998
-offset_right = 335.0
-offset_bottom = 187.0
+offset_left = 150.0
+offset_top = -59.924538
+offset_right = 331.0
+offset_bottom = 127.07546
 
 [node name="PlayerNameLabel" type="Label" parent="MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame/VBox"]
-visible = false
 layout_mode = 2
 text = "Player"
 horizontal_alignment = 1
 uppercase = true
-
-[node name="ScoreContainer" type="TextureRect" parent="MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame/VBox"]
-layout_mode = 2
-texture = ExtResource("4_wjrrg")
-
-[node name="PlayerScoreLabel" type="Label" parent="MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame/VBox/ScoreContainer"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -53.071426
-offset_top = -28.579712
-offset_right = -8.336098
-offset_bottom = -5.579712
-grow_horizontal = 2
-grow_vertical = 2
-scale = Vector2(2, 2)
-text = "0"
-horizontal_alignment = 1
-vertical_alignment = 1
 
 [node name="Spacer" type="Control" parent="MarginContainer/HBoxContainer"]
 layout_mode = 2
@@ -174,18 +181,8 @@ grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("3_klmno")
 
-[node name="Back" type="Sprite2D" parent="."]
-show_behind_parent = true
-position = Vector2(470.87018, 371.225)
-scale = Vector2(7.035308, 8.061717)
-
-[node name="Container" type="Sprite2D" parent="Back"]
-position = Vector2(-16.75409, 60.00891)
-scale = Vector2(0.116001755, 0.072751336)
-texture = ExtResource("5_wjrrg")
-
 [node name="Meaner" type="Sprite2D" parent="."]
 top_level = true
-position = Vector2(357.00003, 116)
+position = Vector2(387, 101)
 scale = Vector2(0.30450678, 0.27272874)
 texture = ExtResource("6_d8tla")

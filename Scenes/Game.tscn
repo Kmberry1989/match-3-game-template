@@ -6,14 +6,6 @@
 
 [node name="Game" type="Node"]
 
-[node name="Background" type="TextureRect" parent="."]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-script = ExtResource("2")
-fade_duration = 2.0
-hold_duration = 8.0
-
 [node name="Panel" type="Panel" parent="."]
 show_behind_parent = true
 offset_left = -36.0
@@ -22,11 +14,28 @@ offset_right = 37.0
 offset_bottom = 42.979485
 
 [node name="Grid" type="Node2D" parent="."]
+position = Vector2(32, -8)
 script = ExtResource("1")
 width = 7
 height = 7
 offset = 70
 y_offset = -2
 
+[node name="Background" type="TextureRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -4.0
+offset_top = 5.0
+offset_right = -4.0
+offset_bottom = 5.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("2")
+fade_duration = 2.0
+hold_duration = 8.0
+
 [node name="GameUI" parent="." instance=ExtResource("3")]
 show_behind_parent = true
+offset_left = 1.0
+offset_right = -7.0

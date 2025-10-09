@@ -27,17 +27,18 @@ func _ready():
 	load_music()
 
 func load_sounds():
-	sounds["match_pop"] = load("res://Assets/Sounds/match_pop.ogg")
+	sounds["match_pop"] = load("res://Assets/Sounds/pop.ogg")
 	sounds["match_chime"] = load("res://Assets/Sounds/match_chime.ogg")
 	sounds["match_fanfare"] = load("res://Assets/Sounds/match_fanfare.ogg")
 	sounds["dot_land"] = load("res://Assets/Sounds/dot_land.ogg")
 	sounds["ui_click"] = load("res://Assets/Sounds/ui_click.ogg")
 	sounds["game_start"] = load("res://Assets/Sounds/game_start_swoosh.ogg")
+	sounds["yawn"] = load("res://Assets/Sounds/yawn.ogg")
+	sounds["surprised"] = load("res://Assets/Sounds/surprised.ogg")
 
 func load_music():
 	music_tracks["menu"] = load("res://Assets/Sounds/music_menu.ogg")
-	# No game music for now, as requested
-	# music_tracks["game"] = load("res://Assets/Sounds/music_game.ogg")
+	music_tracks["game"] = load("res://Assets/Sounds/music_ingame.ogg")
 
 func play_sound(sound_name):
 	if not sounds.has(sound_name):
