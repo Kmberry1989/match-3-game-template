@@ -237,6 +237,10 @@ func swap_dots(column, row, direction):
 	var first_dot = all_dots[column][row]
 	var other_dot = all_dots[column + direction.x][row + direction.y]
 	if first_dot != null && other_dot != null:
+		# Reset dots to normal state before swapping
+		first_dot.reset_to_normal_state()
+		other_dot.reset_to_normal_state()
+		
 		var temp_z = first_dot.z_index
 		first_dot.z_index = other_dot.z_index
 		other_dot.z_index = temp_z
@@ -262,6 +266,10 @@ func swap_back():
 	if dot_one != null && dot_two != null:
 		var first_dot = all_dots[last_place.x][last_place.y]
 		var other_dot = all_dots[last_place.x + last_direction.x][last_place.y + last_direction.y]
+		
+		# Reset dots to normal state before swapping back
+		first_dot.reset_to_normal_state()
+		other_dot.reset_to_normal_state()
 		
 		var temp_z = first_dot.z_index
 		first_dot.z_index = other_dot.z_index
