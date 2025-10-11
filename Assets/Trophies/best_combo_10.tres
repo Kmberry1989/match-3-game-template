@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="Trophy" load_steps=2 format=3 uid="uid://c7d8e9f0g1h2"]
+
+[ext_resource path="res://Scripts/Trophy.gd" type="Script" id="1_abcde"]
+[ext_resource path="res://Assets/Dots/green.svg" type="Texture2D" id="2_fghij"]
+
+[resource]
+script = ExtResource("1_abcde")
+id = "best_combo_10"
+trophy_name = "Combo King"
+description = "Achieve a combo of 10."
+unlocked_icon = ExtResource("2_fghij")

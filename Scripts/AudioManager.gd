@@ -10,16 +10,30 @@ const MAX_SFX_PLAYERS = 8 # Max simultaneous sound effects
 var sounds = {}
 var music_tracks = {}
 
+var music_bus_idx: int
+var sfx_bus_idx: int
+
 func _ready():
+	# Create audio buses for music and SFX
+	AudioServer.add_bus()
+	music_bus_idx = AudioServer.bus_count - 1
+	AudioServer.set_bus_name(music_bus_idx, "Music")
+	
+	AudioServer.add_bus()
+	sfx_bus_idx = AudioServer.bus_count - 1
+	AudioServer.set_bus_name(sfx_bus_idx, "SFX")
+
 	# Create a pool of audio players for sound effects
 	for i in range(MAX_SFX_PLAYERS):
 		var player = AudioStreamPlayer.new()
+		player.bus = "SFX"
 		add_child(player)
 		sfx_players.append(player)
 
 	# Create a dedicated player for music
 	music_player = AudioStreamPlayer.new()
 	music_player.name = "MusicPlayer"
+	music_player.bus = "Music"
 	add_child(music_player)
 
 	# Preload all sounds and music
@@ -38,7 +52,7 @@ func load_sounds():
 
 func load_music():
 	music_tracks["menu"] = load("res://Assets/Sounds/music_menu.ogg")
-	music_tracks["game"] = load("res://Assets/Sounds/music_ingame.ogg")
+	music_tracks["game"] = load("res://Assets/Sounds/music_ingame.mp3")
 
 func play_sound(sound_name):
 	if not sounds.has(sound_name):
@@ -63,3 +77,15 @@ func play_music(track_name, loop = true):
 
 func stop_music():
 	music_player.stop()
+
+func set_music_volume(volume_db):
+	AudioServer.set_bus_volume_db(music_bus_idx, volume_db)
+
+func set_sfx_volume(volume_db):
+	AudioServer.set_bus_volume_db(sfx_bus_idx, volume_db)
+
+func get_music_volume():
+	return AudioServer.get_bus_volume_db(music_bus_idx)
+
+func get_sfx_volume():
+	return AudioServer.get_bus_volume_db(sfx_bus_idx)

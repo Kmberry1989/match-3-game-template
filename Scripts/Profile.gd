@@ -2,8 +2,10 @@ extends Control
 
 @onready var player_name_label = $MarginContainer/VBoxContainer/PlayerNameLabel
 @onready var time_played_label = $MarginContainer/VBoxContainer/TimePlayedLabel
-@onready var pvp_wins_label = $MarginContainer/VBoxContainer/PvpWinsLabel
-@onready var pvp_losses_label = $MarginContainer/VBoxContainer/PvpLossesLabel
+@onready var level_label = $MarginContainer/VBoxContainer/LevelLabel
+@onready var xp_label = $MarginContainer/VBoxContainer/XpLabel
+@onready var best_combo_label = $MarginContainer/VBoxContainer/BestComboLabel
+@onready var lines_cleared_label = $MarginContainer/VBoxContainer/LinesClearedLabel
 @onready var avatar_texture_rect = $MarginContainer/VBoxContainer/HBoxContainer/AvatarFrame/Avatar
 @onready var avatar_frame_rect = $MarginContainer/VBoxContainer/HBoxContainer/AvatarFrame
 @onready var file_dialog = $FileDialog
@@ -36,8 +38,10 @@ func display_player_data():
 	var minutes = int((time_played % 3600) / 60)
 	var seconds = time_played % 60
 	time_played_label.text = "Time Played: %02d:%02d:%02d" % [hours, minutes, seconds]
-	pvp_wins_label.text = "PvP Wins: " + str(data["pvp_wins"])
-	pvp_losses_label.text = "PvP Losses: " + str(data["pvp_losses"])
+	level_label.text = "Level: " + str(data["current_level"])
+	xp_label.text = "XP: " + str(data["current_xp"]) + "/" + str(PlayerManager.get_xp_for_next_level())
+	best_combo_label.text = "Best Combo: " + str(data["best_combo"])
+	lines_cleared_label.text = "Dots Cleared: " + str(data["total_lines_cleared"])
 	
 	# Load avatar
 	var avatar_path = "user://avatars/" + PlayerManager.get_player_name() + ".png"
