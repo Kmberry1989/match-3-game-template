@@ -1,11 +1,11 @@
-[gd_scene load_steps=3 format=3 uid="uid://dg8faho6jm1ry"]
+[gd_scene load_steps=3 format=3 uid="uid://1olamb02mpln"]
 
 [ext_resource type="PackedScene" uid="uid://d0bsiknlebs18" path="res://Scenes/Dot.tscn" id="2"]
-[ext_resource type="Texture2D" uid="uid://bgvxfxc2ov54e" path="res://Assets/Dots/ericavatar.png" id="2_jj1q7"]
+[ext_resource type="Texture2D" uid="uid://cqrkl08ikhhs" path="res://Assets/Dots/vickieavatar.png" id="2_mq2dp"]
 
-[node name="blue_dot" instance=ExtResource("2")]
-color = "blue"
+[node name="brown_dot" instance=ExtResource("2")]
+color = "brown"
 
 [node name="Sprite2D" parent="." index="0"]
 scale = Vector2(0.25, 0.25)
-texture = ExtResource("2_jj1q7")
+texture = ExtResource("2_mq2dp")
