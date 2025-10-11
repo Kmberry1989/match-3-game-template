@@ -74,20 +74,20 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = 66.0
-offset_top = -464.0
-offset_right = 186.0
-offset_bottom = -387.0
+offset_left = 74.0
+offset_top = -432.0
+offset_right = 194.0
+offset_bottom = -355.0
 grow_horizontal = 2
 grow_vertical = 2
 scale = Vector2(1.7199994, 1.7199994)
 alignment = 1
 
 [node name="PlayerNameLabel" type="Label" parent="MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame/VBox"]
+visible = false
 top_level = true
 layout_mode = 2
 text = "Player"
-horizontal_alignment = 1
 uppercase = true
 
 [node name="LevelLabel" type="Label" parent="MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame/VBox"]
@@ -101,5 +101,6 @@ text = "XP: 0/100"
 horizontal_alignment = 1
 
 [node name="AvatarFrame2" type="Sprite2D" parent="MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame"]
-position = Vector2(-14, 60)
+position = Vector2(354, 84.00001)
+scale = Vector2(0.7657648, 0.76369464)
 texture = ExtResource("2_co6lq")
