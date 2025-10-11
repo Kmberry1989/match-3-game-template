@@ -8,6 +8,7 @@ const PULSE_SCALE_MIN = Vector2(0.2575, 0.2575)
 var matched = false
 
 var pulse_tween: Tween = null
+var float_tween: Tween = null
 var shadow: Sprite2D = null
 
 # Visual Effects
@@ -32,7 +33,7 @@ var color_to_character = {
 	"blue": "bethany",
 	"green": "caleb",
 	"pink": "eric",
-red": "kristen",
+	"red": "kristen",
 	"yellow": "kyle",
 	"purple": "maia",
 	"orange": "rochelle",
@@ -178,7 +179,9 @@ func setup_blink_timer():
 	blink_timer.start(randf_range(4.0, 12.0))
 
 func start_floating():
-	var float_tween = get_tree().create_tween().set_loops()
+	if float_tween:
+		float_tween.kill()
+	float_tween = get_tree().create_tween().set_loops()
 	float_tween.tween_property(sprite, "position:y", -5, 1.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	float_tween.tween_property(sprite, "position:y", 5, 1.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 
@@ -225,6 +228,8 @@ func play_idle_animation():
 		
 		if pulse_tween:
 			pulse_tween.kill()
+		if float_tween:
+			float_tween.kill()
 			
 		var tween = get_tree().create_tween()
 		# Lift and inflate over 2 seconds

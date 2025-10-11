@@ -1,25 +1,22 @@
 extends Control
 
-@onready var score_label = $MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame/PlayerScoreLabel
-@onready var opponent_score_label = $MarginContainer/HBoxContainer/OpponentInfo/HBox/VBox/ScoreContainer/OpponentScoreLabel
 @onready var player_name_label = $MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame/VBox/PlayerNameLabel
-@onready var opponent_name_label = $MarginContainer/HBoxContainer/OpponentInfo/HBox/VBox/OpponentNameLabel
-@onready var opponent_info = $MarginContainer/HBoxContainer/OpponentInfo
+@onready var level_label = $MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame/VBox/LevelLabel
+@onready var xp_label = $MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame/VBox/XpLabel
 
 func _ready():
 	set_player_name(PlayerManager.get_player_name())
-	# Opponent name can be set when a match is found
-	set_opponent_name("Opponent")
-	opponent_info.hide()
-
-func set_score(score):
-	score_label.text = "Score: " + str(score)
-
-func set_opponent_score(score):
-	opponent_score_label.text = "Score: " + str(score)
+	update_level_label(PlayerManager.get_current_level())
+	update_xp_label()
+	PlayerManager.level_up.connect(update_level_label)
 
 func set_player_name(p_name):
 	player_name_label.text = p_name
 
-func set_opponent_name(p_name):
-	opponent_name_label.text = p_name
+func update_level_label(level):
+	level_label.text = "Level: " + str(level)
+
+func update_xp_label():
+	var current_xp = PlayerManager.get_current_xp()
+	var xp_needed = PlayerManager.get_xp_for_next_level()
+	xp_label.text = "XP: " + str(current_xp) + "/" + str(xp_needed)

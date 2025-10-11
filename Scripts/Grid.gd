@@ -48,6 +48,7 @@ var drag_start_position = Vector2.ZERO
 
 # Score variables
 var score = 0
+var combo_counter = 1
 
 func _ready():
 	state = move
@@ -61,6 +62,8 @@ func _ready():
 	game_ui.set_player_name(PlayerManager.get_player_name())
 	AudioManager.play_music("game")
 
+	PlayerManager.level_up.connect(_on_level_up)
+
 	while find_potential_match() == null:
 		for i in range(width):
 			for j in range(height):
@@ -72,7 +75,7 @@ func _ready():
 	idle_timer.start()
 
 func update_score_display():
-	game_ui.set_score(score)
+	game_ui.update_xp_label()
 
 func setup_timers():
 	destroy_timer.connect("timeout", Callable(self, "destroy_matches"))
@@ -248,6 +251,7 @@ func swap_back():
 
 	state = move
 	move_checked = false
+	combo_counter = 1
 	
 func _process(_delta):
 	if is_dragging and dragged_dot != null:
@@ -310,7 +314,7 @@ func destroy_matches():
 		for j in range(height):
 			if all_dots[i][j] != null and all_dots[i][j].matched:
 				was_matched = true
-				points_earned += 10
+				points_earned += 10 * combo_counter
 				match_center += all_dots[i][j].position
 				match_count += 1
 				
@@ -318,8 +322,10 @@ func destroy_matches():
 				var particles = match_particles.instantiate()
 				particles.position = all_dots[i][j].position
 				add_child(particles)
-				particles.emitting = true
-				
+				if all_dots[i][j].float_tween:
+					all_dots[i][j].float_tween.kill()
+				if all_dots[i][j].pulse_tween:
+					all_dots[i][j].pulse_tween.kill()
 				all_dots[i][j].queue_free()
 				all_dots[i][j] = null
 	
@@ -331,6 +337,10 @@ func destroy_matches():
 		else:
 			AudioManager.play_sound("match_pop")
 		score += points_earned
+		PlayerManager.add_xp(points_earned)
+		PlayerManager.add_lines_cleared(match_count)
+		PlayerManager.update_best_combo(combo_counter)
+		combo_counter += 1
 		update_score_display()
 		
 		# Instantiate new effects at the center of the match
@@ -339,8 +349,8 @@ func destroy_matches():
 
 			var match_label = match_label_scene.instantiate()
 			match_label.text = "+" + str(points_earned)
-			match_label.position = match_center - Vector2(0, 20)
-			add_child(match_label)
+			get_parent().get_node("CanvasLayer").add_child(match_label)
+			match_label.global_position = match_center - Vector2(0, 20)
 	
 	move_checked = true
 	if was_matched:
@@ -471,3 +481,14 @@ func can_move_create_match(i, j, direction):
 	all_dots[other_i][other_j].color = other_color
 	
 	return is_match
+
+func _on_level_up(new_level):
+	print("Level up to: " + str(new_level))
+	# Clear the grid
+	for i in range(width):
+		for j in range(height):
+			if all_dots[i][j] != null:
+				all_dots[i][j].queue_free()
+				all_dots[i][j] = null
+	# Respawn dots
+	spawn_dots()

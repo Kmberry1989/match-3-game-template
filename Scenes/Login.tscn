@@ -24,10 +24,10 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -13.0
-offset_top = -187.0
-offset_right = -13.0
-offset_bottom = -187.0
+offset_left = 1.0
+offset_top = -1.0
+offset_right = 1.0
+offset_bottom = -1.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -53,11 +53,11 @@ layout_mode = 2
 text = "Sign in with Google"
 
 [node name="Canyou" type="Sprite2D" parent="."]
-position = Vector2(345.0125, 444.543)
+position = Vector2(275.98743, 626.41797)
 scale = Vector2(0.7924002, 0.50448066)
 texture = ExtResource("2_767d8")
 
 [node name="Meaner" type="Sprite2D" parent="."]
-position = Vector2(337, 127.00001)
+position = Vector2(267.97495, 308.875)
 scale = Vector2(0.34696978, 0.34696975)
 texture = ExtResource("3_xklxs")

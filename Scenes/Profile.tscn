@@ -32,13 +32,21 @@ text = "Name: "
 layout_mode = 2
 text = "Time Played: "
 
-[node name="PvpWinsLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+[node name="LevelLabel" type="Label" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
-text = "PvP Wins: "
+text = "Level: "
 
-[node name="PvpLossesLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+[node name="XpLabel" type="Label" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
-text = "PvP Losses: "
+text = "XP: "
+
+[node name="BestComboLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Best Combo: "
+
+[node name="LinesClearedLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Dots Cleared: "
 
 [node name="HSeparator" type="HSeparator" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2

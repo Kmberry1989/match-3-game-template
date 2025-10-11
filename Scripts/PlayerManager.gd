@@ -1,11 +1,15 @@
 extends Node
 
+signal level_up(new_level)
+
 var player_uid = ""
 var player_data = {
 	"player_name": "",
 	"time_played": 0,
-	"pvp_wins": 0,
-	"pvp_losses": 0,
+	"current_level": 1,
+	"current_xp": 0,
+	"best_combo": 0,
+	"total_lines_cleared": 0,
 	"current_frame": "default",
 	"unlocks": {
 		"trophies": [],
@@ -13,8 +17,7 @@ var player_data = {
 		"aliases": []
 	},
 	"objectives": {
-		"time_played_1hr": false,
-		"first_win": false
+		"time_played_1hr": false
 	}
 }
 
@@ -67,31 +70,42 @@ func get_player_name():
 
 func add_time_played(seconds):
 	player_data["time_played"] += seconds
-	save_player_data()
-
-func increment_pvp_wins():
-	player_data["pvp_wins"] += 1
 	check_objectives()
 	save_player_data()
 
-func increment_pvp_losses():
-	player_data["pvp_losses"] += 1
+func get_xp_for_next_level():
+	return 100 * player_data["current_level"]
+
+func add_xp(amount):
+	player_data["current_xp"] += amount
+	while player_data["current_xp"] >= get_xp_for_next_level():
+		player_data["current_xp"] -= get_xp_for_next_level()
+		player_data["current_level"] += 1
+		emit_signal("level_up", player_data["current_level"])
+	save_player_data()
+
+func update_best_combo(new_combo):
+	if new_combo > player_data["best_combo"]:
+		player_data["best_combo"] = new_combo
+		save_player_data()
+
+func add_lines_cleared(lines):
+	player_data["total_lines_cleared"] += lines
 	save_player_data()
 
 func check_objectives():
-	# Check for first win
-	if player_data["pvp_wins"] >= 1 and not player_data["objectives"]["first_win"]:
-		player_data["objectives"]["first_win"] = true
-		unlock_trophy("first_win_trophy")
-
 	# Check for time played
 	if player_data["time_played"] >= 3600 and not player_data["objectives"]["time_played_1hr"]:
 		player_data["objectives"]["time_played_1hr"] = true
 		unlock_trophy("time_played_1hr_trophy")
 
-func unlock_trophy(trophy_name):
-	if not trophy_name in player_data["unlocks"]["trophies"]:
-		player_data["unlocks"]["trophies"].append(trophy_name)
+signal trophy_unlocked(trophy_resource)
+
+func unlock_trophy(trophy_id):
+	if not trophy_id in player_data["unlocks"]["trophies"]:
+		player_data["unlocks"]["trophies"].append(trophy_id)
+		var trophy_resource = load("res://Assets/Trophies/" + trophy_id + ".tres")
+		emit_signal("trophy_unlocked", trophy_resource)
 
 func set_current_frame(frame_name):
 	player_data["current_frame"] = frame_name
@@ -99,3 +113,9 @@ func set_current_frame(frame_name):
 
 func get_current_frame():
 	return player_data["current_frame"]
+
+func get_current_xp():
+	return player_data["current_xp"]
+
+func get_current_level():
+	return player_data["current_level"]
