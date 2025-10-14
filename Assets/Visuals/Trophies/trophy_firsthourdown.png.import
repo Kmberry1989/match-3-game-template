@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://xhlywyeqrccx"
-path="res://.godot/imported/trophy_firsthourin.png-a1954a039b21236312e684b28b8ee9e8.ctex"
+uid="uid://baxlaowbht1xh"
+path="res://.godot/imported/trophy_firsthourdown.png-1fdbb40ee5b94b20e3ba2bb4af613df6.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Visuals/Trophies/trophy_firsthourin.png"
-dest_files=["res://.godot/imported/trophy_firsthourin.png-a1954a039b21236312e684b28b8ee9e8.ctex"]
+source_file="res://Assets/Visuals/Trophies/trophy_firsthourdown.png"
+dest_files=["res://.godot/imported/trophy_firsthourdown.png-1fdbb40ee5b94b20e3ba2bb4af613df6.ctex"]
 
 [params]
 

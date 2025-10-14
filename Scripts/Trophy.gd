@@ -1,5 +1,7 @@
 extends Resource
 
+class_name Trophy
+
 @export var id: String
 @export var trophy_name: String
 @export var description: String

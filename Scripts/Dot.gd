@@ -30,26 +30,28 @@ const YAWN_COOLDOWN = 5000 # 5 seconds in milliseconds
 
 # Mapping from color to character name
 var color_to_character = {
-	"blue": "bethany",
-	"green": "caleb",
-	"pink": "eric",
-	"red": "kristen",
-	"yellow": "kyle",
-	"purple": "maia",
-	"orange": "rochelle",
-	"brown": "vickie"
+	"yellow": "bethany",
+	"brown": "caleb",
+	"gray": "eric",
+	"pink": "kristen",
+	"green": "kyle",
+	"purple": "connie",
+	"red": "rochelle",
+	"blue": "vickie",
+	"orange": "maia"
 }
 
 # Mapping from color to pulse duration
 var color_to_pulse_duration = {
-	"red": 0.8,
-	"orange": 1.0,
-	"yellow": 1.2,
-	"green": 1.5,
-	"blue": 1.8,
-	"purple": 2.0,
-	"pink": 2.2,
-	"brown": 2.5
+	"red": 1,
+	"orange": 1,
+	"yellow": 1,
+	"green": 1,
+	"blue": 1,
+	"purple": 1,
+	"pink": 1,
+	"brown": 1,
+	"gray": 1
 }
 
 var mouse_inside = false
@@ -62,14 +64,24 @@ func _ready():
 	start_pulsing()
 	
 	var area = Area2D.new()
-	var shape = CollisionShape2D.new()
-	var circle = CircleShape2D.new()
-	circle.radius = 50
-	shape.shape = circle
-	area.add_child(shape)
 	add_child(area)
 	area.connect("mouse_entered", Callable(self, "_on_mouse_entered"))
 	area.connect("mouse_exited", Callable(self, "_on_mouse_exited"))
+
+	# Wait for the sprite texture to be loaded
+	await get_tree().process_frame
+
+	var texture = sprite.texture
+	if texture:
+		var image = texture.get_image()
+		var bitmap = BitMap.new()
+		bitmap.create_from_image_alpha(image)
+		var polygons = bitmap.opaque_to_polygons(Rect2(Vector2.ZERO, image.get_size()), 1.0)
+
+		for polygon in polygons:
+			var collision_polygon = CollisionPolygon2D.new()
+			collision_polygon.polygon = polygon
+			area.add_child(collision_polygon)
 
 func _process(_delta):
 	if mouse_inside:
@@ -181,7 +193,7 @@ func setup_blink_timer():
 func start_floating():
 	if float_tween:
 		float_tween.kill()
-	float_tween = get_tree().create_tween().set_loops()
+	float_tween = get_tree().create_tween().set_loops(0)
 	float_tween.tween_property(sprite, "position:y", -5, 1.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	float_tween.tween_property(sprite, "position:y", 5, 1.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 
@@ -191,7 +203,7 @@ func start_pulsing():
 
 	var pulse_duration = color_to_pulse_duration.get(color, 1.5) # Default to 1.5 if color not found
 
-	pulse_tween = get_tree().create_tween().set_loops()
+	pulse_tween = get_tree().create_tween().set_loops(0)
 	pulse_tween.tween_property(sprite, "scale", PULSE_SCALE_MAX, pulse_duration).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	pulse_tween.tween_property(sprite, "scale", PULSE_SCALE_MIN, pulse_duration).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 

@@ -14,7 +14,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_abcde")
 
-[node name="Whisk83Ff20944a40c37b05c4Dd15e3218260Eg" type="Sprite2D" parent="."]
+[node name="loginbg" type="Sprite2D" parent="."]
 position = Vector2(387.00006, 471.50003)
 scale = Vector2(1.2439631, 1.4089675)
 texture = ExtResource("2_1baen")
@@ -49,6 +49,7 @@ layout_mode = 2
 text = "Login"
 
 [node name="GoogleLoginButton" type="Button" parent="CenterContainer/VBoxContainer"]
+visible = false
 layout_mode = 2
 text = "Sign in with Google"
 
