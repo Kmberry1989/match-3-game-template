@@ -1,7 +1,8 @@
-[gd_scene load_steps=4 format=3 uid="uid://dlothci5o3owq"]
+[gd_scene load_steps=5 format=3 uid="uid://dlothci5o3owq"]
 
 [ext_resource type="Script" uid="uid://d13wbq8qr3cqx" path="res://Scripts/GameUI.gd" id="1_abcde"]
 [ext_resource type="Texture2D" uid="uid://byr8w1akrenlh" path="res://Assets/Visuals/avatar_frame_2.png" id="2_co6lq"]
+[ext_resource type="Texture2D" uid="uid://bufill1b8xqxl" path="res://Assets/Visuals/player_avatar.png" id="2_po7eo"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0"]
 bg_color = Color(0.6, 0.6, 0.6, 0.5)
@@ -75,9 +76,9 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = 74.0
-offset_top = -432.0
+offset_top = -413.0
 offset_right = 194.0
-offset_bottom = -355.0
+offset_bottom = -336.0
 grow_horizontal = 2
 grow_vertical = 2
 scale = Vector2(1.7199994, 1.7199994)
@@ -100,7 +101,12 @@ layout_mode = 2
 text = "XP: 0/100"
 horizontal_alignment = 1
 
+[node name="PlayerAvatar" type="Sprite2D" parent="MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame/VBox"]
+position = Vector2(177.03493, 10.755829)
+scale = Vector2(0.47692627, 0.47692627)
+texture = ExtResource("2_po7eo")
+
 [node name="AvatarFrame2" type="Sprite2D" parent="MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame"]
-position = Vector2(354, 84.00001)
+position = Vector2(378.00006, 70.00001)
 scale = Vector2(0.7657648, 0.76369464)
 texture = ExtResource("2_co6lq")

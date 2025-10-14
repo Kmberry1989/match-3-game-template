@@ -24,6 +24,7 @@ var state
 	preload("res://Scenes/Dots/purple_dot.tscn"),
 	preload("res://Scenes/Dots/orange_dot.tscn"),
 	preload("res://Scenes/Dots/brown_dot.tscn"),
+	preload("res://Scenes/Dots/gray_dot.tscn")
 ]
 @onready var match_particles = preload("res://Scenes/MatchParticles.tscn")
 @onready var match_label_scene = preload("res://Scenes/MatchLabel.tscn")
@@ -64,13 +65,15 @@ func _ready():
 
 	PlayerManager.level_up.connect(_on_level_up)
 
-	while find_potential_match() == null:
+	var attempts = 0
+	while find_potential_match() == null and attempts < 10:
 		for i in range(width):
 			for j in range(height):
 				if all_dots[i][j] != null:
 					all_dots[i][j].queue_free()
 		all_dots = make_2d_array()
 		spawn_dots()
+		attempts += 1
 
 	idle_timer.start()
 
@@ -127,6 +130,7 @@ func spawn_dots():
 				while (match_at(i, j, dot.color) && loops < 100):
 					rand = floor(randf_range(0,possible_dots.size()))
 					loops += 1
+					dot.queue_free()
 					dot = possible_dots[rand].instantiate()
 				dot.z_index = height - j
 				add_child(dot)
@@ -169,6 +173,7 @@ func _input(event):
 			var grid_pos = pixel_to_grid(event.position.x, event.position.y)
 			if is_in_grid(grid_pos) and all_dots[grid_pos.x][grid_pos.y] != null:
 				dragged_dot = all_dots[grid_pos.x][grid_pos.y]
+				dragged_dot.z_index = 100 # Bring to front
 				drag_start_position = event.position
 				is_dragging = true
 				dragged_dot.play_drag_sad_animation()
@@ -177,6 +182,7 @@ func _input(event):
 				is_dragging = false
 				
 				var start_grid_pos = pixel_to_grid(drag_start_position.x, drag_start_position.y)
+				dragged_dot.z_index = height - start_grid_pos.y # Restore z-index
 				var end_grid_pos = pixel_to_grid(event.position.x, event.position.y)
 				
 				var difference = end_grid_pos - start_grid_pos
@@ -381,6 +387,7 @@ func refill_columns():
 				while (match_at(i, j, dot.color) && loops < 100):
 					rand = floor(randf_range(0,possible_dots.size()))
 					loops += 1
+					dot.queue_free()
 					dot = possible_dots[rand].instantiate()
 				dot.z_index = height - j
 				add_child(dot)

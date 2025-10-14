@@ -50,8 +50,8 @@ const _AUTH_PROVIDERS : String = "firebase/auth_providers"
 # These values can be found in your Firebase Project
 # See the README checked Github for how to access
 var _config : Dictionary = {
-	"apiKey": "AIzaSyAm1EZXxhyyHL7XMA7_R0f96GCu6C_Cxdw",
-	"authDomain": "meaner-matcher.firebaseapp.com",
+	"apiKey": "",
+	"authDomain": "",
 	"databaseURL": "https://meaner-matcher-default-rtdb.firebaseio.com",
 	"projectId": "meaner-matcher",
 	"storageBucket": "meaner-matcher.firebasestorage.app",

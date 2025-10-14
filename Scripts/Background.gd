@@ -23,7 +23,7 @@ func cycle_background():
 	if tween:
 		tween.kill()
 	
-	tween = get_tree().create_tween().set_loops(-1)
+	tween = get_tree().create_tween().set_loops(0)
 	tween.tween_callback(Callable(self, "change_texture"))
 	tween.tween_property(self, "modulate", Color(1, 1, 1, 1), fade_duration)
 	tween.tween_interval(hold_duration)

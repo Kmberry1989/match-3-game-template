@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://dbfc8vw1b80dl"]
+[gd_scene load_steps=3 format=3 uid="uid://dbfc8vw1b80dl"]
 
 [ext_resource type="Script" uid="uid://0qx7jujucyji" path="res://Scripts/Menu.gd" id="1_t0j7j"]
+[ext_resource type="Texture2D" uid="uid://c153otdfmgy06" path="res://Assets/Visuals/main_menu_background.png" id="2_6pedr"]
 
 [node name="Menu" type="Control"]
 layout_mode = 3
@@ -19,3 +20,8 @@ script = ExtResource("1_t0j7j")
 [node name="MainMenuBackground" type="Sprite2D" parent="."]
 position = Vector2(343.71466, 471.1384)
 scale = Vector2(0.9205288, 0.7796867)
+
+[node name="MainMenuBackground2" type="Sprite2D" parent="."]
+position = Vector2(392.21143, 892.85706)
+scale = Vector2(1.0423445, 1.0438313)
+texture = ExtResource("2_6pedr")
