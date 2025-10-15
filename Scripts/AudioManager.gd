@@ -49,6 +49,7 @@ func load_sounds():
 	sounds["game_start"] = load("res://Assets/Sounds/game_start_swoosh.ogg")
 	sounds["yawn"] = load("res://Assets/Sounds/yawn.ogg")
 	sounds["surprised"] = load("res://Assets/Sounds/surprised.ogg")
+	sounds["shuffle"] = load("res://Assets/Sounds/Music_fx_cymbal_rush.ogg")
 
 func load_music():
 	music_tracks["menu"] = load("res://Assets/Sounds/music_menu.ogg")

@@ -4,12 +4,15 @@ var status_label: Label
 var offline_button: TextureButton
 var profile_button: TextureButton
 var showcase_button: TextureButton
+var logout_button: TextureButton
+@onready var firebase = get_node_or_null("/root/Firebase")
 
 func _ready():
 	status_label = Label.new()
 	offline_button = TextureButton.new()
 	profile_button = TextureButton.new()
 	showcase_button = TextureButton.new()
+	logout_button = TextureButton.new()
 
 	# Background
 	var bg = ColorRect.new()
@@ -85,6 +88,22 @@ func _ready():
 	showcase_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	showcase_button.add_child(showcase_label)
 
+	# Logout Button (shown only if Firebase is present and logged in)
+	logout_button.texture_normal = normal_tex
+	logout_button.texture_pressed = pressed_tex
+	logout_button.texture_hover = hover_tex
+	logout_button.connect("pressed", _on_logout_button_pressed)
+	vbox.add_child(logout_button)
+
+	var logout_label = Label.new()
+	logout_label.text = "Logout"
+	logout_label.set_anchors_preset(Control.PRESET_FULL_RECT)
+	logout_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	logout_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	logout_button.add_child(logout_label)
+
+	_update_logout_visibility()
+
 	# Status Label
 	status_label.text = ""
 	status_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -93,6 +112,11 @@ func _ready():
 
 	# Play menu music
 	AudioManager.play_music("menu")
+
+	# Keep logout visibility in sync with auth state
+	if firebase != null:
+		firebase.Auth.login_succeeded.connect(Callable(self, "_update_logout_visibility"))
+		firebase.Auth.logged_out.connect(Callable(self, "_update_logout_visibility"))
 
 func _on_offline_button_pressed():
 	AudioManager.play_sound("ui_click")
@@ -110,3 +134,17 @@ func _start_game():
 	AudioManager.stop_music()
 	AudioManager.play_sound("game_start")
 	get_tree().change_scene_to_file("res://Scenes/Game.tscn")
+
+func _update_logout_visibility():
+	var show = false
+	if firebase != null:
+		show = firebase.Auth.is_logged_in()
+	logout_button.visible = show
+
+func _on_logout_button_pressed():
+	AudioManager.play_sound("ui_click")
+	if firebase != null:
+		firebase.Auth.logout()
+	# Optionally clear some local player data if desired
+	PlayerManager.player_uid = ""
+	get_tree().change_scene_to_file("res://Scenes/Login.tscn")

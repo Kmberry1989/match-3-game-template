@@ -73,15 +73,14 @@ func _ready():
 
 	var texture = sprite.texture
 	if texture:
-		var image = texture.get_image()
-		var bitmap = BitMap.new()
-		bitmap.create_from_image_alpha(image)
-		var polygons = bitmap.opaque_to_polygons(Rect2(Vector2.ZERO, image.get_size()), 1.0)
-
-		for polygon in polygons:
-			var collision_polygon = CollisionPolygon2D.new()
-			collision_polygon.polygon = polygon
-			area.add_child(collision_polygon)
+		var collision_shape = CollisionShape2D.new()
+		var square_shape = RectangleShape2D.new()
+		var max_dimension = max(texture.get_width(), texture.get_height())
+		var target_scale = max(PULSE_SCALE_MAX.x, PULSE_SCALE_MAX.y)
+		var side_length = max_dimension * target_scale
+		square_shape.size = Vector2(side_length, side_length)
+		collision_shape.shape = square_shape
+		area.add_child(collision_shape)
 
 func _process(_delta):
 	if mouse_inside:

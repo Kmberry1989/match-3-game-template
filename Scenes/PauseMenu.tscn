@@ -1,61 +1,74 @@
-[gd_scene load_steps=2 format=3 uid="uid://bciw7vj3yq4vj"]
+[gd_scene load_steps=2 format=3]
 
-[ext_resource type="Script" path="res://Scripts/PauseMenu.gd" id="1_abcde"]
+[ext_resource type="Script" path="res://Scripts/PauseMenu.gd" id="1"]
 
-[node name="PauseMenu" type="PanelContainer"]
-process_mode = 2
+[node name="PauseMenu" type="Control"]
+pause_mode = 2
+visible = false
+layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_abcde")
+script = ExtResource("1")
 
-[node name="MarginContainer" type="MarginContainer" parent="."]
-layout_mode = 2
-theme_override_constants/margin_left = 20
-theme_override_constants/margin_top = 20
-theme_override_constants/margin_right = 20
-theme_override_constants/margin_bottom = 20
+[node name="Panel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+[node name="Center" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="Center"]
 layout_mode = 2
 alignment = 1
 
-[node name="Title" type="Label" parent="MarginContainer/VBoxContainer"]
+[node name="Title" type="Label" parent="Center/VBox"]
 layout_mode = 2
 text = "Paused"
 horizontal_alignment = 1
 
-[node name="MusicLabel" type="Label" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
-text = "Music Volume"
-
-[node name="MusicSlider" type="HSlider" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
-min_value = -40.0
-max_value = 0.0
-step = 1.0
-
-[node name="SfxLabel" type="Label" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
-text = "Sound FX Volume"
-
-[node name="SfxSlider" type="HSlider" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
-min_value = -40.0
-max_value = 0.0
-step = 1.0
-
-[node name="ResumeButton" type="Button" parent="MarginContainer/VBoxContainer"]
+[node name="ResumeButton" type="Button" parent="Center/VBox"]
 layout_mode = 2
 text = "Resume"
 
-[node name="QuitButton" type="Button" parent="MarginContainer/VBoxContainer"]
+[node name="ShopButton" type="Button" parent="Center/VBox"]
 layout_mode = 2
-text = "Quit to Menu"
+text = "Shop"
 
-[connection signal="value_changed" from="MarginContainer/VBoxContainer/MusicSlider" to="." method="_on_music_slider_value_changed"]
-[connection signal="value_changed" from="MarginContainer/VBoxContainer/SfxSlider" to="." method="_on_sfx_slider_value_changed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/ResumeButton" to="." method="_on_resume_button_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/QuitButton" to="." method="_on_quit_button_pressed"]
+[node name="Shop" type="VBoxContainer" parent="Center/VBox"]
+visible = false
+layout_mode = 2
+alignment = 1
+
+[node name="Coins" type="Label" parent="Center/VBox/Shop"]
+layout_mode = 2
+text = "Coins: 0"
+horizontal_alignment = 1
+
+[node name="BuyFrame2" type="Button" parent="Center/VBox/Shop"]
+layout_mode = 2
+text = "Buy Frame 2 (10)"
+
+[node name="BuyBG2" type="Button" parent="Center/VBox/Shop"]
+layout_mode = 2
+text = "Buy Background 2 (20)"
+
+[node name="BuyBG3" type="Button" parent="Center/VBox/Shop"]
+layout_mode = 2
+text = "Buy Background 3 (20)"
+
+[node name="BuyBG4" type="Button" parent="Center/VBox/Shop"]
+layout_mode = 2
+text = "Buy Background 4 (20)"
+

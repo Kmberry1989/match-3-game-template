@@ -18,10 +18,10 @@ config/icon="res://icon.png"
 
 [autoload]
 
+#EnsureFirebaseloadsbeforescriptsthatdependonitFirebase="*res://addons/godot-firebase/firebase/firebase.tscn"
 PlayerManager="*res://Scripts/PlayerManager.gd"
 NetworkManager="*res://Scripts/NetworkManager.gd"
 AudioManager="*res://Scripts/AudioManager.gd"
-Firebase="*res://addons/godot-firebase/firebase/firebase.tscn"
 
 [display]
 
@@ -45,4 +45,5 @@ ui_touch={
 
 [rendering]
 
+rendering_device/driver="d3d12"
 environment/defaults/default_environment="res://default_env.tres"
