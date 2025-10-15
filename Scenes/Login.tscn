@@ -15,7 +15,7 @@ grow_vertical = 2
 script = ExtResource("1_abcde")
 
 [node name="loginbg" type="Sprite2D" parent="."]
-position = Vector2(387.00006, 471.50003)
+position = Vector2(320.00006, 471.50003)
 scale = Vector2(1.2439631, 1.4089675)
 texture = ExtResource("2_1baen")
 
@@ -50,8 +50,8 @@ text = "Login"
 
 [node name="RememberCheck" type="CheckBox" parent="CenterContainer/VBoxContainer"]
 layout_mode = 2
-text = "Remember me"
 button_pressed = true
+text = "Remember me"
 
 [node name="GoogleLoginButton" type="Button" parent="CenterContainer/VBoxContainer"]
 visible = false
@@ -65,15 +65,14 @@ text = "Cancel"
 
 [node name="StatusLabel" type="Label" parent="CenterContainer/VBoxContainer"]
 layout_mode = 2
-text = ""
 horizontal_alignment = 1
 
 [node name="Canyou" type="Sprite2D" parent="."]
-position = Vector2(275.98743, 626.41797)
+position = Vector2(275.98743, 637.418)
 scale = Vector2(0.7924002, 0.50448066)
 texture = ExtResource("2_767d8")
 
 [node name="Meaner" type="Sprite2D" parent="."]
-position = Vector2(267.97495, 308.875)
+position = Vector2(272.97495, 269.875)
 scale = Vector2(0.34696978, 0.34696975)
 texture = ExtResource("3_xklxs")

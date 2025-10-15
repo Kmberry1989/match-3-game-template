@@ -1,9 +1,9 @@
 extends Control
 
-@onready var player_name_label = $MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame/VBox/PlayerNameLabel
-@onready var level_label = $MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame/VBox/LevelLabel
-@onready var xp_label = $MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame/VBox/XpLabel
-@onready var coins_label = $MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame/VBox/CoinsLabel
+@onready var player_name_label = $MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame/PlayerNameLabel
+@onready var level_label = $MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame/LevelLabel
+@onready var xp_label = $MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame/XpLabel
+@onready var coins_label = $MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame/CoinsLabel
 @onready var pause_button = $PauseButton
 @onready var frame_sprite = $MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame/AvatarFrame2
 
@@ -45,7 +45,8 @@ func _apply_current_frame():
 
 func _frame_to_texture_path(frame_name: String) -> String:
 	if frame_name == "default":
-		return "res://Assets/Visuals/frame_standard.png"
+		# Use an existing avatar frame as the default visual now that frame_standard.png is removed
+		return "res://Assets/Visuals/avatar_frame_2.png"
 	# e.g., frame_2 -> avatar_frame_2.png
 	return "res://Assets/Visuals/" + "avatar_" + frame_name + ".png"
 
@@ -59,15 +60,32 @@ func _fit_sprite_to_height(sprite: Sprite2D, target_h: float):
 	sprite.scale = Vector2(sf, sf)
 
 func _on_pause_pressed():
-	var existing = get_tree().get_current_scene().get_node_or_null("CanvasLayer/PauseMenu")
+	var root = get_tree().get_current_scene()
+	if root == null:
+		return
+	# Find or create the CanvasLayer to host overlays
+	var layer: Node = root.get_node_or_null("CanvasLayer")
+	if layer == null:
+		layer = root.find_child("CanvasLayer", true, false)
+	if layer == null:
+		layer = CanvasLayer.new()
+		layer.name = "CanvasLayer"
+		root.add_child(layer)
+
+	var existing = layer.get_node_or_null("PauseMenu")
 	if existing:
 		existing.show_menu()
 		return
 	var pause_menu = preload("res://Scenes/PauseMenu.tscn").instantiate()
 	pause_menu.name = "PauseMenu"
-	var layer = get_tree().get_current_scene().get_node("CanvasLayer")
 	layer.add_child(pause_menu)
 	pause_menu.show_menu()
+
+func _unhandled_input(event):
+	# Fallback: allow Esc/back to open pause
+	if event is InputEventKey and event.pressed and not event.echo:
+		if event.keycode == KEY_ESCAPE:
+			_on_pause_pressed()
 
 func get_xp_anchor_pos() -> Vector2:
 	return xp_label.get_global_transform().origin

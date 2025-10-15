@@ -311,7 +311,16 @@ func login_with_oauth(_token: String, provider: AuthProvider) -> void:
 		if provider.should_exchange:
 			exchange_token(token, _local_uri, provider.access_token_uri, provider.get_client_id(), provider.get_client_secret())
 			is_successful = await self.token_exchanged
-			token = auth.accesstoken
+			# Guard against missing access token when exchange fails or provider returns a different key
+			if is_successful and typeof(auth) == TYPE_DICTIONARY:
+				# Keys are cleaned via get_clean_keys elsewhere (underscores removed, lowercased)
+				if auth.has("accesstoken"):
+					token = auth.accesstoken
+				elif auth.has("idtoken"):
+					# Some providers may return an id token; use it as a fallback
+					token = auth.idtoken
+				else:
+					is_successful = false
 		if is_successful and _is_ready():
 			is_busy = true
 			_oauth_login_request_body.postBody = "access_token="+token+"&providerId="+provider.provider_id

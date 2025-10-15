@@ -1,19 +1,21 @@
 {
   "cSpell.words": [
-    "COOLDOWN",
     "Cooldown",
-    "idtoken",
-    "printerr",
+    "COOLDOWN",
     "Firestore",
+    "idtoken",
+    "ingame",
     "OAuth",
-    "uid",
+    "printerr",
     "tween",
-    "tweens"
+    "tweens",
+    "uid"
   ],
   "files.exclude": {
     "addons/godot-firebase/**": false
   },
   "godot_ls.exclude": [
     "addons/godot-firebase/**"
-  ]
+  ],
+  "godotTools.editorPath.godot4": "z:\\Downloads Comet new\\Godot_v4.5-stable_win64.exe\\Godot_v4.5-stable_win64.exe"
 }

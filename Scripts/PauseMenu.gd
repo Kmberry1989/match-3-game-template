@@ -8,11 +8,16 @@
 @onready var buy_bg2 = $Center/VBox/Shop/BuyBG2
 @onready var buy_bg3 = $Center/VBox/Shop/BuyBG3
 @onready var buy_bg4 = $Center/VBox/Shop/BuyBG4
+@onready var music_slider: HSlider = $Center/VBox/MusicVolume/MusicSlider
+@onready var music_percent: Label = $Center/VBox/MusicVolume/MusicPercent
+@onready var sfx_slider: HSlider = $Center/VBox/SfxVolume/SfxSlider
+@onready var sfx_percent: Label = $Center/VBox/SfxVolume/SfxPercent
 
 const PRICE_FRAME := 10
 const PRICE_BG := 20
 
 func _ready():
+    process_mode = Node.PROCESS_MODE_WHEN_PAUSED
     resume_button.connect("pressed", Callable(self, "_on_resume"))
     shop_button.connect("pressed", Callable(self, "_on_shop_toggle"))
     buy_frame2.connect("pressed", Callable(self, "_on_buy_frame2"))
@@ -23,6 +28,8 @@ func _ready():
     buy_bg2.visible = false
     buy_bg3.visible = false
     buy_bg4.visible = false
+    # Initialize volume sliders
+    _init_volume_sliders()
 
 func show_menu():
     show()
@@ -87,4 +94,38 @@ func _populate_frame_shop():
             PlayerManager.set_current_frame(frame_name)
         )
         shop_panel.add_child(btn)
+
+# Volume controls
+func _init_volume_sliders():
+    if AudioManager != null:
+        var mdb = AudioManager.get_music_volume()
+        var sdb = AudioManager.get_sfx_volume()
+        music_slider.min_value = -60.0
+        music_slider.max_value = 0.0
+        sfx_slider.min_value = -60.0
+        sfx_slider.max_value = 0.0
+        music_slider.value = clamp(mdb, music_slider.min_value, music_slider.max_value)
+        sfx_slider.value = clamp(sdb, sfx_slider.min_value, sfx_slider.max_value)
+        _update_music_label(music_slider.value)
+        _update_sfx_label(sfx_slider.value)
+        music_slider.value_changed.connect(_on_music_slider_changed)
+        sfx_slider.value_changed.connect(_on_sfx_slider_changed)
+
+func _on_music_slider_changed(v):
+    if AudioManager != null:
+        AudioManager.set_music_volume(v)
+    _update_music_label(v)
+
+func _on_sfx_slider_changed(v):
+    if AudioManager != null:
+        AudioManager.set_sfx_volume(v)
+    _update_sfx_label(v)
+
+func _update_music_label(db):
+    var pct = int(round(db_to_linear(db) * 100.0)) if typeof(db) != TYPE_NIL else 0
+    music_percent.text = str(pct) + "%"
+
+func _update_sfx_label(db):
+    var pct = int(round(db_to_linear(db) * 100.0)) if typeof(db) != TYPE_NIL else 0
+    sfx_percent.text = str(pct) + "%"
 

@@ -59,7 +59,7 @@ var _config : Dictionary = {
 	"appId": "1:413636882791:web:834dae40038c4d81f9ffc2",
 	"measurementId": "G-WYG9G4ED1R",
 	"clientId": "",
-	"clientSecret" : "",
+	"clientSecret": "",
 	"domainUriPrefix" : "",
 	"functionsGeoZone" : "",
 	"cacheLocation":"",

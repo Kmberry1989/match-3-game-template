@@ -14,11 +14,15 @@ func _ready():
 	showcase_button = TextureButton.new()
 	logout_button = TextureButton.new()
 
-	# Background
-	var bg = ColorRect.new()
-	bg.color = Color(0, 0, 0) # Black
+	# Background image (cover)
+	var bg = TextureRect.new()
+	bg.texture = load("res://Assets/Visuals/main_menu_background.png")
+	bg.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(bg)
+	# Ensure it stays behind the rest of UI
+	move_child(bg, 0)
 
 	# Use a CenterContainer to ensure all elements are perfectly centered
 	var center_container = CenterContainer.new()

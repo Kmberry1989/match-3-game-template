@@ -3,8 +3,8 @@
 [ext_resource type="PackedScene" uid="uid://d0bsiknlebs18" path="res://Scenes/Dot.tscn" id="2"]
 [ext_resource type="Texture2D" uid="uid://bgvxfxc2ov54e" path="res://Assets/Dots/ericavatar.png" id="2_jj1q7"]
 
-[node name="blue_dot" instance=ExtResource("2")]
-color = "blue"
+[node name="gray_dot" instance=ExtResource("2")]
+color = "gray"
 
 [node name="Sprite2D" parent="." index="0"]
 scale = Vector2(0.25, 0.25)

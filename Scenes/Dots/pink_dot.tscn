@@ -7,6 +7,5 @@
 color = "pink"
 
 [node name="Sprite2D" parent="." index="0"]
-position = Vector2(0, -2)
 scale = Vector2(0.25, 0.25)
 texture = ExtResource("2_cvlyw")

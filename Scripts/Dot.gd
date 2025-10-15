@@ -24,7 +24,7 @@ var surprised_texture: Texture
 var yawn_texture: Texture
 
 var last_yawn_time = 0
-const YAWN_COOLDOWN = 5000 # 5 seconds in milliseconds
+const YAWN_COOLDOWN = 2500 # 2.5 seconds in milliseconds
 
 @onready var blink_timer = Timer.new()
 
@@ -111,9 +111,9 @@ func play_drag_sad_animation():
 	animation_state = "sad"
 	sprite.texture = sad_texture
 
-func move(new_position):
+func move(new_position, duration := 0.2):
 	var tween = get_tree().create_tween()
-	tween.tween_property(self, "position", new_position, 0.2).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	tween.tween_property(self, "position", new_position, duration).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	return tween
 
 func play_match_animation(delay):
@@ -192,9 +192,10 @@ func setup_blink_timer():
 func start_floating():
 	if float_tween:
 		float_tween.kill()
-	float_tween = get_tree().create_tween().set_loops(0)
+	float_tween = get_tree().create_tween()
 	float_tween.tween_property(sprite, "position:y", -5, 1.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	float_tween.tween_property(sprite, "position:y", 5, 1.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	float_tween.finished.connect(Callable(self, "start_floating"))
 
 func start_pulsing():
 	if pulse_tween:
@@ -202,9 +203,10 @@ func start_pulsing():
 
 	var pulse_duration = color_to_pulse_duration.get(color, 1.5) # Default to 1.5 if color not found
 
-	pulse_tween = get_tree().create_tween().set_loops(0)
+	pulse_tween = get_tree().create_tween()
 	pulse_tween.tween_property(sprite, "scale", PULSE_SCALE_MAX, pulse_duration).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	pulse_tween.tween_property(sprite, "scale", PULSE_SCALE_MIN, pulse_duration).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	pulse_tween.finished.connect(Callable(self, "start_pulsing"))
 
 func _on_blink_timer_timeout():
 	if animation_state == "normal":
@@ -212,23 +214,23 @@ func _on_blink_timer_timeout():
 		sprite.texture = blink_texture
 		await get_tree().create_timer(0.15).timeout
 		if animation_state == "blinking": # Ensure state wasn't changed by a higher priority animation
-            set_normal_texture()
-    
-    blink_timer.start(randf_range(4.0, 12.0))
+			set_normal_texture()
+	
+	blink_timer.start(randf_range(4.0, 12.0))
 
 func play_idle_animation():
-    var current_time = Time.get_ticks_msec()
-    if current_time - last_yawn_time < YAWN_COOLDOWN:
-        return # Cooldown is active, so we do nothing.
+	var current_time = Time.get_ticks_msec()
+	if current_time - last_yawn_time < YAWN_COOLDOWN:
+		return # Cooldown is active, so we do nothing.
 
-    if animation_state != "normal":
-        return
+	if animation_state != "normal":
+		return
 
-    last_yawn_time = current_time
-    animation_state = "idle"
-    sprite.texture = sleepy_texture
-    await get_tree().create_timer(0.5).timeout
-    
+	last_yawn_time = current_time
+	animation_state = "idle"
+	sprite.texture = sleepy_texture
+	await get_tree().create_timer(0.5).timeout
+	
 	if animation_state == "idle": # Make sure we weren't interrupted
 		sprite.texture = yawn_texture
 		AudioManager.play_sound("yawn")

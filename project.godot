@@ -14,6 +14,9 @@ config/name="Match3 Game Template"
 run/main_scene="res://Scenes/Login.tscn"
 config/features=PackedStringArray("4.5")
 boot_splash/bg_color=Color(0, 0, 0, 1)
+boot_splash/fullsize=false
+boot_splash/use_filter=false
+boot_splash/image="uid://c153otdfmgy06"
 config/icon="res://icon.png"
 
 [autoload]
@@ -28,7 +31,6 @@ AudioManager="*res://Scripts/AudioManager.gd"
 window/size/viewport_width=540
 window/size/viewport_height=960
 window/stretch/mode="canvas_items"
-window/stretch/aspect="expand"
 window/handheld/orientation=1
 
 [editor_plugins]

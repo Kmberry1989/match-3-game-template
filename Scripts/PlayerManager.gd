@@ -32,10 +32,6 @@ func _ready():
 		print("Firebase not available: running offline (cloud save disabled).")
 		return
 
-	firebase.Firestore.document_loaded.connect(Callable(self, "_on_document_loaded"))
-	firebase.Firestore.document_saved.connect(Callable(self, "_on_document_saved"))
-	firebase.Firestore.document_error.connect(Callable(self, "_on_document_error"))
-
 func load_player_data(user_info):
 	if firebase == null:
 		return
@@ -52,37 +48,31 @@ func load_player_data(user_info):
 		uid = str(last_user_info.get("user_id"))
 	player_uid = uid
 	if player_uid:
-		firebase.Firestore.get_document("players", player_uid)
+		var coll = firebase.Firestore.collection("players")
+		var doc = await coll.get_doc(player_uid)
+		if doc != null:
+			print("Player data loaded from Firestore.")
+			player_data = doc.get_unsafe_document()
+		else:
+			print("New player. Creating default data.")
+			var display = ""
+			if typeof(last_user_info) == TYPE_DICTIONARY:
+				display = str(last_user_info.get("displayname", last_user_info.get("displayName", "")))
+			if display == "":
+				display = "Player"
+			player_data["player_name"] = display
+			await coll.set_doc(player_uid, player_data)
 	else:
 		print("No UID found in user_info")
-
-
-func _on_document_loaded(doc_data):
-	if doc_data:
-		print("Player data loaded from Firestore.")
-		player_data = doc_data
-	else:
-		# New player, create default data and save it
-		print("New player. Creating default data.")
-		var display = ""
-		if typeof(last_user_info) == TYPE_DICTIONARY:
-			display = str(last_user_info.get("displayname", last_user_info.get("displayName", "")))
-		if display == "":
-			display = "Player"
-		player_data["player_name"] = display
-		save_player_data()
 
 func save_player_data():
 	if firebase == null or player_uid == "":
 		return
-
-	firebase.Firestore.set_document("players", player_uid, player_data)
+	var coll = firebase.Firestore.collection("players")
+	await coll.set_doc(player_uid, player_data)
 
 func _on_document_saved():
 	print("Player data saved to Firestore.")
-
-func _on_document_error(error_message):
-	print("Firestore error: " + error_message)
 
 
 func get_player_name():
@@ -93,8 +83,8 @@ func add_time_played(seconds):
 	check_objectives()
 	save_player_data()
 
-const BASE_XP := 100
-const XP_GROWTH := 1.25 # multiplicative growth per level
+const BASE_XP := 180
+const XP_GROWTH := 1.35 # multiplicative growth per level
 const COIN_CONVERSION_RATE := 50 # XP per 1 coin awarded at level-up
 
 func get_xp_for_level(level: int) -> int:

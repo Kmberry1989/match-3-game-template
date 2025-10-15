@@ -1,4 +1,4 @@
-[gd_scene load_steps=3 format=3 uid="uid://d2bt360oo77t2"]
+[gd_scene load_steps=3 format=3 uid="uid://c8baylp68o7dv"]
 
 [ext_resource type="PackedScene" uid="uid://d0bsiknlebs18" path="res://Scenes/Dot.tscn" id="2"]
 [ext_resource type="Texture2D" uid="uid://kslc3b0t5atb" path="res://Assets/Dots/connieavatar.png" id="3"]
@@ -7,5 +7,6 @@
 color = "purple"
 
 [node name="Sprite2D" parent="." index="0"]
+position = Vector2(0, 2)
 scale = Vector2(0.25, 0.25)
 texture = ExtResource("3")

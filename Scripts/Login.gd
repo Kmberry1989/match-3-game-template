@@ -17,6 +17,9 @@ func _ready():
     google_login_button.connect("pressed", Callable(self, "_on_google_login_pressed"))
     cancel_button.connect("pressed", Callable(self, "_on_cancel_pressed"))
     _load_local_name()
+    # Play login music on the login screen
+    if AudioManager != null:
+        AudioManager.play_music("login")
     
     # Check if Firebase is available (autoload singleton present)
     if firebase == null:
@@ -42,8 +45,10 @@ func _ready():
             firebase.Auth.login_with_oauth(token, provider)
     else:
         # Attempt automatic sign-in if a saved auth file exists (not supported on web)
-        if firebase.Auth.check_auth_file():
-            _begin_auth("Signing in...")
+        # Guard the call to avoid the plugin printing an error when the file doesn't exist
+        if FileAccess.file_exists("user://user.auth"):
+            if firebase.Auth.check_auth_file():
+                _begin_auth("Signing in...")
 
 func _on_login_pressed():
     if auth_in_progress:

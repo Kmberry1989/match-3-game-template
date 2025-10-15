@@ -52,8 +52,21 @@ func load_sounds():
 	sounds["shuffle"] = load("res://Assets/Sounds/Music_fx_cymbal_rush.ogg")
 
 func load_music():
-	music_tracks["menu"] = load("res://Assets/Sounds/music_menu.ogg")
-	music_tracks["game"] = load("res://Assets/Sounds/music_ingame.mp3")
+	_add_music_track("login", "res://Assets/Sounds/music_login.ogg")
+	_add_music_track("menu", "res://Assets/Sounds/music_menu.ogg")
+	_add_music_track("ingame", "res://Assets/Sounds/music_ingame.ogg")
+
+func _add_music_track(track_name: String, path: String) -> void:
+	# Only register track if file exists and loads successfully
+	if ResourceLoader.exists(path):
+		var res = load(path)
+		if res != null:
+			music_tracks[track_name] = res
+		else:
+			print("Music load failed for '", track_name, "' at ", path)
+	else:
+		# Silent skip to avoid noise when certain tracks are not present in a build
+		pass
 
 func play_sound(sound_name):
 	if not sounds.has(sound_name):
@@ -68,11 +81,31 @@ func play_sound(sound_name):
 			return
 
 func play_music(track_name, loop = true):
-	if not music_tracks.has(track_name):
-		print("Music not found: ", track_name)
-		return
+	var stream: AudioStream = null
+	if music_tracks.has(track_name):
+		stream = music_tracks[track_name]
+	else:
+		# Friendly fallback order
+		var fallbacks: Array[String] = []
+		match String(track_name):
+			"login":
+				fallbacks = ["menu", "ingame"]
+			"menu":
+				fallbacks = ["login", "ingame"]
+			"ingame":
+				fallbacks = ["menu", "login"]
+			_:
+				fallbacks = ["menu", "login", "ingame"]
+		for alt in fallbacks:
+			if music_tracks.has(alt):
+				print("Music '", track_name, "' not found; falling back to '", alt, "'.")
+				stream = music_tracks[alt]
+				break
+		if stream == null:
+			print("Music not found and no fallback available: ", track_name)
+			return
 
-	music_player.stream = music_tracks[track_name]
+	music_player.stream = stream
 	music_player.stream.loop = loop
 	music_player.play()
 
