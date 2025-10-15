@@ -18,7 +18,8 @@ config/icon="res://icon.png"
 
 [autoload]
 
-#EnsureFirebaseloadsbeforescriptsthatdependonitFirebase="*res://addons/godot-firebase/firebase/firebase.tscn"
+; Ensure Firebase loads before scripts that depend on it
+Firebase="*res://addons/godot-firebase/firebase/firebase.tscn"
 PlayerManager="*res://Scripts/PlayerManager.gd"
 NetworkManager="*res://Scripts/NetworkManager.gd"
 AudioManager="*res://Scripts/AudioManager.gd"
@@ -46,4 +47,6 @@ ui_touch={
 [rendering]
 
 rendering_device/driver="d3d12"
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
 environment/defaults/default_environment="res://default_env.tres"
