@@ -1,4 +1,4 @@
-extends Control
+﻿extends Control
 
 var status_label: Label
 var offline_button: TextureButton
@@ -8,143 +8,144 @@ var logout_button: TextureButton
 @onready var firebase = get_node_or_null("/root/Firebase")
 
 func _ready():
-	status_label = Label.new()
-	offline_button = TextureButton.new()
-	profile_button = TextureButton.new()
-	showcase_button = TextureButton.new()
-	logout_button = TextureButton.new()
+    status_label = Label.new()
+    offline_button = TextureButton.new()
+    profile_button = TextureButton.new()
+    showcase_button = TextureButton.new()
+    logout_button = TextureButton.new()
 
-	# Background
-	var bg = ColorRect.new()
-	bg.color = Color(0, 0, 0) # Black
-	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
-	add_child(bg)
+    # Background
+    var bg = ColorRect.new()
+    bg.color = Color(0, 0, 0) # Black
+    bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+    add_child(bg)
 
-	# Use a CenterContainer to ensure all elements are perfectly centered
-	var center_container = CenterContainer.new()
-	center_container.set_anchors_preset(Control.PRESET_FULL_RECT)
-	add_child(center_container)
+    # Use a CenterContainer to ensure all elements are perfectly centered
+    var center_container = CenterContainer.new()
+    center_container.set_anchors_preset(Control.PRESET_FULL_RECT)
+    add_child(center_container)
 
-	# VBoxContainer holds our UI elements vertically
-	var vbox = VBoxContainer.new()
-	center_container.add_child(vbox)
+    # VBoxContainer holds our UI elements vertically
+    var vbox = VBoxContainer.new()
+    center_container.add_child(vbox)
 
-	# Title Label
-	var title = Label.new()
-	title.text = " " # Updated game title
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.add_theme_font_size_override("font_size", 48)
-	vbox.add_child(title)
+    # Title Label
+    var title = Label.new()
+    title.text = " " # Updated game title
+    title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+    title.add_theme_font_size_override("font_size", 48)
+    vbox.add_child(title)
 
-	# Margin for spacing
-	var margin = Control.new()
-	margin.custom_minimum_size = Vector2(0, 40)
-	vbox.add_child(margin)
+    # Margin for spacing
+    var margin = Control.new()
+    margin.custom_minimum_size = Vector2(0, 40)
+    vbox.add_child(margin)
 
-	# Load button textures
-	var normal_tex = load("res://Assets/Visuals/button_normal.svg")
-	var hover_tex = load("res://Assets/Visuals/button_hover.svg")
-	var pressed_tex = load("res://Assets/Visuals/button_pressed.svg")
+    # Load button textures
+    var normal_tex = load("res://Assets/Visuals/button_normal.svg")
+    var hover_tex = load("res://Assets/Visuals/button_hover.svg")
+    var pressed_tex = load("res://Assets/Visuals/button_pressed.svg")
 
-	# Play Button
-	offline_button.texture_normal = normal_tex
-	offline_button.texture_pressed = pressed_tex
-	offline_button.texture_hover = hover_tex
-	offline_button.connect("pressed", _on_offline_button_pressed)
-	vbox.add_child(offline_button)
+    # Play Button
+    offline_button.texture_normal = normal_tex
+    offline_button.texture_pressed = pressed_tex
+    offline_button.texture_hover = hover_tex
+    offline_button.connect("pressed", _on_offline_button_pressed)
+    vbox.add_child(offline_button)
 
-	var offline_label = Label.new()
-	offline_label.text = "Play"
-	offline_label.set_anchors_preset(Control.PRESET_FULL_RECT)
-	offline_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	offline_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	offline_button.add_child(offline_label)
+    var offline_label = Label.new()
+    offline_label.text = "Play"
+    offline_label.set_anchors_preset(Control.PRESET_FULL_RECT)
+    offline_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+    offline_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+    offline_button.add_child(offline_label)
 
-	# Profile Button
-	profile_button.texture_normal = normal_tex
-	profile_button.texture_pressed = pressed_tex
-	profile_button.texture_hover = hover_tex
-	profile_button.connect("pressed", _on_profile_button_pressed)
-	vbox.add_child(profile_button)
+    # Profile Button
+    profile_button.texture_normal = normal_tex
+    profile_button.texture_pressed = pressed_tex
+    profile_button.texture_hover = hover_tex
+    profile_button.connect("pressed", _on_profile_button_pressed)
+    vbox.add_child(profile_button)
 
-	var profile_label = Label.new()
-	profile_label.text = "Profile"
-	profile_label.set_anchors_preset(Control.PRESET_FULL_RECT)
-	profile_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	profile_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	profile_button.add_child(profile_label)
+    var profile_label = Label.new()
+    profile_label.text = "Profile"
+    profile_label.set_anchors_preset(Control.PRESET_FULL_RECT)
+    profile_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+    profile_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+    profile_button.add_child(profile_label)
 
-	# Showcase Button
-	showcase_button.texture_normal = normal_tex
-	showcase_button.texture_pressed = pressed_tex
-	showcase_button.texture_hover = hover_tex
-	showcase_button.connect("pressed", _on_showcase_button_pressed)
-	vbox.add_child(showcase_button)
+    # Showcase Button
+    showcase_button.texture_normal = normal_tex
+    showcase_button.texture_pressed = pressed_tex
+    showcase_button.texture_hover = hover_tex
+    showcase_button.connect("pressed", _on_showcase_button_pressed)
+    vbox.add_child(showcase_button)
 
-	var showcase_label = Label.new()
-	showcase_label.text = "Showcase"
-	showcase_label.set_anchors_preset(Control.PRESET_FULL_RECT)
-	showcase_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	showcase_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	showcase_button.add_child(showcase_label)
+    var showcase_label = Label.new()
+    showcase_label.text = "Showcase"
+    showcase_label.set_anchors_preset(Control.PRESET_FULL_RECT)
+    showcase_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+    showcase_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+    showcase_button.add_child(showcase_label)
 
-	# Logout Button (shown only if Firebase is present and logged in)
-	logout_button.texture_normal = normal_tex
-	logout_button.texture_pressed = pressed_tex
-	logout_button.texture_hover = hover_tex
-	logout_button.connect("pressed", _on_logout_button_pressed)
-	vbox.add_child(logout_button)
+    # Logout Button (shown only if Firebase is present and logged in)
+    logout_button.texture_normal = normal_tex
+    logout_button.texture_pressed = pressed_tex
+    logout_button.texture_hover = hover_tex
+    logout_button.connect("pressed", _on_logout_button_pressed)
+    vbox.add_child(logout_button)
 
-	var logout_label = Label.new()
-	logout_label.text = "Logout"
-	logout_label.set_anchors_preset(Control.PRESET_FULL_RECT)
-	logout_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	logout_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	logout_button.add_child(logout_label)
+    var logout_label = Label.new()
+    logout_label.text = "Logout"
+    logout_label.set_anchors_preset(Control.PRESET_FULL_RECT)
+    logout_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+    logout_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+    logout_button.add_child(logout_label)
 
-	_update_logout_visibility()
+    _update_logout_visibility()
 
-	# Status Label
-	status_label.text = ""
-	status_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	status_label.custom_minimum_size = Vector2(300, 50)
-	vbox.add_child(status_label)
+    # Status Label
+    status_label.text = ""
+    status_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+    status_label.custom_minimum_size = Vector2(300, 50)
+    vbox.add_child(status_label)
 
-	# Play menu music
-	AudioManager.play_music("menu")
+    # Play menu music
+    AudioManager.play_music("menu")
 
-	# Keep logout visibility in sync with auth state
-	if firebase != null:
-		firebase.Auth.login_succeeded.connect(Callable(self, "_update_logout_visibility"))
-		firebase.Auth.logged_out.connect(Callable(self, "_update_logout_visibility"))
+    # Keep logout visibility in sync with auth state
+    if firebase != null:
+        firebase.Auth.login_succeeded.connect(Callable(self, "_update_logout_visibility"))
+        firebase.Auth.logged_out.connect(Callable(self, "_update_logout_visibility"))
 
 func _on_offline_button_pressed():
-	AudioManager.play_sound("ui_click")
-	_start_game()
+    AudioManager.play_sound("ui_click")
+    _start_game()
 
 func _on_profile_button_pressed():
-	AudioManager.play_sound("ui_click")
-	get_tree().change_scene_to_file("res://Scenes/Profile.tscn")
+    AudioManager.play_sound("ui_click")
+    get_tree().change_scene_to_file("res://Scenes/Profile.tscn")
 
 func _on_showcase_button_pressed():
-	AudioManager.play_sound("ui_click")
-	get_tree().change_scene_to_file("res://Scenes/Showcase.tscn")
+    AudioManager.play_sound("ui_click")
+    get_tree().change_scene_to_file("res://Scenes/Showcase.tscn")
 
 func _start_game():
-	AudioManager.stop_music()
-	AudioManager.play_sound("game_start")
-	get_tree().change_scene_to_file("res://Scenes/Game.tscn")
+    AudioManager.stop_music()
+    AudioManager.play_sound("game_start")
+    get_tree().change_scene_to_file("res://Scenes/Game.tscn")
 
 func _update_logout_visibility():
-	var show = false
-	if firebase != null:
-		show = firebase.Auth.is_logged_in()
-	logout_button.visible = show
+    var logout_visible = false
+    if firebase != null:
+        logout_visible = firebase.Auth.is_logged_in()
+    logout_button.visible = logout_visible
 
 func _on_logout_button_pressed():
-	AudioManager.play_sound("ui_click")
-	if firebase != null:
-		firebase.Auth.logout()
-	# Optionally clear some local player data if desired
-	PlayerManager.player_uid = ""
-	get_tree().change_scene_to_file("res://Scenes/Login.tscn")
+    AudioManager.play_sound("ui_click")
+    if firebase != null:
+        firebase.Auth.logout()
+    # Optionally clear some local player data if desired
+    PlayerManager.player_uid = ""
+    get_tree().change_scene_to_file("res://Scenes/Login.tscn")
+

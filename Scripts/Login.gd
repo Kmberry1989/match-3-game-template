@@ -17,13 +17,13 @@ func _ready():
     google_login_button.connect("pressed", Callable(self, "_on_google_login_pressed"))
     cancel_button.connect("pressed", Callable(self, "_on_cancel_pressed"))
     _load_local_name()
-
-	# Check if Firebase is available (autoload singleton present)
-	if firebase == null:
-		print("Firebase plugin not found. Please install and enable it.")
-		google_login_button.disabled = true
-		google_login_button.visible = false
-		return
+    
+    # Check if Firebase is available (autoload singleton present)
+    if firebase == null:
+        print("Firebase plugin not found. Please install and enable it.")
+        google_login_button.disabled = true
+        google_login_button.visible = false
+        return
 
     # Show Google login if Firebase is available
     google_login_button.visible = true
