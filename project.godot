@@ -18,7 +18,6 @@ config/icon="res://icon.png"
 
 [autoload]
 
-; Ensure Firebase loads before scripts that depend on it
 Firebase="*res://addons/godot-firebase/firebase/firebase.tscn"
 PlayerManager="*res://Scripts/PlayerManager.gd"
 NetworkManager="*res://Scripts/NetworkManager.gd"
@@ -30,7 +29,7 @@ window/size/viewport_width=540
 window/size/viewport_height=960
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
-window/handheld/orientation="portrait"
+window/handheld/orientation=1
 
 [editor_plugins]
 
