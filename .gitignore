@@ -14,3 +14,38 @@ icon.png.import
 .mono/
 data_*/
 mono_crash.*.json
+
+# Firebase local config (do not commit secrets)
+addons/godot-firebase/.env
+
+# Env files (generic)
+.env
+.env.*
+!.env.example
+
+# Editor/IDE
+.vscode/
+.idea/
+.fleet/
+.vs/
+*.code-workspace
+
+# OS junk files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Backups and temp
+*.tmp
+*.temp
+*.bak
+*~
+*.swp
+*.swo
+
+# Build/exports (adjust if you use a different folder)
+dist/
+build/
+bin/
+exports/
+export/

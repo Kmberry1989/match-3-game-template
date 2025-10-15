@@ -1,8 +1,19 @@
 {
-    "godotTools.editorPath.godot4": "z:\\Downloads Comet new\\Godot_v4.5-stable_win64.exe\\Godot_v4.5-stable_win64.exe",
-    "files.autoSave": "onFocusChange",
-    "material-icon-theme.activeIconPack": "react_redux",
-    "cSpell.words": [
-        "tweens"
-    ]
+  "cSpell.words": [
+    "COOLDOWN",
+    "Cooldown",
+    "idtoken",
+    "printerr",
+    "Firestore",
+    "OAuth",
+    "uid",
+    "tween",
+    "tweens"
+  ],
+  "files.exclude": {
+    "addons/godot-firebase/**": false
+  },
+  "godot_ls.exclude": [
+    "addons/godot-firebase/**"
+  ]
 }

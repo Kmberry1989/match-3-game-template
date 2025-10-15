@@ -25,7 +25,7 @@ scale = Vector2(0.85, 0.85)
 script = ExtResource("1")
 width = 7
 height = 7
-offset = 70
+offset = 80
 y_offset = -2
 
 [node name="Background" type="TextureRect" parent="."]
@@ -39,11 +39,13 @@ fade_duration = 2.0
 hold_duration = 8.0
 
 [node name="Score" type="Sprite2D" parent="."]
-position = Vector2(260.61612, 128.5)
-scale = Vector2(1.2418108, 0.91875005)
+visible = false
+position = Vector2(-102.86981, 314.88596)
+scale = Vector2(0.43045825, 0.31847325)
 texture = ExtResource("4_fgofq")
 
 [node name="GameUI" parent="." instance=ExtResource("3")]
+top_level = true
 offset_right = -8.0
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
@@ -54,3 +56,8 @@ offset_right = -8.0
 position = Vector2(269.62497, 511.3227)
 scale = Vector2(0.9, 0.9)
 texture = ExtResource("7_2irst")
+
+[node name="Score2" type="Sprite2D" parent="."]
+position = Vector2(248, 128)
+scale = Vector2(0.25, 0.25)
+texture = ExtResource("4_fgofq")
