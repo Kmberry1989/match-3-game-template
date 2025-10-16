@@ -75,3 +75,7 @@ func server_disconnected_handler():
         print("Disconnected from server.")
         server_disconnected.emit()
 
+func _exit_tree():
+    if peer != null:
+        peer.close()
+        peer = null

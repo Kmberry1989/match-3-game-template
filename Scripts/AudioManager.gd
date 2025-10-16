@@ -122,4 +122,12 @@ func get_music_volume():
 	return AudioServer.get_bus_volume_db(music_bus_idx)
 
 func get_sfx_volume():
-	return AudioServer.get_bus_volume_db(sfx_bus_idx)
+    return AudioServer.get_bus_volume_db(sfx_bus_idx)
+
+func _exit_tree():
+    # Stop any playing audio to avoid lingering objects at shutdown
+    if music_player and music_player.playing:
+        music_player.stop()
+    for p in sfx_players:
+        if p and p.playing:
+            p.stop()

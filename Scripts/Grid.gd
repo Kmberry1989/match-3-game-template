@@ -939,3 +939,9 @@ func show_stage_banner(new_level):
 	t2.parallel().tween_property(text, "modulate:a", 0.0, 0.3)
 	await t2.finished
 	root.queue_free()
+
+func _exit_tree():
+	# Stop any running timers to avoid lingering objects at shutdown
+	for t in [destroy_timer, collapse_timer, refill_timer, idle_timer]:
+		if t != null:
+			t.stop()
