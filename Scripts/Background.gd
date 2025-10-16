@@ -31,16 +31,16 @@ func cycle_background():
 	tween.finished.connect(Callable(self, "cycle_background"))
 
 func change_texture():
-    current_texture_index = (current_texture_index + 1) % textures.size()
-    texture = textures[current_texture_index]
+	current_texture_index = (current_texture_index + 1) % textures.size()
+	texture = textures[current_texture_index]
 
 func _process(_delta):
 	#time += delta * hue_shift_speed
 	#var hue = fmod(time, 1.0)
 	#modulate = Color.from_hsv(hue, 0.5, 1.0)
-    pass
+	pass
 
 func _exit_tree():
-    if tween:
-        tween.kill()
-        tween = null
+	if tween:
+		tween.kill()
+		tween = null

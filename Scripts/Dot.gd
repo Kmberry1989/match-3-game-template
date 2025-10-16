@@ -7,9 +7,15 @@ const PULSE_SCALE_MIN = Vector2(0.2575, 0.2575)
 @onready var sprite = get_node("Sprite2D")
 var matched = false
 
+# Emitted when the match fade-out finishes; used to trigger XP orbs immediately.
+signal match_faded(global_pos, color_name)
+
 var pulse_tween: Tween = null
 var float_tween: Tween = null
 var shadow: Sprite2D = null
+
+# Whether an XP orb has already been spawned for this dot in the current match.
+var orb_spawned: bool = false
 
 # Visual Effects
 @onready var flash_texture = preload("res://Assets/Visuals/bright_flash.png")
@@ -122,6 +128,12 @@ func play_match_animation(delay):
 	tween.tween_callback(Callable(self, "show_flash"))
 	tween.parallel().tween_property(self, "scale", scale * 1.5, 0.3).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	tween.parallel().tween_property(self, "modulate:a", 0.0, 0.3).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	tween.finished.connect(Callable(self, "_on_match_fade_finished"))
+
+func _on_match_fade_finished():
+	if not orb_spawned:
+		orb_spawned = true
+		emit_signal("match_faded", global_position, color)
 
 func show_flash():
 	var flash = Sprite2D.new()

@@ -125,7 +125,7 @@ func update_score_display():
 func setup_timers():
 	destroy_timer.connect("timeout", Callable(self, "destroy_matches"))
 	destroy_timer.set_one_shot(true)
-	destroy_timer.set_wait_time(1.5) # Increased for new animation
+	destroy_timer.set_wait_time(0.6) # Tightened to align with last dot fade
 	add_child(destroy_timer)
 	
 	collapse_timer.connect("timeout", Callable(self, "collapse_columns"))
@@ -352,6 +352,9 @@ func process_match_animations(dots_in_match):
 	for dot in unique_dots:
 		if not dot.matched:
 			dot.matched = true
+			# When each dot finishes fading out, spawn its XP orb immediately via signal
+			if not dot.is_connected("match_faded", Callable(self, "_on_dot_match_faded")):
+				dot.match_faded.connect(Callable(self, "_on_dot_match_faded"))
 			dot.play_match_animation(delay)
 			delay += 0.05
 			if matched_color == "":
@@ -381,7 +384,9 @@ func destroy_matches():
 				var particles = match_particles.instantiate()
 				particles.position = all_dots[i][j].position
 				add_child(particles)
-				_spawn_xp_orb(all_dots[i][j].global_position, all_dots[i][j].color)
+				# If an orb wasn't already spawned on fade completion, spawn it now as a fallback
+				if not all_dots[i][j].orb_spawned:
+					_spawn_xp_orb(all_dots[i][j].global_position, all_dots[i][j].color)
 				if all_dots[i][j].float_tween:
 					all_dots[i][j].float_tween.kill()
 				if all_dots[i][j].pulse_tween:
@@ -443,6 +448,10 @@ func _spawn_xp_orb(from_global_pos: Vector2, color_name: String = ""):
 	t.parallel().tween_property(orb, "rotation_degrees", orb.rotation_degrees + 360.0, 0.5)
 	t.parallel().tween_property(orb, "modulate:a", 0.0, 0.15).set_delay(0.45)
 	t.finished.connect(Callable(orb, "queue_free"))
+
+# Called when a dot finishes its match fade-out; spawns the orb immediately.
+func _on_dot_match_faded(pos: Vector2, color_name: String):
+	_spawn_xp_orb(pos, color_name)
 
 func collapse_columns():
 	for i in range(width):
