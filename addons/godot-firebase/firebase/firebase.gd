@@ -54,7 +54,7 @@ var _config : Dictionary = {
 	"authDomain": "",
 	"databaseURL": "https://meaner-matcher-default-rtdb.firebaseio.com",
 	"projectId": "meaner-matcher",
-	"storageBucket": "meaner-matcher.firebasestorage.app",
+	"storageBucket": "meaner-matcher.appspot.com",
 	"messagingSenderId": "413636882791",
 	"appId": "1:413636882791:web:834dae40038c4d81f9ffc2",
 	"measurementId": "G-WYG9G4ED1R",
