@@ -729,39 +729,16 @@ func _get_color_pool() -> Array:
 # Rotate stage colors: swap the 3 inactive colors in, and remove 3 random active colors to keep 6 total
 func _rotate_stage_colors():
 	var all = possible_colors.duplicate()
-	var missing: Array = []
-	for c in all:
-		if not active_colors.has(c):
-			missing.append(c)
-	# Add missing colors
-	var to_add = missing.duplicate()
-	# Choose an equal number to remove from current active
-	var active_copy = active_colors.duplicate()
-	active_copy.shuffle()
-	var remove_count = min(to_add.size(), active_copy.size())
-	var to_remove: Array = []
-	for idx in range(remove_count):
-		to_remove.append(active_copy[idx])
-	# Build new active set
+	if all.size() <= 6:
+		active_colors = all
+		return
+	_color_rotation_index = (_color_rotation_index + 3) % all.size()
 	var new_active: Array = []
-	for c in active_colors:
-		if to_remove.find(c) == -1:
-			new_active.append(c)
-	for c in to_add:
+	for k in range(6):
+		var idx = (_color_rotation_index + k) % all.size()
+		var c = all[idx]
 		if new_active.find(c) == -1:
 			new_active.append(c)
-	# Ensure exactly 6 colors
-	if new_active.size() > 6:
-		new_active.shuffle()
-		while new_active.size() > 6:
-			new_active.pop_back()
-	elif new_active.size() < 6:
-		var candidates = all.duplicate()
-		for c in new_active:
-			candidates.erase(c)
-		candidates.shuffle()
-		while new_active.size() < 6 and candidates.size() > 0:
-			new_active.append(candidates.pop_back())
 	active_colors = new_active
 
 func reshuffle_board() -> bool:
