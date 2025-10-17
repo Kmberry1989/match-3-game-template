@@ -19,7 +19,7 @@ boot_splash/fullsize=false
 boot_splash/use_filter=false
 boot_splash/image="uid://c153otdfmgy06"
 config/icon="res://icon.png"
-boot_splash/minimum_display_time=10
+boot_splash/minimum_display_time=0
 
 [autoload]
 
