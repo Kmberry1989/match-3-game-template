@@ -49,3 +49,6 @@ build/
 bin/
 exports/
 export/
+
+# Node.js dependencies
+node_modules/
