@@ -49,5 +49,10 @@ build/
 bin/
 exports/
 export/
+
+# Project asset folders to ignore
 Assets/_unused/
 Assets/Sounds/_backup_originals/
+
+# Node.js dependencies
+node_modules/
