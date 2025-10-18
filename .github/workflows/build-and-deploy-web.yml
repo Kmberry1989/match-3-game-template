@@ -1,0 +1,73 @@
+name: Build and Deploy Web (PWA)
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - try
+  workflow_dispatch:
+
+env:
+  GODOT_VERSION: 4.5
+  EXPORT_NAME: meaner-matcher
+  PROJECT_PATH: .
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Export Web (PWA)
+    runs-on: ubuntu-24.04
+    container:
+      image: barichello/godot-ci:4.5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Setup Godot export templates
+        run: |
+          mkdir -p ~/.local/share/godot/export_templates/
+          mkdir -p ~/.config/
+          if [ -d /root/.config/godot ]; then mv /root/.config/godot ~/.config/godot; fi
+          if [ -d /root/.local/share/godot/export_templates/${GODOT_VERSION}.stable ]; then \
+            mv /root/.local/share/godot/export_templates/${GODOT_VERSION}.stable ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable; \
+          fi
+
+      - name: Export Web using preset "Web (docs)"
+        run: |
+          mkdir -p build/web
+          EXPORT_DIR="$(readlink -f build)"
+          cd "$PROJECT_PATH"
+          godot --headless --verbose --export-release "Web (docs)" "$EXPORT_DIR/web/index.html"
+          ls -la "$EXPORT_DIR/web"
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/web
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
+

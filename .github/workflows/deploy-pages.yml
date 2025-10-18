@@ -1,10 +1,6 @@
-name: Deploy Web to GitHub Pages
+name: Deploy Web (static docs)
 
 on:
-  push:
-    branches:
-      - main
-      - master
   workflow_dispatch:
 
 permissions:
@@ -37,4 +33,3 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-
