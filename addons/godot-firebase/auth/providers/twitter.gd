@@ -1,4 +1,4 @@
-class_name TwitterProvider 
+﻿class_name TwitterProvider 
 extends AuthProvider
 
 var request_token_endpoint: String = "https://api.twitter.com/oauth/access_token?oauth_callback="
@@ -37,3 +37,5 @@ func get_oauth_params() -> String:
     for key in self.oauth.keys():
         params.append(key+"="+self.oauth.get(key))
     return "&".join(params)
+
+

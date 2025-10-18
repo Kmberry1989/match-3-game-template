@@ -2,10 +2,12 @@ extends Node2D
 
 const PULSE_SCALE_MAX = Vector2(0.2725, 0.2725)
 const PULSE_SCALE_MIN = Vector2(0.2575, 0.2575)
+const REFERENCE_DOT_PX = 512.0
 
 @export var color = ""
 @onready var sprite = get_node("Sprite2D")
 var matched = false
+var scale_multiplier: float = 1.0
 
 # Emitted when the match fade-out finishes; used to trigger XP orbs immediately.
 signal match_faded(global_pos, color_name)
@@ -64,6 +66,13 @@ var mouse_inside = false
 
 func _ready():
 	load_textures()
+	# Adjust dot scale based on texture size so in-game size stays consistent
+	if sprite and sprite.texture:
+		var tex_w: float = float(sprite.texture.get_width())
+		var tex_h: float = float(sprite.texture.get_height())
+		var max_dim: float = max(tex_w, tex_h)
+		if max_dim > 0.0:
+			scale_multiplier = REFERENCE_DOT_PX / max_dim
 	create_shadow()
 	setup_blink_timer()
 	start_floating()
@@ -82,7 +91,7 @@ func _ready():
 		var collision_shape = CollisionShape2D.new()
 		var square_shape = RectangleShape2D.new()
 		var max_dimension = max(texture.get_width(), texture.get_height())
-		var target_scale = max(PULSE_SCALE_MAX.x, PULSE_SCALE_MAX.y)
+		var target_scale = max(PULSE_SCALE_MAX.x, PULSE_SCALE_MAX.y) * scale_multiplier
 		var side_length = max_dimension * target_scale
 		square_shape.size = Vector2(side_length, side_length)
 		collision_shape.shape = square_shape
@@ -98,12 +107,12 @@ func _on_mouse_entered():
 		pulse_tween.kill()
 	
 	# Set scale to the largest size from the pulse animation
-	sprite.scale = PULSE_SCALE_MAX
+	sprite.scale = PULSE_SCALE_MAX * scale_multiplier
 	play_surprised_animation()
 
 func _on_mouse_exited():
 	mouse_inside = false
-	sprite.scale = PULSE_SCALE_MIN # Reset scale
+	sprite.scale = PULSE_SCALE_MIN * scale_multiplier # Reset scale
 	start_pulsing()
 	set_normal_texture()
 
@@ -216,8 +225,8 @@ func start_pulsing():
 	var pulse_duration = color_to_pulse_duration.get(color, 1.5) # Default to 1.5 if color not found
 
 	pulse_tween = get_tree().create_tween()
-	pulse_tween.tween_property(sprite, "scale", PULSE_SCALE_MAX, pulse_duration).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	pulse_tween.tween_property(sprite, "scale", PULSE_SCALE_MIN, pulse_duration).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	pulse_tween.tween_property(sprite, "scale", PULSE_SCALE_MAX * scale_multiplier, pulse_duration).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	pulse_tween.tween_property(sprite, "scale", PULSE_SCALE_MIN * scale_multiplier, pulse_duration).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	pulse_tween.finished.connect(Callable(self, "start_pulsing"))
 
 func _on_blink_timer_timeout():
@@ -259,7 +268,7 @@ func play_idle_animation():
 		var tween = get_tree().create_tween()
 		# Lift and inflate over 2 seconds
 		tween.parallel().tween_property(self, "position", original_pos + Vector2(0, -15), 2.0).set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_OUT)
-		tween.parallel().tween_property(sprite, "scale", PULSE_SCALE_MIN * 1.5, 2.0).set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_OUT)
+		tween.parallel().tween_property(sprite, "scale", (PULSE_SCALE_MIN * 1.5) * scale_multiplier, 2.0).set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_OUT)
 		tween.parallel().tween_property(shadow, "scale", original_shadow_scale * 2.5, 2.0).set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_OUT)
 		tween.parallel().tween_property(shadow, "modulate:a", 0.0, 2.0).set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_OUT)
 		await tween.finished
@@ -267,7 +276,7 @@ func play_idle_animation():
 		if animation_state == "idle":
 			var down_tween = get_tree().create_tween()
 			down_tween.parallel().tween_property(self, "position", original_pos, 1.0)
-			down_tween.parallel().tween_property(sprite, "scale", PULSE_SCALE_MIN, 1.0)
+			down_tween.parallel().tween_property(sprite, "scale", PULSE_SCALE_MIN * scale_multiplier, 1.0)
 			down_tween.parallel().tween_property(shadow, "scale", original_shadow_scale, 1.0)
 			down_tween.parallel().tween_property(shadow, "modulate:a", original_shadow_opacity, 1.0)
 			await down_tween.finished

@@ -1,4 +1,4 @@
-## @meta-authors TODO
+﻿## @meta-authors TODO
 ## @meta-version 2.3
 ## Authentication user data.
 ## Documentation TODO.
@@ -42,3 +42,5 @@ func _to_string() -> String:
     txt += "provider_id : %s\n" % provider_id
     txt += "display name : %s\n" % display_name
     return txt
+
+
