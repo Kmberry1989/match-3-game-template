@@ -1,4 +1,4 @@
-﻿extends Control
+extends Control
 
 @onready var resume_button = $Center/VBox/ResumeButton
 @onready var shop_button = $Center/VBox/ShopButton
@@ -47,8 +47,8 @@ func _on_coins_changed(new_amount):
 
 func _on_buy_frame2():
 	if PlayerManager.spend_coins(PRICE_FRAME):
-	    PlayerManager.unlock_frame("frame_2")
-	    PlayerManager.set_current_frame("frame_2")
+		PlayerManager.unlock_frame("frame_2")
+		PlayerManager.set_current_frame("frame_2")
 
 func _on_buy_bg2():
 	pass
@@ -64,61 +64,61 @@ func _populate_frame_shop():
 	var visuals_path = "res://Assets/Visuals"
 	var dir = DirAccess.open(visuals_path)
 	if dir == null:
-	    return
+		return
 	dir.list_dir_begin()
 	var file_name = dir.get_next()
 	var frames := []
 	while file_name != "":
-	    if not dir.current_is_dir():
-	        if file_name.begins_with("avatar_frame_") and file_name.ends_with(".png"):
-	            var num_str = file_name.trim_prefix("avatar_frame_").trim_suffix(".png")
-	            if num_str.is_valid_int():
-	                var n = int(num_str)
-	                if n >= 2:
-	                    frames.append(n)
-	    file_name = dir.get_next()
+		if not dir.current_is_dir():
+			if file_name.begins_with("avatar_frame_") and file_name.ends_with(".png"):
+				var num_str = file_name.trim_prefix("avatar_frame_").trim_suffix(".png")
+				if num_str.is_valid_int():
+					var n = int(num_str)
+					if n >= 2:
+						frames.append(n)
+		file_name = dir.get_next()
 	dir.list_dir_end()
 	frames.sort()
 	for n in frames:
-	    if n == 2:
-	        continue # we already have a dedicated Frame 2 button
-	    var frame_name = "frame_" + str(n)
-	    var btn = Button.new()
-	    var unlocked = PlayerManager.player_data.get("unlocks", {}).get("frames", []).has(frame_name)
-	    btn.text = ("Use " if unlocked else "Buy ") + "Frame " + str(n) + ("" if unlocked else " (" + str(PRICE_FRAME) + ")")
-	    btn.pressed.connect(func():
-	        if not unlocked:
-	            if not PlayerManager.spend_coins(PRICE_FRAME):
-	                return
-	            PlayerManager.unlock_frame(frame_name)
-	        PlayerManager.set_current_frame(frame_name)
-	    )
-	    shop_panel.add_child(btn)
+		if n == 2:
+			continue # we already have a dedicated Frame 2 button
+		var frame_name = "frame_" + str(n)
+		var btn = Button.new()
+		var unlocked = PlayerManager.player_data.get("unlocks", {}).get("frames", []).has(frame_name)
+		btn.text = ("Use " if unlocked else "Buy ") + "Frame " + str(n) + ("" if unlocked else " (" + str(PRICE_FRAME) + ")")
+		btn.pressed.connect(func():
+			if not unlocked:
+				if not PlayerManager.spend_coins(PRICE_FRAME):
+					return
+				PlayerManager.unlock_frame(frame_name)
+			PlayerManager.set_current_frame(frame_name)
+		)
+		shop_panel.add_child(btn)
 
 # Volume controls
 func _init_volume_sliders():
 	if AudioManager != null:
-	    var mdb = AudioManager.get_music_volume()
-	    var sdb = AudioManager.get_sfx_volume()
-	    music_slider.min_value = -60.0
-	    music_slider.max_value = 0.0
-	    sfx_slider.min_value = -60.0
-	    sfx_slider.max_value = 0.0
-	    music_slider.value = clamp(mdb, music_slider.min_value, music_slider.max_value)
-	    sfx_slider.value = clamp(sdb, sfx_slider.min_value, sfx_slider.max_value)
-	    _update_music_label(music_slider.value)
-	    _update_sfx_label(sfx_slider.value)
-	    music_slider.value_changed.connect(_on_music_slider_changed)
-	    sfx_slider.value_changed.connect(_on_sfx_slider_changed)
+		var mdb = AudioManager.get_music_volume()
+		var sdb = AudioManager.get_sfx_volume()
+		music_slider.min_value = -60.0
+		music_slider.max_value = 0.0
+		sfx_slider.min_value = -60.0
+		sfx_slider.max_value = 0.0
+		music_slider.value = clamp(mdb, music_slider.min_value, music_slider.max_value)
+		sfx_slider.value = clamp(sdb, sfx_slider.min_value, sfx_slider.max_value)
+		_update_music_label(music_slider.value)
+		_update_sfx_label(sfx_slider.value)
+		music_slider.value_changed.connect(_on_music_slider_changed)
+		sfx_slider.value_changed.connect(_on_sfx_slider_changed)
 
 func _on_music_slider_changed(v):
 	if AudioManager != null:
-	    AudioManager.set_music_volume(v)
+		AudioManager.set_music_volume(v)
 	_update_music_label(v)
 
 func _on_sfx_slider_changed(v):
 	if AudioManager != null:
-	    AudioManager.set_sfx_volume(v)
+		AudioManager.set_sfx_volume(v)
 	_update_sfx_label(v)
 
 func _update_music_label(db):
@@ -128,5 +128,3 @@ func _update_music_label(db):
 func _update_sfx_label(db):
 	var pct = int(round(db_to_linear(db) * 100.0)) if typeof(db) != TYPE_NIL else 0
 	sfx_percent.text = str(pct) + "%"
-
-

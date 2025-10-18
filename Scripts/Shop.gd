@@ -15,6 +15,7 @@ var _frame_ids: Array = []
 const BADGE_H := 24
 const CARD_W := 220.0
 const CARD_SEP := 10.0
+const THUMB_H := 320.0 # normalized preview area height
 
 var frames_catalog := {
 	"frame_2": {"price": 100, "display": "avatar_frame_2.png"},
@@ -131,16 +132,19 @@ func _make_frame_card(frame_id: String) -> Control:
 	var vb := VBoxContainer.new()
 	vb.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	vb.add_theme_constant_override("separation", 6)
+	vb.alignment = BoxContainer.ALIGNMENT_CENTER
 	panel.add_child(vb)
 
 	var thumb := Control.new()
-	thumb.custom_minimum_size = Vector2(0, 0)
+	# Normalize preview area so all frames appear consistent and centered
+	thumb.custom_minimum_size = Vector2(0, THUMB_H)
 	thumb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	thumb.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	vb.add_child(thumb)
 
 	var tex := TextureRect.new()
 	tex.texture = load(display_path)
+	# Keep aspect and center; rely on preview area height. Use a widely-supported expand mode.
 	tex.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	tex.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	tex.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -163,14 +167,17 @@ func _make_frame_card(frame_id: String) -> Control:
 	var name_label := Label.new()
 	name_label.text = frame_id.capitalize()
 	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	name_label.add_theme_font_size_override("font_size", 20)
 	vb.add_child(name_label)
 
 	var price_label := Label.new()
 	price_label.text = "Price: %d" % price
 	price_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	price_label.add_theme_font_size_override("font_size", 18)
 	vb.add_child(price_label)
 
 	var btn := Button.new()
+	btn.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	vb.add_child(btn)
 
 	var owned: bool = false

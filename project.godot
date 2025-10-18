@@ -17,7 +17,7 @@ config/features=PackedStringArray("4.5")
 boot_splash/bg_color=Color(0, 0, 0, 1)
 boot_splash/fullsize=false
 boot_splash/use_filter=false
-boot_splash/image="uid://c153otdfmgy06"
+boot_splash/image="res://Assets/Visuals/player_avatar.png"
 config/icon="res://icon.png"
 boot_splash/minimum_display_time=10
 
@@ -32,7 +32,6 @@ AudioManager="*res://Scripts/AudioManager.gd"
 
 window/size/viewport_width=540
 window/size/viewport_height=960
-window/size/mode=0
 window/size/resizable=false
 window/stretch/mode="canvas_items"
 window/handheld/orientation=1

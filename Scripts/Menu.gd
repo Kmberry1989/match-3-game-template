@@ -31,9 +31,14 @@ func _ready():
 	center_container.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(center_container)
 
+	# Add a small downward offset so the menu sits ~25px lower than center
+	var offset_container = MarginContainer.new()
+	offset_container.add_theme_constant_override("margin_top", 50)
+	center_container.add_child(offset_container)
+
 	# VBoxContainer holds our UI elements vertically
 	var vbox = VBoxContainer.new()
-	center_container.add_child(vbox)
+	offset_container.add_child(vbox)
 
 	# Title Label
 	var title = Label.new()

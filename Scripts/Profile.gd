@@ -26,6 +26,10 @@ func _ready():
 	else:
 		change_avatar_button.connect("pressed", _on_change_avatar_pressed)
 		file_dialog.connect("file_selected", _on_file_selected)
+		# Ensure the dialog opens files (photo picker), not saving
+		file_dialog.file_mode = FileDialog.FILE_MODE_OPEN_FILE
+		# Optional: restrict to common image types
+		file_dialog.filters = PackedStringArray(["*.png, *.jpg, *.jpeg; Image Files"])
 
 	back_button.connect("pressed", _on_back_button_pressed)
 	frame_selection_button.connect("item_selected", _on_frame_selected)
@@ -105,16 +109,9 @@ func _on_change_avatar_pressed():
 func _on_file_selected(path):
 	var img = Image.load_from_file(path)
 	if img:
-		# Ensure avatars directory exists
-		DirAccess.make_dir_absolute("user://avatars")
-		var avatar_path = "user://avatars/" + PlayerManager.get_player_name() + ".png"
-		img.save_png(avatar_path)
-		
-		# Update texture
+		# Update avatar preview directly without saving a copy
 		var tex = ImageTexture.create_from_image(img)
 		avatar_texture_rect.texture = tex
-		
-		PlayerManager.save_player_data()
 
 func _on_back_button_pressed():
 	get_tree().change_scene_to_file("res://Scenes/Menu.tscn")

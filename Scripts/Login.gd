@@ -17,6 +17,14 @@ func _ready():
 	google_login_button.connect("pressed", Callable(self, "_on_google_login_pressed"))
 	cancel_button.connect("pressed", Callable(self, "_on_cancel_pressed"))
 	_load_local_name()
+
+	# Scale login buttons and input fields to 2x for better readability
+	var scale_factor := 2.0
+	var to_scale: Array = [name_edit, login_button, google_login_button, cancel_button, remember_check]
+	for c in to_scale:
+		if c != null:
+			c.scale = Vector2(scale_factor, scale_factor)
+
 	# Play login music on the login screen
 	if AudioManager != null:
 		AudioManager.play_music("login")

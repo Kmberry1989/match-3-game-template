@@ -433,6 +433,9 @@ func _spawn_xp_orb(from_global_pos: Vector2, color_name: String = ""):
 	orb.modulate = tint
 	layer.add_child(orb)
 	var target = game_ui.get_xp_anchor_pos()
+	# Override X to center of the viewport; keep current Y
+	var vp_size: Vector2 = get_viewport().get_visible_rect().size
+	target.x = vp_size.x * 0.5
 
 	# Swirl path: two control points offset around a curve toward the target
 	var to_target = (target - from_global_pos)

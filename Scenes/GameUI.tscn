@@ -1,11 +1,14 @@
-[gd_scene load_steps=8 format=3 uid="uid://dlothci5o3owq"]
+[gd_scene load_steps=11 format=3 uid="uid://dlothci5o3owq"]
 
 [ext_resource type="Script" uid="uid://d13wbq8qr3cqx" path="res://Scripts/GameUI.gd" id="1_abcde"]
-[ext_resource type="Texture2D" uid="uid://byr8w1akrenlh" path="res://Assets/Visuals/avatar_frame_2.png" id="2_co6lq"]
-[ext_resource type="Texture2D" uid="uid://c5q55va2gock1" path="res://Assets/Visuals/container.png" id="2_d8tla"]
-[ext_resource type="Texture2D" uid="uid://bufill1b8xqxl" path="res://Assets/Visuals/player_avatar.png" id="2_po7eo"]
-[ext_resource type="Texture2D" uid="uid://bg66trnxtd38a" path="res://Assets/Visuals/pause_button.png" id="2_wjrrg"]
-[ext_resource type="Texture2D" uid="uid://cb8rujtg7rhsf" path="res://Assets/Visuals/score.png" id="3_d8tla"]
+[ext_resource type="Texture2D" uid="uid://1r7vkjbldcwb" path="res://Assets/Visuals/longcontainer.png" id="2_8dgta"]
+[ext_resource type="Texture2D" uid="uid://bjg4inv0ffnb2" path="res://Assets/Visuals/avatar_frame_2.png" id="2_co6lq"]
+[ext_resource type="Texture2D" uid="uid://doqf702xgk1ix" path="res://Assets/Visuals/container.png" id="2_d8tla"]
+[ext_resource type="Texture2D" uid="uid://b6ggqxhb5mcqi" path="res://Assets/Visuals/home_button.png" id="2_homebtn"]
+[ext_resource type="Texture2D" uid="uid://c0hu2rx1lhrlu" path="res://Assets/Visuals/player_avatar.png" id="2_po7eo"]
+[ext_resource type="Texture2D" uid="uid://cg3pvny67f7fd" path="res://Assets/Visuals/shop_button.png" id="2_shopbtn"]
+[ext_resource type="Texture2D" uid="uid://djbwxp0xg5mr" path="res://Assets/Visuals/pause_button.png" id="2_wjrrg"]
+[ext_resource type="Texture2D" uid="uid://cnmisbe00ul5o" path="res://Assets/Visuals/score.png" id="3_d8tla"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0"]
 bg_color = Color(0.6, 0.6, 0.6, 0.5)
@@ -23,25 +26,15 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_abcde")
 
-[node name="Container" type="Sprite2D" parent="."]
-position = Vector2(265.12158, 88.95949)
-scale = Vector2(0.43511584, 0.40215912)
-texture = ExtResource("2_d8tla")
+[node name="Longcontainer" type="Sprite2D" parent="."]
+position = Vector2(269.0331, 867.5)
+scale = Vector2(0.9337748, 0.9337748)
+texture = ExtResource("2_8dgta")
 
-[node name="PauseButton" type="Button" parent="."]
-layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -194.99997
-offset_top = 35.000008
-offset_right = -62.241486
-offset_bottom = 184.21143
-grow_horizontal = 0
-scale = Vector2(0.6123228, 0.60904586)
-icon = ExtResource("2_wjrrg")
-flat = true
-expand_icon = true
+[node name="Container" type="Sprite2D" parent="."]
+position = Vector2(269.5, 103.30631)
+scale = Vector2(0.47727275, 0.48832622)
+texture = ExtResource("2_d8tla")
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
 layout_mode = 1
@@ -82,13 +75,13 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = 154.0
-offset_top = -368.0
-offset_right = 254.65125
-offset_bottom = -267.34872
+offset_left = -165.99998
+offset_top = -411.92
+offset_right = -41.791183
+offset_bottom = -285.97195
 grow_horizontal = 2
 grow_vertical = 2
-scale = Vector2(0.8775545, 0.8177975)
+scale = Vector2(0.8775545, 0.68708867)
 
 [node name="VBox" type="VBoxContainer" parent="MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame"]
 layout_mode = 1
@@ -97,23 +90,23 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -44.00003
-offset_top = -415.0
-offset_right = 44.372086
-offset_bottom = -338.0
+offset_left = 8.756813
+offset_top = -430.92
+offset_right = 97.12893
+offset_bottom = -353.92
 grow_horizontal = 2
 grow_vertical = 2
-scale = Vector2(0.9574801, 1.0172)
+scale = Vector2(1.487774, 1.3335458)
 alignment = 1
 
 [node name="Score" type="Sprite2D" parent="MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame/VBox"]
-position = Vector2(39.06508, 32.442)
-scale = Vector2(0.5464125, 0.48203167)
+position = Vector2(58.304047, 35.96428)
+scale = Vector2(0.49510705, 0.551138)
 texture = ExtResource("3_d8tla")
 
 [node name="PlayerAvatar" type="Sprite2D" parent="MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame/VBox"]
-position = Vector2(-86.72269, 13.763271)
-scale = Vector2(0.44, 0.446)
+position = Vector2(-87.772064, 28.846607)
+scale = Vector2(0.50557595, 0.50557595)
 texture = ExtResource("2_po7eo")
 
 [node name="LevelLabel" type="Label" parent="MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame"]
@@ -121,41 +114,42 @@ layout_mode = 1
 anchors_preset = -1
 anchor_top = 0.003
 anchor_bottom = 0.003
-offset_left = -45.0
-offset_top = 45.24001
-offset_right = 51.0
-offset_bottom = 68.240005
-scale = Vector2(0.7996389, 0.7996389)
+offset_left = 36.000015
+offset_top = 32.319973
+offset_right = 132.00002
+offset_bottom = 55.319984
+scale = Vector2(1.2425133, 1.0483236)
 text = "Level: 1"
 horizontal_alignment = 1
 
 [node name="XpLabel" type="Label" parent="MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame"]
 layout_mode = 0
-offset_left = -44.0
-offset_top = 68.00003
-offset_right = 49.99997
-offset_bottom = 91.00003
-scale = Vector2(0.7996389, 0.7996389)
+offset_left = 37.000015
+offset_top = 62.079994
+offset_right = 130.99998
+offset_bottom = 85.079994
+scale = Vector2(1.2425134, 1.0483238)
 text = "XP: 0/100"
 horizontal_alignment = 1
 
 [node name="CoinsLabel" type="Label" parent="MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame"]
 layout_mode = 0
-offset_left = -45.0
-offset_top = 86.99999
-offset_right = 51.0
-offset_bottom = 109.99999
-scale = Vector2(0.7996389, 0.7996389)
+offset_left = 36.000015
+offset_top = 88.07996
+offset_right = 132.00002
+offset_bottom = 111.07996
+scale = Vector2(1.2425134, 1.0483238)
 text = "Coins: 0"
 horizontal_alignment = 1
 
 [node name="PlayerNameLabel" type="Label" parent="MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame"]
 top_level = true
 layout_mode = 0
-offset_left = 211.0
-offset_top = 33.000008
-offset_right = 315.0
-offset_bottom = 56.000008
+offset_left = 91.000015
+offset_top = 139.08
+offset_right = 195.00003
+offset_bottom = 162.08
+scale = Vector2(1.1724528, 0.9850594)
 text = "Player"
 horizontal_alignment = 1
 uppercase = true
@@ -165,3 +159,48 @@ visible = false
 position = Vector2(-122.000244, 79.999985)
 scale = Vector2(0.4761297, 0.4761297)
 texture = ExtResource("2_co6lq")
+
+[node name="PauseButton" type="Button" parent="MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = 77.06619
+offset_top = 783.4999
+offset_right = 209.82466
+offset_bottom = 932.7113
+grow_horizontal = 0
+scale = Vector2(0.8673519, 0.8627101)
+icon = ExtResource("2_wjrrg")
+flat = true
+expand_icon = true
+
+[node name="HomeButton" type="Button" parent="MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -57.933838
+offset_top = 783.4999
+offset_right = 74.06616
+offset_bottom = 932.4999
+grow_horizontal = 0
+scale = Vector2(0.8673519, 0.8627101)
+icon = ExtResource("2_homebtn")
+flat = true
+expand_icon = true
+
+[node name="ShopButton" type="Button" parent="MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -192.93378
+offset_top = 783.4999
+offset_right = -59.933777
+offset_bottom = 932.4999
+grow_horizontal = 0
+scale = Vector2(0.8673519, 0.8627101)
+icon = ExtResource("2_shopbtn")
+flat = true
+expand_icon = true

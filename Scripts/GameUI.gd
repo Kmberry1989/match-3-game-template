@@ -4,7 +4,7 @@ extends Control
 @onready var level_label = $MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame/LevelLabel
 @onready var xp_label = $MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame/XpLabel
 @onready var coins_label = $MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame/CoinsLabel
-@onready var pause_button = $PauseButton
+# Pause button is looked up safely at runtime to avoid errors when missing
 @onready var frame_sprite = $MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame/AvatarFrame2
 
 func _ready():
@@ -16,7 +16,10 @@ func _ready():
 	PlayerManager.frame_changed.connect(_on_frame_changed)
 	_on_coins_changed(PlayerManager.get_coins())
 	_apply_current_frame()
-	pause_button.connect("pressed", Callable(self, "_on_pause_pressed"))
+	# Ensure pause/home/shop buttons are clickable above other UI (guard if not found)
+	_wire_button("PauseButton", Callable(self, "_on_pause_pressed"))
+	_wire_button("HomeButton", Callable(self, "_on_home_pressed"))
+	_wire_button("ShopButton", Callable(self, "_on_shop_pressed"))
 
 func set_player_name(p_name):
 	player_name_label.text = p_name
@@ -56,7 +59,10 @@ func _fit_sprite_to_height(sprite: Sprite2D, target_h: float):
 	var h = float(sprite.texture.get_height())
 	if h <= 0.0:
 		return
+	# Do not upscale frames; only downscale if larger than target height
 	var sf = target_h / h
+	if sf > 1.0:
+		sf = 1.0
 	sprite.scale = Vector2(sf, sf)
 
 func _on_pause_pressed():
@@ -89,3 +95,25 @@ func _unhandled_input(event):
 
 func get_xp_anchor_pos() -> Vector2:
 	return xp_label.get_global_transform().origin
+
+func _wire_button(name: String, handler: Callable) -> void:
+	var n: Node = get_node_or_null(name)
+	if n == null:
+		n = find_child(name, true, false)
+	var c: Control = n as Control
+	if c != null:
+		c.z_index = 1000
+		c.mouse_filter = Control.MOUSE_FILTER_STOP
+	var b: Button = n as Button
+	if b != null and not b.is_connected("pressed", handler):
+		b.connect("pressed", handler)
+
+func _on_home_pressed():
+	if AudioManager != null:
+		AudioManager.play_sound("ui_click")
+	get_tree().change_scene_to_file("res://Scenes/Menu.tscn")
+
+func _on_shop_pressed():
+	if AudioManager != null:
+		AudioManager.play_sound("ui_click")
+	get_tree().change_scene_to_file("res://Scenes/Shop.tscn")

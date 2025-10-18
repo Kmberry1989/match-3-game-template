@@ -2,6 +2,7 @@ extends Node2D
 
 const PULSE_SCALE_MAX = Vector2(0.2725, 0.2725)
 const PULSE_SCALE_MIN = Vector2(0.2575, 0.2575)
+const DOT_SCALE := 2.0 # Global multiplier to enlarge dot visuals
 const REFERENCE_DOT_PX = 512.0
 
 @export var color = ""
@@ -72,7 +73,7 @@ func _ready():
 		var tex_h: float = float(sprite.texture.get_height())
 		var max_dim: float = max(tex_w, tex_h)
 		if max_dim > 0.0:
-			scale_multiplier = REFERENCE_DOT_PX / max_dim
+			scale_multiplier = (REFERENCE_DOT_PX / max_dim) * DOT_SCALE
 	create_shadow()
 	setup_blink_timer()
 	start_floating()
@@ -182,6 +183,9 @@ func create_shadow():
 	shadow.z_index = -1
 	shadow.position = Vector2(0, 35)
 	add_child(shadow)
+	# Hide shadow to remove it visually
+	shadow.visible = false
+	shadow.modulate.a = 0.0
 
 func load_textures():
 	var character = color_to_character.get(color, "bethany") # Default to bethany if color not found

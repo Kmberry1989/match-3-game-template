@@ -41,7 +41,7 @@ const Features = {
 	 * @function Engine.isFetchAvailable
 	 */
 	isFetchAvailable: function () {
-		return 'fetch' in window && 'Response' in window && typeof window.Response.prototype.arrayBuffer === 'function';
+		return 'fetch' in window && 'Response' in window && 'body' in window.Response.prototype;
 	},
 
 	/**
@@ -163,30 +163,6 @@ const Preloader = /** @constructor */ function () { // eslint-disable-line no-un
 		return fetch(file).then(function (response) {
 			if (!response.ok) {
 				return Promise.reject(new Error(`Failed loading file '${file}'`));
-			}
-			const supportsStreaming = response.body && typeof response.body.getReader === 'function';
-			if (!supportsStreaming) {
-				if (raw) {
-					const headers = new Headers(response.headers);
-					return response.arrayBuffer().then(function (buffer) {
-						const length = buffer ? buffer.byteLength : 0;
-						if (!tracker[file].total) {
-							tracker[file].total = length;
-						}
-						tracker[file].loaded = length || tracker[file].total;
-						tracker[file].done = true;
-						return new Response(buffer, { headers });
-				});
-			}
-				return response.arrayBuffer().then(function (buffer) {
-					const length = buffer ? buffer.byteLength : 0;
-					if (!tracker[file].total) {
-						tracker[file].total = length;
-					}
-					tracker[file].loaded = length || tracker[file].total;
-					tracker[file].done = true;
-					return buffer;
-				});
 			}
 			const tr = getTrackedResponse(response, tracker[file]);
 			if (raw) {
@@ -755,30 +731,22 @@ const Engine = (function () {
 					// Care! Promise chaining is bogus with old emscripten versions.
 					// This caused a regression with the Mono build (which uses an older emscripten version).
 					// Make sure to test that when refactoring.
-                                        return new Promise(function (resolve, reject) {
-                                                promise.then(function (response) {
-                                                        const clonedResponse = response.clone();
-                                                        const hasStreamBody = clonedResponse.body && typeof clonedResponse.body.getReader === 'function';
-                                                        const wasmResponsePromise = hasStreamBody
-                                                                ? Promise.resolve(new Response(clonedResponse.body, { 'headers': [['content-type', 'application/wasm']] }))
-                                                                : clonedResponse.arrayBuffer().then(function (buffer) {
-                                                                        return new Response(buffer, { 'headers': [['content-type', 'application/wasm']] });
-                                                                });
-                                                        wasmResponsePromise.then(function (preparedResponse) {
-                                                                Godot(me.config.getModuleConfig(loadPath, preparedResponse)).then(function (module) {
-                                                                        const paths = me.config.persistentPaths;
-                                                                        module['initFS'](paths).then(function (err) {
-                                                                                me.rtenv = module;
-                                                                                if (me.config.unloadAfterInit) {
-                                                                                        Engine.unload();
-                                                                                }
-                                                                                resolve();
-                                                                        });
-                                                                });
-                                                        }, reject);
-                                                });
-                                        });
-
+					return new Promise(function (resolve, reject) {
+						promise.then(function (response) {
+							const cloned = new Response(response.clone().body, { 'headers': [['content-type', 'application/wasm']] });
+							Godot(me.config.getModuleConfig(loadPath, cloned)).then(function (module) {
+								const paths = me.config.persistentPaths;
+								module['initFS'](paths).then(function (err) {
+									me.rtenv = module;
+									if (me.config.unloadAfterInit) {
+										Engine.unload();
+									}
+									resolve();
+								});
+							});
+						});
+					});
+				}
 				preloader.setProgressFunc(this.config.onProgress);
 				initPromise = doInit(loadPromise);
 				return initPromise;

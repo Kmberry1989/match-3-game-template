@@ -25,6 +25,7 @@ width = 7
 height = 7
 offset = 80
 y_offset = -2
+grid_scale = 0.9
 
 [node name="Background" type="TextureRect" parent="."]
 anchors_preset = 15
