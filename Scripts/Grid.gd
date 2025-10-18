@@ -16,22 +16,28 @@ var y_start: float
 
 @export var empty_spaces: PackedVector2Array
 
-# Preload scenes for dots and new visual effects
-@onready var possible_dots = [
-	preload("res://Scenes/Dots/blue_dot.tscn"),
-	preload("res://Scenes/Dots/green_dot.tscn"),
-	preload("res://Scenes/Dots/pink_dot.tscn"),
-	preload("res://Scenes/Dots/red_dot.tscn"),
-	preload("res://Scenes/Dots/yellow_dot.tscn"),
-	preload("res://Scenes/Dots/purple_dot.tscn"),
-	preload("res://Scenes/Dots/orange_dot.tscn"),
-	preload("res://Scenes/Dots/brown_dot.tscn"),
-	preload("res://Scenes/Dots/gray_dot.tscn")
+# Dot scene paths (loaded at runtime to avoid hard preload failures on Web)
+const DOT_SCENE_PATHS := [
+	"res://Scenes/Dots/blue_dot.tscn",
+	"res://Scenes/Dots/green_dot.tscn",
+	"res://Scenes/Dots/pink_dot.tscn",
+	"res://Scenes/Dots/red_dot.tscn",
+	"res://Scenes/Dots/yellow_dot.tscn",
+	"res://Scenes/Dots/purple_dot.tscn",
+	"res://Scenes/Dots/orange_dot.tscn",
+	"res://Scenes/Dots/brown_dot.tscn",
+	"res://Scenes/Dots/gray_dot.tscn"
 ]
-@onready var match_particles = preload("res://Scenes/MatchParticles.tscn")
-@onready var match_label_scene = preload("res://Scenes/MatchLabel.tscn")
-@onready var xp_orb_texture = preload("res://Assets/Visuals/xp_orb.png")
-@onready var stage_banner_texture = preload("res://Assets/Visuals/stage_banner.png")
+var possible_dots: Array[PackedScene] = []
+const MATCH_PARTICLES_PATH := "res://Scenes/MatchParticles.tscn"
+const MATCH_LABEL_PATH := "res://Scenes/MatchLabel.tscn"
+const XP_ORB_TEXTURE_PATH := "res://Assets/Visuals/xp_orb.png"
+const STAGE_BANNER_TEXTURE_PATH := "res://Assets/Visuals/stage_banner.png"
+
+var match_particles: PackedScene
+var match_label_scene: PackedScene
+var xp_orb_texture: Texture2D
+var stage_banner_texture: Texture2D
 var xp_orb_colors = {
 	"red": Color(1.0, 0.25, 0.25),
 	"orange": Color(1.0, 0.6, 0.2),
@@ -76,6 +82,35 @@ func _ready():
 	state = move
 	setup_timers()
 	randomize()
+	# Load dot scenes (defer hard failures until runtime, log any missing)
+	possible_dots.clear()
+	for p in DOT_SCENE_PATHS:
+		if ResourceLoader.exists(p):
+			var ps: PackedScene = load(p)
+			if ps:
+				possible_dots.append(ps)
+			else:
+				push_warning("Failed to load dot scene: %s" % p)
+		else:
+			push_warning("Missing dot scene: %s" % p)
+
+	# Load other scenes/textures safely
+	if ResourceLoader.exists(MATCH_PARTICLES_PATH):
+		match_particles = load(MATCH_PARTICLES_PATH) as PackedScene
+	else:
+		push_warning("Missing scene: %s" % MATCH_PARTICLES_PATH)
+	if ResourceLoader.exists(MATCH_LABEL_PATH):
+		match_label_scene = load(MATCH_LABEL_PATH) as PackedScene
+	else:
+		push_warning("Missing scene: %s" % MATCH_LABEL_PATH)
+	if ResourceLoader.exists(XP_ORB_TEXTURE_PATH):
+		xp_orb_texture = load(XP_ORB_TEXTURE_PATH) as Texture2D
+	else:
+		push_warning("Missing texture: %s" % XP_ORB_TEXTURE_PATH)
+	if ResourceLoader.exists(STAGE_BANNER_TEXTURE_PATH):
+		stage_banner_texture = load(STAGE_BANNER_TEXTURE_PATH) as Texture2D
+	else:
+		push_warning("Missing texture: %s" % STAGE_BANNER_TEXTURE_PATH)
 	# Apply grid-only scale by adjusting the cell size (offset).
 	# This preserves collision/hit testing because grid_to_pixel/pixel_to_grid use the same offset.
 	if grid_scale != 1.0:

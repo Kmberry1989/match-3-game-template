@@ -1,7 +1,7 @@
-[gd_scene load_steps=3 format=3 uid="uid://dhw8ict00vn3n"]
+﻿[gd_scene load_steps=3 format=3 uid="uid://dhw8ict00vn3n"]
 
-[ext_resource type="PackedScene" uid="uid://d0bsiknlebs18" path="res://Scenes/Dot.tscn" id="2"]
-[ext_resource type="Texture2D" uid="uid://w4ufhtcip0t2" path="res://Assets/Dots/maiaavatar.png" id="2_rg4gy"]
+[ext_resource type="PackedScene" path="res://Scenes/Dot.tscn" id="2"]
+[ext_resource type="Texture2D" path="res://Assets/Dots/maiaavatar.png" id="2_rg4gy"]
 
 [node name="orange_dot" instance=ExtResource("2")]
 color = "orange"
@@ -9,3 +9,4 @@ color = "orange"
 [node name="Sprite2D" parent="." index="0"]
 scale = Vector2(0.25, 0.25)
 texture = ExtResource("2_rg4gy")
+

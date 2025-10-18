@@ -1,0 +1,13 @@
+[gd_scene load_steps=2 format=3 uid="uid://btbt1todu87qo"]
+
+[ext_resource type="Script" uid="uid://c471shivigav6" path="res://Scripts/Shop.gd" id="1"]
+
+[node name="Shop" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 206.0
+offset_top = 386.0
+offset_right = 206.0
+offset_bottom = 386.0
+scale = Vector2(1.9332663, 0.8885511)
+script = ExtResource("1")

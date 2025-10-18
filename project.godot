@@ -17,9 +17,7 @@ config/features=PackedStringArray("4.5")
 boot_splash/bg_color=Color(0, 0, 0, 1)
 boot_splash/fullsize=false
 boot_splash/use_filter=false
-boot_splash/image="uid://c153otdfmgy06"
 config/icon="res://icon.png"
-boot_splash/minimum_display_time=10
 
 [autoload]
 
@@ -32,7 +30,6 @@ AudioManager="*res://Scripts/AudioManager.gd"
 
 window/size/viewport_width=540
 window/size/viewport_height=960
-window/size/mode=0
 window/size/resizable=false
 window/stretch/mode="canvas_items"
 window/handheld/orientation=1
@@ -40,6 +37,17 @@ window/handheld/orientation=1
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/godot-firebase/plugin.cfg", "res://addons/http-sse-client/plugin.cfg")
+
+[importer_defaults]
+
+texture={
+"compress/high_quality": false,
+"compress/lossy_quality": 0.5,
+"compress/mode": 1,
+"detect_3d/compress_to": 0,
+"mipmaps/generate": false,
+"process/size_limit": 512
+}
 
 [input]
 

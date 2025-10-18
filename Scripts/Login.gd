@@ -132,7 +132,13 @@ func _setup_web_oauth():
 
 func _read_env_value(key: String) -> String:
     var cfg = ConfigFile.new()
-    var err = cfg.load("res://addons/godot-firebase/.env")
+    # On Web, prefer the public env file that contains only safe keys.
+    var env_path := "res://addons/godot-firebase/.env"
+    if OS.has_feature("web"):
+        var public_path := "res://addons/godot-firebase/.env.public"
+        if FileAccess.file_exists(public_path):
+            env_path = public_path
+    var err = cfg.load(env_path)
     if err == OK:
         return str(cfg.get_value("firebase/environment_variables", key, ""))
     return ""
