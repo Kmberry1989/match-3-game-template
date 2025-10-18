@@ -1,0 +1,53 @@
+name: Export iOS (Xcode project)
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - try
+  workflow_dispatch:
+
+env:
+  GODOT_VERSION: 4.5
+  EXPORT_NAME: meaner-matcher
+  PROJECT_PATH: .
+
+jobs:
+  ios_export:
+    name: Generate Xcode Project
+    runs-on: ubuntu-24.04
+    container:
+      image: barichello/godot-ci:4.5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Setup Godot export templates
+        run: |
+          mkdir -p ~/.local/share/godot/export_templates/
+          mkdir -p ~/.config/
+          if [ -d /root/.config/godot ]; then mv /root/.config/godot ~/.config/godot; fi
+          if [ -d /root/.local/share/godot/export_templates/${GODOT_VERSION}.stable ]; then \
+            mv /root/.local/share/godot/export_templates/${GODOT_VERSION}.stable ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable; \
+          fi
+
+      - name: Export iOS (Xcode project)
+        run: |
+          mkdir -p build/ios
+          EXPORT_DIR="$(readlink -f build)"
+          cd "$PROJECT_PATH"
+          godot --headless --verbose --export-release "iOS" "$EXPORT_DIR/ios"
+          ls -la "$EXPORT_DIR/ios" || true
+
+      - name: Upload Xcode project artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-xcode-project
+          path: build/ios
+
+    # Note: building/signing an IPA requires macOS + Xcode + signing creds.
+    # This job only generates the Xcode project you can open on a Mac.
+
