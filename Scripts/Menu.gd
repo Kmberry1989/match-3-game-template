@@ -4,6 +4,7 @@ var status_label: Label
 var offline_button: TextureButton
 var profile_button: TextureButton
 var showcase_button: TextureButton
+var shop_button: TextureButton
 var logout_button: TextureButton
 @onready var firebase = get_node_or_null("/root/Firebase")
 
@@ -12,6 +13,7 @@ func _ready():
 	offline_button = TextureButton.new()
 	profile_button = TextureButton.new()
 	showcase_button = TextureButton.new()
+	shop_button = TextureButton.new()
 	logout_button = TextureButton.new()
 
 	# Background image (cover)
@@ -92,6 +94,20 @@ func _ready():
 	showcase_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	showcase_button.add_child(showcase_label)
 
+	# Shop Button
+	shop_button.texture_normal = normal_tex
+	shop_button.texture_pressed = pressed_tex
+	shop_button.texture_hover = hover_tex
+	shop_button.connect("pressed", _on_shop_button_pressed)
+	vbox.add_child(shop_button)
+
+	var shop_label = Label.new()
+	shop_label.text = "Shop"
+	shop_label.set_anchors_preset(Control.PRESET_FULL_RECT)
+	shop_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	shop_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	shop_button.add_child(shop_label)
+
 	# Logout Button (shown only if Firebase is present and logged in)
 	logout_button.texture_normal = normal_tex
 	logout_button.texture_pressed = pressed_tex
@@ -133,6 +149,10 @@ func _on_profile_button_pressed():
 func _on_showcase_button_pressed():
 	AudioManager.play_sound("ui_click")
 	get_tree().change_scene_to_file("res://Scenes/Showcase.tscn")
+
+func _on_shop_button_pressed():
+	AudioManager.play_sound("ui_click")
+	get_tree().change_scene_to_file("res://Scenes/Shop.tscn")
 
 func _start_game():
 	AudioManager.stop_music()

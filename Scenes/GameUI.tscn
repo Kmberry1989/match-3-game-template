@@ -1,11 +1,11 @@
 [gd_scene load_steps=8 format=3 uid="uid://dlothci5o3owq"]
 
 [ext_resource type="Script" uid="uid://d13wbq8qr3cqx" path="res://Scripts/GameUI.gd" id="1_abcde"]
-[ext_resource type="Texture2D" uid="uid://byr8w1akrenlh" path="res://Assets/Visuals/avatar_frame_2.png" id="2_co6lq"]
-[ext_resource type="Texture2D" uid="uid://c5q55va2gock1" path="res://Assets/Visuals/container.png" id="2_d8tla"]
-[ext_resource type="Texture2D" uid="uid://bufill1b8xqxl" path="res://Assets/Visuals/player_avatar.png" id="2_po7eo"]
-[ext_resource type="Texture2D" uid="uid://bg66trnxtd38a" path="res://Assets/Visuals/pause_button.png" id="2_wjrrg"]
-[ext_resource type="Texture2D" uid="uid://cb8rujtg7rhsf" path="res://Assets/Visuals/score.png" id="3_d8tla"]
+[ext_resource type="Texture2D" uid="uid://bjg4inv0ffnb2" path="res://Assets/Visuals/avatar_frame_2.png" id="2_co6lq"]
+[ext_resource type="Texture2D" uid="uid://doqf702xgk1ix" path="res://Assets/Visuals/container.png" id="2_d8tla"]
+[ext_resource type="Texture2D" uid="uid://c0hu2rx1lhrlu" path="res://Assets/Visuals/player_avatar.png" id="2_po7eo"]
+[ext_resource type="Texture2D" uid="uid://djbwxp0xg5mr" path="res://Assets/Visuals/pause_button.png" id="2_wjrrg"]
+[ext_resource type="Texture2D" uid="uid://cnmisbe00ul5o" path="res://Assets/Visuals/score.png" id="3_d8tla"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0"]
 bg_color = Color(0.6, 0.6, 0.6, 0.5)
@@ -25,7 +25,7 @@ script = ExtResource("1_abcde")
 
 [node name="Container" type="Sprite2D" parent="."]
 position = Vector2(265.12158, 88.95949)
-scale = Vector2(0.43511584, 0.40215912)
+scale = Vector2(0.71511585, 0.64215946)
 texture = ExtResource("2_d8tla")
 
 [node name="PauseButton" type="Button" parent="."]

@@ -64,7 +64,6 @@ var mouse_inside = false
 
 func _ready():
 	load_textures()
-	create_shadow()
 	setup_blink_timer()
 	start_floating()
 	start_pulsing()
@@ -159,20 +158,7 @@ func play_surprised_for_a_second():
 		if animation_state == "surprised":
 			set_normal_texture()
 
-func create_shadow():
-	shadow = Sprite2D.new()
-	var gradient = Gradient.new()
-	gradient.colors = [Color(0,0,0,0.4), Color(0,0,0,0)] # Black center, transparent edge
-	var gradient_tex = GradientTexture2D.new()
-	gradient_tex.gradient = gradient
-	gradient_tex.fill = GradientTexture2D.FILL_RADIAL
-	gradient_tex.width = 64
-	gradient_tex.height = 64
-	shadow.texture = gradient_tex
-	shadow.scale = Vector2(1, 0.5) # Make it oval
-	shadow.z_index = -1
-	shadow.position = Vector2(0, 35)
-	add_child(shadow)
+## Shadow removed: no longer created or used.
 
 func load_textures():
 	var character = color_to_character.get(color, "bethany") # Default to bethany if color not found
@@ -242,34 +228,39 @@ func play_idle_animation():
 	animation_state = "idle"
 	sprite.texture = sleepy_texture
 	await get_tree().create_timer(0.5).timeout
-	
+
 	if animation_state == "idle": # Make sure we weren't interrupted
 		sprite.texture = yawn_texture
 		AudioManager.play_sound("yawn")
 		
 		var original_pos = self.position
-		var original_shadow_scale = shadow.scale
-		var original_shadow_opacity = shadow.modulate.a
+		var original_shadow_scale = Vector2.ONE
+		var original_shadow_opacity = 0.0
+		if shadow:
+			original_shadow_scale = shadow.scale
+			original_shadow_opacity = shadow.modulate.a
 		
 		if pulse_tween:
 			pulse_tween.kill()
 		if float_tween:
 			float_tween.kill()
-			
+		
 		var tween = get_tree().create_tween()
 		# Lift and inflate over 2 seconds
 		tween.parallel().tween_property(self, "position", original_pos + Vector2(0, -15), 2.0).set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_OUT)
 		tween.parallel().tween_property(sprite, "scale", PULSE_SCALE_MIN * 1.5, 2.0).set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_OUT)
-		tween.parallel().tween_property(shadow, "scale", original_shadow_scale * 2.5, 2.0).set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_OUT)
-		tween.parallel().tween_property(shadow, "modulate:a", 0.0, 2.0).set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_OUT)
+		if shadow:
+			tween.parallel().tween_property(shadow, "scale", original_shadow_scale * 2.5, 2.0).set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_OUT)
+			tween.parallel().tween_property(shadow, "modulate:a", 0.0, 2.0).set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_OUT)
 		await tween.finished
-
+		
 		if animation_state == "idle":
 			var down_tween = get_tree().create_tween()
 			down_tween.parallel().tween_property(self, "position", original_pos, 1.0)
 			down_tween.parallel().tween_property(sprite, "scale", PULSE_SCALE_MIN, 1.0)
-			down_tween.parallel().tween_property(shadow, "scale", original_shadow_scale, 1.0)
-			down_tween.parallel().tween_property(shadow, "modulate:a", original_shadow_opacity, 1.0)
+			if shadow:
+				down_tween.parallel().tween_property(shadow, "scale", original_shadow_scale, 1.0)
+				down_tween.parallel().tween_property(shadow, "modulate:a", original_shadow_opacity, 1.0)
 			await down_tween.finished
 			set_normal_texture()
 			start_pulsing()

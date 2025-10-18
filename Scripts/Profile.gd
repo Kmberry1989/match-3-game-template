@@ -29,6 +29,7 @@ func _ready():
 
 	back_button.connect("pressed", _on_back_button_pressed)
 	frame_selection_button.connect("item_selected", _on_frame_selected)
+	PlayerManager.connect("frame_changed", Callable(self, "_on_frame_changed"))
 
 func display_player_data():
 	var data = PlayerManager.player_data
@@ -89,6 +90,9 @@ func update_avatar_frame():
 	if frame_name != "default":
 		frame_path = "res://Assets/Visuals/avatar_" + frame_name + ".png"
 	avatar_frame_rect.texture = load(frame_path)
+
+func _on_frame_changed(_name):
+	update_avatar_frame()
 
 func _on_frame_selected(index):
 	var frame_name = frame_selection_button.get_item_text(index).to_lower()
