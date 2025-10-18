@@ -42,6 +42,7 @@ Desktop.ini
 *~
 *.swp
 *.swo
+Assets/Sounds/_backup_originals/
 
 # Build/exports (adjust if you use a different folder)
 dist/
