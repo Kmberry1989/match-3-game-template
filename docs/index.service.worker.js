@@ -4,7 +4,7 @@
 // Incrementing CACHE_VERSION will kick off the install event and force
 // previously cached resources to be updated from the network.
 /** @type {string} */
-const CACHE_VERSION = '1760816081|1118049049';
+const CACHE_VERSION = '1760839581|44622511';
 /** @type {string} */
 const CACHE_PREFIX = 'Meaner Matcher-sw-cache-';
 const CACHE_NAME = CACHE_PREFIX + CACHE_VERSION;

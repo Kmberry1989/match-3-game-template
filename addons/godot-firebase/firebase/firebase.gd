@@ -103,25 +103,34 @@ func _check_emulating() -> void:
 
 func _load_config() -> void:
 	if not (_config.apiKey != "" and _config.authDomain != ""):
-		var env = ConfigFile.new()
-		var err = env.load("res://addons/godot-firebase/.env")
+		var env := ConfigFile.new()
+		var err := env.load("res://addons/godot-firebase/.env")
+		if err != OK:
+			# Fallback for web exports where a public env is shipped
+			err = env.load("res://addons/godot-firebase/.env.public")
 		if err == OK:
 			for key in _config.keys():
 				var config_value = _config[key]
 				if key == "emulators" and config_value.has("ports"):
 					for port in config_value["ports"].keys():
 						config_value["ports"][port] = env.get_value(_EMULATORS_PORTS, port, "")
-				if key == "auth_providers":
+				elif key == "auth_providers":
 					for provider in config_value.keys():
 						config_value[provider] = env.get_value(_AUTH_PROVIDERS, provider, "")
 				else:
 					var value : String = env.get_value(_ENVIRONMENT_VARIABLES, key, "")
 					if value == "":
-						_print("The value for `%s` is not configured. If you are not planning to use it, ignore this message." % key)
+						# Allow fallback: if clientId missing, use webClientId if provided
+						if key == "clientId":
+							var web_client := env.get_value(_ENVIRONMENT_VARIABLES, "webClientId", "")
+							if str(web_client) != "":
+								_config.clientId = str(web_client)
+						else:
+							_print("The value for `%s` is not configured. If you are not planning to use it, ignore this message." % key)
 					else:
 						_config[key] = value
 		else:
-			_printerr("Unable to read .env file at path 'res://addons/godot-firebase/.env'")
+			_printerr("Unable to read .env or .env.public at path 'res://addons/godot-firebase/'")
 
 	_setup_modules()
 
