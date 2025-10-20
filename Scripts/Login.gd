@@ -2,7 +2,7 @@ extends Control
 
 @onready var name_edit = $CenterContainer/VBoxContainer/NameEdit
 @onready var login_button = $CenterContainer/VBoxContainer/LoginButton
-@onready var google_login_button = $CenterContainer/VBoxContainer/GoogleLoginButton
+@onready var google_login_button: Button = get_node_or_null("CenterContainer/VBoxContainer/GoogleLoginButton")
 @onready var remember_check: CheckBox = $CenterContainer/VBoxContainer/RememberCheck
 @onready var status_label: Label = $CenterContainer/VBoxContainer/StatusLabel
 @onready var cancel_button: Button = $CenterContainer/VBoxContainer/CancelButton
@@ -14,7 +14,8 @@ var _web_client_id: String = ""
 
 func _ready():
 	login_button.connect("pressed", Callable(self, "_on_login_pressed"))
-	google_login_button.connect("pressed", Callable(self, "_on_google_login_pressed"))
+	if google_login_button != null:
+		google_login_button.connect("pressed", Callable(self, "_on_google_login_pressed"))
 	cancel_button.connect("pressed", Callable(self, "_on_cancel_pressed"))
 	_load_local_name()
 
@@ -36,8 +37,10 @@ func _ready():
 		google_login_button.visible = false
 		return
 
-	# Show Google login if Firebase is available
-	google_login_button.visible = true
+	# Hide Google login for this build (local saves only)
+	if google_login_button != null:
+		google_login_button.visible = false
+		google_login_button.disabled = true
 	# Connect correct Firebase Auth signals for GodotFirebase
 	firebase.Auth.login_succeeded.connect(Callable(self, "_on_authentication_succeeded"))
 	firebase.Auth.login_failed.connect(Callable(self, "_on_authentication_failed"))
@@ -65,24 +68,16 @@ func _on_login_pressed():
 	# If empty, default to Guest
 	if player_name == "":
 		player_name = "Guest"
-	# Offline/local name login: store name directly and continue
-	status_label.text = "Saving..."
-	_save_local_name(player_name)
+	# Local save: update PlayerManager and persist via SaveManager
 	PlayerManager.player_data["player_name"] = player_name
+	SaveManager.save_player(PlayerManager.player_data)
 	get_tree().change_scene_to_file("res://Scenes/Menu.tscn")
 
 func _on_google_login_pressed():
 	if auth_in_progress:
 		return
-	if firebase != null:
-		_begin_auth("Signing in...")
-		if OS.has_feature("web"):
-			var provider = _setup_web_oauth()
-			# Redirect browser for OAuth (returns to this same page)
-			firebase.Auth.get_auth_with_redirect(provider)
-		else:
-			# Desktop/native: use localhost capture
-			firebase.Auth.get_auth_localhost()
+	# Hidden/disabled in this build
+	status_label.text = "Google sign-in is disabled"
 
 func _on_authentication_succeeded(auth_data):
 	print("Firebase authentication succeeded!")
@@ -171,12 +166,21 @@ func _set_ui_enabled(enabled: bool):
 		remember_check.disabled = not enabled
 
 func _load_local_name():
-	var cfg = ConfigFile.new()
-	var err = cfg.load("user://player.cfg")
+	# Prefer JSON save via SaveManager; migrate legacy player.cfg if found
+	var data := SaveManager.load_player()
+	if typeof(data) == TYPE_DICTIONARY and data.has("player_name"):
+		name_edit.text = str(data["player_name"]) if str(data["player_name"]) != "" else name_edit.text
+		PlayerManager.player_data = data
+		return
+	# Legacy config migration
+	var cfg := ConfigFile.new()
+	var err := cfg.load("user://player.cfg")
 	if err == OK:
 		var n = cfg.get_value("player", "name", "")
 		if typeof(n) == TYPE_STRING and n != "":
 			name_edit.text = n
+			PlayerManager.player_data["player_name"] = n
+			SaveManager.save_player(PlayerManager.player_data)
 
 func _save_local_name(n: String):
 	var cfg = ConfigFile.new()

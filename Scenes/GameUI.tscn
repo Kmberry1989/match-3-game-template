@@ -27,13 +27,13 @@ grow_vertical = 2
 script = ExtResource("1_abcde")
 
 [node name="Longcontainer" type="Sprite2D" parent="."]
-position = Vector2(269.0331, 867.5)
+position = Vector2(269.0331, 855.5)
 scale = Vector2(0.9337748, 0.9337748)
 texture = ExtResource("2_8dgta")
 
 [node name="Container" type="Sprite2D" parent="."]
-position = Vector2(269.5, 103.30631)
-scale = Vector2(0.47727275, 0.48832622)
+position = Vector2(273.12756, 144.79587)
+scale = Vector2(0.36872622, 0.3891644)
 texture = ExtResource("2_d8tla")
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
@@ -75,13 +75,13 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -165.99998
-offset_top = -411.92
-offset_right = -41.791183
-offset_bottom = -285.97195
+offset_left = -118.87248
+offset_top = -366.51044
+offset_right = 5.3363647
+offset_bottom = -240.56238
 grow_horizontal = 2
 grow_vertical = 2
-scale = Vector2(0.8775545, 0.68708867)
+scale = Vector2(0.66697454, 0.52221334)
 
 [node name="VBox" type="VBoxContainer" parent="MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame"]
 layout_mode = 1
@@ -90,23 +90,23 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = 8.756813
-offset_top = -430.92
-offset_right = 97.12893
-offset_bottom = -353.92
+offset_left = 14.884361
+offset_top = -376.43045
+offset_right = 103.25648
+offset_bottom = -299.43045
 grow_horizontal = 2
 grow_vertical = 2
-scale = Vector2(1.487774, 1.3335458)
+scale = Vector2(1.1307645, 1.0135452)
 alignment = 1
 
 [node name="Score" type="Sprite2D" parent="MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame/VBox"]
-position = Vector2(58.304047, 35.96428)
-scale = Vector2(0.49510705, 0.551138)
+position = Vector2(47.869568, 32.151325)
+scale = Vector2(0.5842003, 0.57487595)
 texture = ExtResource("3_d8tla")
 
 [node name="PlayerAvatar" type="Sprite2D" parent="MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame/VBox"]
-position = Vector2(-87.772064, 28.846607)
-scale = Vector2(0.50557595, 0.50557595)
+position = Vector2(-90.59485, 31.094536)
+scale = Vector2(0.5622695, 0.5794463)
 texture = ExtResource("2_po7eo")
 
 [node name="LevelLabel" type="Label" parent="MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame"]
@@ -114,42 +114,42 @@ layout_mode = 1
 anchors_preset = -1
 anchor_top = 0.003
 anchor_bottom = 0.003
-offset_left = 36.000015
-offset_top = 32.319973
-offset_right = 132.00002
-offset_bottom = 55.319984
-scale = Vector2(1.2425133, 1.0483236)
+offset_left = 4.127548
+offset_top = 80.80955
+offset_right = 144.97112
+offset_bottom = 103.80956
+scale = Vector2(0.94435704, 0.79676557)
 text = "Level: 1"
 horizontal_alignment = 1
 
 [node name="XpLabel" type="Label" parent="MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame"]
 layout_mode = 0
-offset_left = 37.000015
-offset_top = 62.079994
-offset_right = 130.99998
-offset_bottom = 85.079994
-scale = Vector2(1.2425134, 1.0483238)
+offset_left = -1.872467
+offset_top = 102.5696
+offset_right = 151.53607
+offset_bottom = 125.5696
+scale = Vector2(0.94435716, 0.7967657)
 text = "XP: 0/100"
 horizontal_alignment = 1
 
 [node name="CoinsLabel" type="Label" parent="MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame"]
 layout_mode = 0
-offset_left = 36.000015
-offset_top = 88.07996
-offset_right = 132.00002
-offset_bottom = 111.07996
-scale = Vector2(1.2425134, 1.0483238)
+offset_left = 2.1275635
+offset_top = 122.56954
+offset_right = 142.9711
+offset_bottom = 145.56955
+scale = Vector2(0.94435716, 0.7967657)
 text = "Coins: 0"
 horizontal_alignment = 1
 
 [node name="PlayerNameLabel" type="Label" parent="MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame"]
 top_level = true
 layout_mode = 0
-offset_left = 91.000015
-offset_top = 139.08
-offset_right = 195.00003
-offset_bottom = 162.08
-scale = Vector2(1.1724528, 0.9850594)
+offset_left = 131.12752
+offset_top = 178.48953
+offset_right = 245.41786
+offset_bottom = 210.89366
+scale = Vector2(0.8911085, 0.7486824)
 text = "Player"
 horizontal_alignment = 1
 uppercase = true
@@ -166,9 +166,9 @@ anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
 offset_left = 77.06619
-offset_top = 783.4999
+offset_top = 771.49994
 offset_right = 209.82466
-offset_bottom = 932.7113
+offset_bottom = 920.71136
 grow_horizontal = 0
 scale = Vector2(0.8673519, 0.8627101)
 icon = ExtResource("2_wjrrg")
@@ -181,9 +181,9 @@ anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
 offset_left = -57.933838
-offset_top = 783.4999
+offset_top = 771.49994
 offset_right = 74.06616
-offset_bottom = 932.4999
+offset_bottom = 920.49994
 grow_horizontal = 0
 scale = Vector2(0.8673519, 0.8627101)
 icon = ExtResource("2_homebtn")
@@ -196,9 +196,9 @@ anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
 offset_left = -192.93378
-offset_top = 783.4999
+offset_top = 771.49994
 offset_right = -59.933777
-offset_bottom = 932.4999
+offset_bottom = 920.49994
 grow_horizontal = 0
 scale = Vector2(0.8673519, 0.8627101)
 icon = ExtResource("2_shopbtn")

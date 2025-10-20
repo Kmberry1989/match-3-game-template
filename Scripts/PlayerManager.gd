@@ -5,6 +5,9 @@ extends Node
 signal level_up(new_level)
 signal frame_changed(new_frame)
 signal coins_changed(new_amount)
+signal avatar_changed
+signal meaner_meter_changed(current, max)
+signal meaner_meter_filled()
 
 var player_uid = ""
 var last_user_info: Dictionary = {}
@@ -17,6 +20,7 @@ var player_data = {
 	"best_combo": 0,
 	"total_lines_cleared": 0,
 	"current_frame": "default",
+	"meaner_meter": {"current": 0, "max": 100},
 	"unlocks": {
 		"trophies": [],
 		"frames": ["default", "frame_2"],
@@ -30,6 +34,11 @@ var player_data = {
 func _ready():
 	if firebase == null:
 		print("Firebase not available: running offline (cloud save disabled).")
+		# Load local save if present
+		if SaveManager.has_player():
+			var local = SaveManager.load_player()
+			if typeof(local) == TYPE_DICTIONARY and local.size() > 0:
+				player_data = local
 		return
 
 func load_player_data(user_info):
@@ -67,6 +76,8 @@ func load_player_data(user_info):
 
 func save_player_data():
 	if firebase == null or player_uid == "":
+		# Fallback: persist locally
+		SaveManager.save_player(player_data)
 		return
 	var coll = firebase.Firestore.collection("players")
 	await coll.set_doc(player_uid, player_data)
@@ -168,3 +179,47 @@ func get_current_xp():
 
 func get_current_level():
 	return player_data["current_level"]
+
+# External callers (e.g., Profile.gd) should call this when avatar image changes
+func notify_avatar_changed() -> void:
+	emit_signal("avatar_changed")
+
+# MEANER METER API
+func get_meaner_meter_current() -> int:
+	if typeof(player_data) == TYPE_DICTIONARY:
+		var meter = player_data.get("meaner_meter", {})
+		if typeof(meter) == TYPE_DICTIONARY:
+			return int(meter.get("current", 0))
+	return 0
+
+func get_meaner_meter_max() -> int:
+	if typeof(player_data) == TYPE_DICTIONARY:
+		var meter = player_data.get("meaner_meter", {})
+		if typeof(meter) == TYPE_DICTIONARY:
+			return int(meter.get("max", 100))
+	return 100
+
+func add_to_meaner_meter(delta: int) -> void:
+	if delta <= 0:
+		return
+	var meter = player_data.get("meaner_meter", {"current": 0, "max": 100})
+	var cur: int = int((meter.get("current", 0)))
+	var mx: int = int((meter.get("max", 100)))
+	cur += delta
+	var filled_now: bool = false
+	if cur >= mx:
+		cur = mx
+		filled_now = true
+	meter["current"] = cur
+	player_data["meaner_meter"] = meter
+	emit_signal("meaner_meter_changed", cur, mx)
+	if filled_now:
+		emit_signal("meaner_meter_filled")
+	save_player_data()
+
+func reset_meaner_meter() -> void:
+	var meter = player_data.get("meaner_meter", {"current": 0, "max": 100})
+	meter["current"] = 0
+	player_data["meaner_meter"] = meter
+	emit_signal("meaner_meter_changed", 0, int(meter.get("max", 100)))
+	save_player_data()

@@ -18,18 +18,13 @@ extends Control
 func _ready():
 	display_player_data()
 	
-	# Platform-specific feature handling for avatar upload
-	var os_name = OS.get_name()
-	if os_name == "Android" or os_name == "iOS":
-		change_avatar_button.disabled = true
-		change_avatar_button.text = "Upload not on mobile"
-	else:
-		change_avatar_button.connect("pressed", _on_change_avatar_pressed)
-		file_dialog.connect("file_selected", _on_file_selected)
-		# Ensure the dialog opens files (photo picker), not saving
-		file_dialog.file_mode = FileDialog.FILE_MODE_OPEN_FILE
-		# Optional: restrict to common image types
-		file_dialog.filters = PackedStringArray(["*.png, *.jpg, *.jpeg; Image Files"])
+	# Enable avatar upload on all platforms; use FileDialog for mobile and desktop
+	change_avatar_button.connect("pressed", _on_change_avatar_pressed)
+	file_dialog.connect("file_selected", _on_file_selected)
+	# Ensure the dialog opens files (photo picker), not saving
+	file_dialog.file_mode = FileDialog.FILE_MODE_OPEN_FILE
+	# Restrict to common image types
+	file_dialog.filters = PackedStringArray(["*.png, *.jpg, *.jpeg; Image Files"])
 
 	back_button.connect("pressed", _on_back_button_pressed)
 	frame_selection_button.connect("item_selected", _on_frame_selected)
@@ -37,7 +32,8 @@ func _ready():
 func display_player_data():
 	var data = PlayerManager.player_data
 	player_name_label.text = "Name: " + data["player_name"]
-	var time_played = data["time_played"]
+	# Ensure integer seconds for modulo ops
+	var time_played: int = int(round(float(data.get("time_played", 0))))
 	var hours = int(time_played / 3600)
 	var minutes = int((time_played % 3600) / 60)
 	var seconds = time_played % 60
@@ -89,7 +85,7 @@ func display_player_data():
 
 func update_avatar_frame():
 	var frame_name = PlayerManager.get_current_frame()
-	var frame_path = "res://Assets/Visuals/avatar_frame.png" # Default
+	var frame_path = "res://Assets/Visuals/avatar_frame_2.png" # Default matches in-game
 	if frame_name != "default":
 		frame_path = "res://Assets/Visuals/avatar_" + frame_name + ".png"
 	avatar_frame_rect.texture = load(frame_path)
@@ -109,9 +105,37 @@ func _on_change_avatar_pressed():
 func _on_file_selected(path):
 	var img = Image.load_from_file(path)
 	if img:
-		# Update avatar preview directly without saving a copy
+		# Center-crop to square and scale to 512x512 for consistent quality
+		img = _crop_to_square(img)
+		img.resize(512, 512, Image.INTERPOLATE_LANCZOS)
+		# Save to user storage
+		var avatars_dir: String = "user://avatars"
+		var da: DirAccess = DirAccess.open("user://")
+		if da != null:
+			da.make_dir_recursive("avatars")
+		var save_path: String = avatars_dir + "/" + PlayerManager.get_player_name() + ".png"
+		var err: int = img.save_png(save_path)
+		if err != OK:
+			push_warning("Failed to save avatar: " + str(err))
+		# Update preview
 		var tex = ImageTexture.create_from_image(img)
 		avatar_texture_rect.texture = tex
+		# Notify game UI to refresh (emit from PlayerManager to avoid UNUSED_SIGNAL)
+		if PlayerManager != null and PlayerManager.has_method("notify_avatar_changed"):
+			PlayerManager.notify_avatar_changed()
 
 func _on_back_button_pressed():
 	get_tree().change_scene_to_file("res://Scenes/Menu.tscn")
+
+# Helper: center-crop to a 1:1 square
+func _crop_to_square(img: Image) -> Image:
+	var w: int = img.get_width()
+	var h: int = img.get_height()
+	if w == h:
+		return img
+	var side: int = min(w, h)
+	var x: int = int((w - side) / 2)
+	var y: int = int((h - side) / 2)
+	var cropped := Image.create(side, side, false, img.get_format())
+	cropped.blit_rect(img, Rect2i(x, y, side, side), Vector2i(0,0))
+	return cropped

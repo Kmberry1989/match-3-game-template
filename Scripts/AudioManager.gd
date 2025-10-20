@@ -50,6 +50,23 @@ func load_sounds():
 	sounds["yawn"] = load("res://Assets/Sounds/yawn.ogg")
 	sounds["surprised"] = load("res://Assets/Sounds/surprised.ogg")
 	sounds["shuffle"] = load("res://Assets/Sounds/Music_fx_cymbal_rush.ogg")
+	# New special match sounds (add these files under Assets/Sounds)
+	sounds["line_clear"] = load("res://Assets/Sounds/line_clear.ogg")
+	sounds["wildcard_spawn"] = load("res://Assets/Sounds/wildcard_spawn.ogg")
+	# Slot machine SFX (if present)
+	var slot_sounds: Dictionary = {
+		"slot_spin": "res://Assets/Sounds/slot_spin.ogg",
+		"slot_tick": "res://Assets/Sounds/slot_tick.ogg",
+		"slot_stop": "res://Assets/Sounds/slot_stop.ogg",
+		"slot_win": "res://Assets/Sounds/slot_win.ogg",
+		"slot_fail": "res://Assets/Sounds/slot_fail.ogg"
+	}
+	for k in slot_sounds.keys():
+		var path: String = slot_sounds[k]
+		if ResourceLoader.exists(path):
+			var res = load(path)
+			if res != null:
+				sounds[k] = res
 
 func load_music():
 	_add_music_track("login", "res://Assets/Sounds/music_login.ogg")

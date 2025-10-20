@@ -32,6 +32,7 @@ var frames_catalog := {
 
 func _ready():
 	set_anchors_preset(Control.PRESET_FULL_RECT)
+	_load_dynamic_frames()
 	_build_ui()
 	if Engine.has_singleton("PlayerManager") == false and typeof(PlayerManager) != TYPE_OBJECT:
 		pass
@@ -118,6 +119,38 @@ func _post_build_layout():
 	_update_card_widths()
 	_rebuild_dots()
 	_update_pager_by_scroll()
+
+# Scan res://Assets/Visuals for avatar_*.png and add frames not already listed
+func _load_dynamic_frames() -> void:
+	var root := "res://Assets/Visuals"
+	var d := DirAccess.open(root)
+	if d == null:
+		return
+	d.list_dir_begin()
+	var fname := d.get_next()
+	while fname != "":
+		if not d.current_is_dir() and fname.to_lower().ends_with(".png"):
+			if fname.begins_with("avatar_"):
+				# Skip default frame provided for free
+				if fname == "avatar_frame_2.png":
+					fname = d.get_next()
+					continue
+				var id := fname.get_basename().replace("avatar_", "")
+				# Normalize common "frameX" names to match existing style
+				id = id
+				if not frames_catalog.has(id):
+					# Default price for discovered frames
+					var price := 250
+					# If name contains a number, scale price a bit
+					var m := RegEx.new()
+					m.compile(".*?(\\d+)")
+					var res := m.search(id)
+					if res != null:
+						var n := int(res.get_string(1))
+						price = max(150, 100 + n * 20)
+					frames_catalog[id] = {"price": price, "display": fname}
+		fname = d.get_next()
+	d.list_dir_end()
 
 func _make_frame_card(frame_id: String) -> Control:
 	var data = frames_catalog[frame_id]
@@ -206,7 +239,45 @@ func _make_frame_card(frame_id: String) -> Control:
 				if PlayerManager.spend_coins(price):
 					PlayerManager.unlock_frame(frame_id)
 					PlayerManager.set_current_frame(frame_id)
+					if AudioManager != null:
+						AudioManager.play_sound("ui_click")
 					_refresh()
+					# Show a brief purchase/equip toast before returning to menu
+					var root: Node = get_tree().get_current_scene()
+					var layer: Node = root.get_node_or_null("CanvasLayer")
+					if layer == null:
+						layer = root.find_child("CanvasLayer", true, false)
+					if layer == null:
+						layer = CanvasLayer.new()
+						layer.name = "CanvasLayer"
+						root.add_child(layer)
+					var toast_panel := PanelContainer.new()
+					toast_panel.name = "PurchaseToast"
+					toast_panel.modulate = Color(1,1,1,0.0)
+					toast_panel.anchor_left = 0.5
+					toast_panel.anchor_right = 0.5
+					toast_panel.anchor_top = 0.1
+					toast_panel.anchor_bottom = 0.1
+					toast_panel.offset_left = -220
+					toast_panel.offset_right = 220
+					toast_panel.offset_top = -24
+					toast_panel.offset_bottom = 24
+					var box := VBoxContainer.new()
+					box.alignment = BoxContainer.ALIGNMENT_CENTER
+					var lbl := Label.new()
+					lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+					lbl.add_theme_font_size_override("font_size", 22)
+					lbl.text = "New Frame Equipped!"
+					box.add_child(lbl)
+					toast_panel.add_child(box)
+					layer.add_child(toast_panel)
+					var t := get_tree().create_tween()
+					t.tween_property(toast_panel, "modulate:a", 1.0, 0.2)
+					t.tween_interval(0.65)
+					t.tween_property(toast_panel, "modulate:a", 0.0, 0.2)
+					await t.finished
+					# Return to main menu
+					get_tree().change_scene_to_file("res://Scenes/Menu.tscn")
 			)
 		badge.text = "Price: %d" % price
 		badge_bg.color = Color(1.0, 0.84, 0.0, 0.7)

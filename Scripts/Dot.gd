@@ -9,6 +9,7 @@ const REFERENCE_DOT_PX = 512.0
 @onready var sprite = get_node("Sprite2D")
 var matched = false
 var scale_multiplier: float = 1.0
+var is_wildcard: bool = false
 
 # Emitted when the match fade-out finishes; used to trigger XP orbs immediately.
 signal match_faded(global_pos, color_name)
@@ -36,6 +37,9 @@ var last_yawn_time = 0
 const YAWN_COOLDOWN = 2500 # 2.5 seconds in milliseconds
 
 @onready var blink_timer = Timer.new()
+@onready var wildcard_timer = Timer.new()
+var wildcard_textures: Array[Texture] = []
+var _wildcard_index: int = 0
 
 # Mapping from color to character name
 var color_to_character = {
@@ -76,6 +80,7 @@ func _ready():
 			scale_multiplier = (REFERENCE_DOT_PX / max_dim) * DOT_SCALE
 	create_shadow()
 	setup_blink_timer()
+	setup_wildcard_timer()
 	start_floating()
 	start_pulsing()
 	
@@ -202,10 +207,14 @@ func load_textures():
 	sprite.texture = normal_texture
 
 func set_normal_texture():
+	if is_wildcard:
+		return
 	animation_state = "normal"
 	sprite.texture = normal_texture
 
 func reset_to_normal_state():
+	if is_wildcard:
+		return
 	set_normal_texture()
 
 func setup_blink_timer():
@@ -213,6 +222,45 @@ func setup_blink_timer():
 	blink_timer.set_one_shot(true)
 	add_child(blink_timer)
 	blink_timer.start(randf_range(4.0, 12.0))
+
+func setup_wildcard_timer():
+	add_child(wildcard_timer)
+	wildcard_timer.one_shot = false
+	wildcard_timer.wait_time = 0.12
+	wildcard_timer.connect("timeout", Callable(self, "_on_wildcard_tick"))
+
+func _on_wildcard_tick():
+	if not is_wildcard:
+		wildcard_timer.stop()
+		return
+	if wildcard_textures.size() == 0:
+		return
+	_wildcard_index = (_wildcard_index + 1) % wildcard_textures.size()
+	sprite.texture = wildcard_textures[_wildcard_index]
+
+func set_wildcard(enable: bool = true):
+	is_wildcard = enable
+	if enable:
+		animation_state = "wildcard"
+		# Build a list of normal textures across all characters/colors
+		wildcard_textures.clear()
+		for col in color_to_character.keys():
+			var character = color_to_character[col]
+			var base_path = "res://Assets/Dots/" + character + "avatar"
+			var tex: Texture = load(base_path + ".png")
+			if tex:
+				wildcard_textures.append(tex)
+		if wildcard_textures.size() > 0:
+			_wildcard_index = 0
+			sprite.texture = wildcard_textures[_wildcard_index]
+			wildcard_timer.start()
+		# Make the shadow slightly brighter for wildcard
+		if shadow:
+			shadow.modulate = Color(0.2,0.2,0.2,0.6)
+	else:
+		wildcard_timer.stop()
+		animation_state = "normal"
+		set_normal_texture()
 
 func start_floating():
 	if float_tween:

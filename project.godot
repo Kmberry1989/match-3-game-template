@@ -27,6 +27,7 @@ Firebase="*res://addons/godot-firebase/firebase/firebase.tscn"
 PlayerManager="*res://Scripts/PlayerManager.gd"
 NetworkManager="*res://Scripts/NetworkManager.gd"
 AudioManager="*res://Scripts/AudioManager.gd"
+SaveManager="*res://Scripts/SaveManager.gd"
 
 [display]
 

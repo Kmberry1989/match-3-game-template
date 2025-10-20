@@ -53,10 +53,7 @@ layout_mode = 2
 button_pressed = true
 text = "Remember me"
 
-[node name="GoogleLoginButton" type="Button" parent="CenterContainer/VBoxContainer"]
-visible = false
-layout_mode = 2
-text = "Sign in with Google"
+
 
 [node name="CancelButton" type="Button" parent="CenterContainer/VBoxContainer"]
 visible = false
