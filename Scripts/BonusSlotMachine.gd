@@ -5,6 +5,16 @@ signal finished
 
 const SYMBOL_SIZE: Vector2i = Vector2i(320, 320)
 const SYMBOL_DIR: String = "res://Assets/BonusSlot"
+const SYMBOL_TEX := {
+	SymbolId.COIN: preload("res://Assets/BonusSlot/symbol_coin.png"),
+	SymbolId.XP: preload("res://Assets/BonusSlot/symbol_xp.png"),
+	SymbolId.WILDCARD: preload("res://Assets/BonusSlot/symbol_wildcard.png"),
+	SymbolId.ROW_CLEAR: preload("res://Assets/BonusSlot/symbol_row_clear.png"),
+	SymbolId.COL_CLEAR: preload("res://Assets/BonusSlot/symbol_col_clear.png"),
+	SymbolId.MULT2X: preload("res://Assets/BonusSlot/symbol_multiplier_2x.png"),
+	SymbolId.MULT3X: preload("res://Assets/BonusSlot/symbol_multiplier_3x.png"),
+	SymbolId.FREE_SPIN: preload("res://Assets/BonusSlot/symbol_free_spin.png")
+}
 var _symbol_size: Vector2i = SYMBOL_SIZE
 
 enum SymbolId { COIN, XP, WILDCARD, ROW_CLEAR, COL_CLEAR, MULT2X, MULT3X, FREE_SPIN }
@@ -44,6 +54,8 @@ func _ready() -> void:
 		$Panel/VBox/Reels/Reel2/Glow as TextureRect,
 		$Panel/VBox/Reels/Reel3/Glow as TextureRect
 	]
+	# Ensure glows overlay exactly the reel window
+	_align_glows_to_reels()
 	# Load any provided symbol_* textures before building reels so tiles use your art
 	_load_symbol_textures()
 	for r in _reels:
@@ -55,6 +67,7 @@ func _notification(what):
 		if not is_inside_tree():
 			return
 		_layout_for_viewport()
+		_align_glows_to_reels()
 
 func _build_reel(reel: Control) -> void:
 	reel.clip_contents = true
@@ -92,8 +105,9 @@ func _make_symbol_tile(sym: Dictionary) -> Control:
 		sb.bg_color = Color(0,0,0,0)
 		var tr: TextureRect = TextureRect.new()
 		tr.texture = tex
+		# Fill the available tile while preserving aspect (250x250 assets fit cleanly)
 		tr.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		tr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		tr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 		tr.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		tr.size_flags_vertical = Control.SIZE_EXPAND_FILL
 		tile.add_child(tr)
@@ -387,8 +401,7 @@ func _load_symbol_textures() -> void:
 		var tex: Texture2D = null
 		if exact.has(sid):
 			var path: String = exact[sid]
-			if FileAccess.file_exists(path):
-				tex = load(path) as Texture2D
+			tex = load(path) as Texture2D
 		if tex == null:
 			var bases: Array[String] = []
 			match sid:
@@ -544,6 +557,15 @@ func _finish_after_delay() -> void:
 
 func _layout_for_viewport() -> void:
 	# Compute responsive panel size and reel window size for portrait/landscape
+	# Ensure the root fills the viewport at runtime (editor keeps a manageable default size)
+	anchor_left = 0.0
+	anchor_top = 0.0
+	anchor_right = 1.0
+	anchor_bottom = 1.0
+	offset_left = 0.0
+	offset_top = 0.0
+	offset_right = 0.0
+	offset_bottom = 0.0
 	var vp: Vector2 = get_viewport().get_visible_rect().size
 	var is_portrait: bool = vp.y > vp.x
 	var panel: Panel = get_node_or_null("Panel") as Panel
@@ -564,6 +586,17 @@ func _layout_for_viewport() -> void:
 	var sep: float = 24.0
 	var usable_w: float = vp.x * 0.88 - 2.0 * sep
 	var target: int = int(floor(usable_w / 3.0))
-	# Clamp between 140 and base 320
+	# Clamp between 140 and base 320, then cap at 250 to match source art for crisp rendering
 	target = clamp(target, 140, 320)
+	target = min(target, 250)
 	_symbol_size = Vector2i(target, target)
+
+func _align_glows_to_reels() -> void:
+	for g in _glows:
+		if g == null: continue
+		# Stretch to cover the reel control fully and get clipped by it
+		g.set_anchors_preset(Control.PRESET_FULL_RECT)
+		g.offset_left = 0
+		g.offset_top = 0
+		g.offset_right = 0
+		g.offset_bottom = 0

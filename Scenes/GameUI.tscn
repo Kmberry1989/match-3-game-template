@@ -100,7 +100,7 @@ scale = Vector2(1.1307645, 1.0135452)
 alignment = 1
 
 [node name="Score" type="Sprite2D" parent="MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame/VBox"]
-position = Vector2(47.869568, 32.151325)
+position = Vector2(46.98523, 32.151325)
 scale = Vector2(0.5842003, 0.57487595)
 texture = ExtResource("3_d8tla")
 

@@ -4,17 +4,17 @@
 [ext_resource type="Texture2D" uid="uid://chus8isb6vr6w" path="res://Assets/BonusSlot/slot_frame.png" id="2_ub4sa"]
 
 [node name="BonusSlotMachine" type="Control"]
+custom_minimum_size = Vector2(1280, 720)
 layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
+anchors_preset = 0
+offset_right = 1280.0
+offset_bottom = 720.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("1_5p4gk")
 
 [node name="Background" type="TextureRect" parent="."]
-visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -52,9 +52,9 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -640.0
-offset_top = -400.0
+offset_top = -360.0
 offset_right = 640.0
-offset_bottom = 400.0
+offset_bottom = 360.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -68,12 +68,13 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 24.0
-offset_top = 24.0
-offset_right = -24.0
-offset_bottom = -24.0
+offset_left = 28.0
+offset_top = 29.999998
+offset_right = -20.0
+offset_bottom = -18.0
 grow_horizontal = 2
 grow_vertical = 2
+scale = Vector2(0.98853993, 0.995815)
 theme_override_constants/separation = 20
 alignment = 1
 
