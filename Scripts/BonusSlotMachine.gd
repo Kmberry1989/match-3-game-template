@@ -5,16 +5,17 @@ signal finished
 
 const SYMBOL_SIZE: Vector2i = Vector2i(320, 320)
 const SYMBOL_DIR: String = "res://Assets/BonusSlot"
-const SYMBOL_TEX := {
-	SymbolId.COIN: preload("res://Assets/BonusSlot/symbol_coin.png"),
-	SymbolId.XP: preload("res://Assets/BonusSlot/symbol_xp.png"),
-	SymbolId.WILDCARD: preload("res://Assets/BonusSlot/symbol_wildcard.png"),
-	SymbolId.ROW_CLEAR: preload("res://Assets/BonusSlot/symbol_row_clear.png"),
-	SymbolId.COL_CLEAR: preload("res://Assets/BonusSlot/symbol_col_clear.png"),
-	SymbolId.MULT2X: preload("res://Assets/BonusSlot/symbol_multiplier_2x.png"),
-	SymbolId.MULT3X: preload("res://Assets/BonusSlot/symbol_multiplier_3x.png"),
-	SymbolId.FREE_SPIN: preload("res://Assets/BonusSlot/symbol_free_spin.png")
-}
+# Preload textures in enum order: COIN, XP, WILDCARD, ROW_CLEAR, COL_CLEAR, MULT2X, MULT3X, FREE_SPIN
+const SYMBOL_TEX: Array = [
+	preload("res://Assets/BonusSlot/symbol_coin.png"),
+	preload("res://Assets/BonusSlot/symbol_xp.png"),
+	preload("res://Assets/BonusSlot/symbol_wildcard.png"),
+	preload("res://Assets/BonusSlot/symbol_row_clear.png"),
+	preload("res://Assets/BonusSlot/symbol_col_clear.png"),
+	preload("res://Assets/BonusSlot/symbol_multiplier_2x.png"),
+	preload("res://Assets/BonusSlot/symbol_multiplier_3x.png"),
+	preload("res://Assets/BonusSlot/symbol_free_spin.png")
+]
 var _symbol_size: Vector2i = SYMBOL_SIZE
 
 enum SymbolId { COIN, XP, WILDCARD, ROW_CLEAR, COL_CLEAR, MULT2X, MULT3X, FREE_SPIN }
@@ -29,6 +30,23 @@ var _glows: Array[TextureRect] = []
 var _attempts: int = 0
 var _finished: bool = false
 var _success_done: bool = false
+var _reel_tracks: Array = []
+var _tick_timer: Timer = null
+var _reels_stopped: int = 0
+var _stop_targets: Array[int] = []
+var _reel_orders: Array = []
+var _awaiting_ack: bool = false
+var _post_ack_action: String = "close"  # "close" or "spin_again"
+
+# Optional: manually assign textures per reel from the editor
+@export var apply_manual_textures_on_ready: bool = false
+@export var reel1_textures: Array[Texture2D] = []
+@export var reel2_textures: Array[Texture2D] = []
+@export var reel3_textures: Array[Texture2D] = []
+@export var use_fallback_color_reels: bool = true
+@export var use_placeholders_if_missing: bool = true
+@export var placeholder_save_dir: String = "user://bonus_slot_placeholders"
+@export var placeholder_overwrite_existing: bool = false
 
 func _ready() -> void:
 	_layout_for_viewport()
@@ -42,6 +60,11 @@ func _ready() -> void:
 		{"id": SymbolId.MULT3X, "name": "3x", "color": Color(1.0, 0.3, 0.2)},
 		{"id": SymbolId.FREE_SPIN, "name": "FREE", "color": Color(0.8, 0.8, 0.8)}
 	]
+	# Pre-attach preloaded textures so reels show art immediately
+	for i in range(_symbols.size()):
+		var sid: int = int(_symbols[i].get("id", -1))
+		if sid >= 0 and sid < SYMBOL_TEX.size() and SYMBOL_TEX[sid] != null:
+			_symbols[i]["tex"] = SYMBOL_TEX[sid]
 	_result_label = $Panel/VBox/ResultLabel as Label
 	_spin_button = $Panel/VBox/HBox/SpinButton as BaseButton
 	_reels = [
@@ -60,7 +83,27 @@ func _ready() -> void:
 	_load_symbol_textures()
 	for r in _reels:
 		_build_reel(r)
+	# Attach SlotReel behavior to each reel and configure textures
+	var reel_script = load("res://Scripts/SlotReel.gd")
+	var imgs: Array[Texture2D] = []
+	for d in _symbols:
+		var tex: Texture2D = d.get("tex", null)
+		if tex != null:
+			imgs.append(tex)
+	for i in range(_reels.size()):
+		var r = _reels[i]
+		if r.get_script() == null:
+			r.set_script(reel_script)
+		if r.has_method("setup_reel"):
+			r.call("setup_reel", imgs, 3, _symbol_size, 180.0)
+		if r.has_signal("spin_finished"):
+			var cb := Callable(self, "_on_slot_reel_finished").bind(i)
+			if not r.is_connected("spin_finished", cb):
+				r.connect("spin_finished", cb)
+	# If requested, apply editor-provided textures per reel (visual only)
+	_apply_manual_textures_from_exports()
 	_apply_assets()
+	_animate_in()
 
 func _notification(what):
 	if what == NOTIFICATION_RESIZED:
@@ -77,12 +120,15 @@ func _build_reel(reel: Control) -> void:
 	track.position = Vector2.ZERO
 	track.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	track.size_flags_vertical = Control.SIZE_FILL
-	for _i in range(3):
-		for s_idx in range(_symbols.size()):
-			var tile: Control = _make_symbol_tile(_symbols[s_idx])
-			track.add_child(tile)
+	# Each symbol appears only once on the reel
+	var order: Array = _symbols.duplicate()
+	for s_idx in range(order.size()):
+		var tile: Control = _make_symbol_tile(order[s_idx])
+		track.add_child(tile)
 	track.add_child(_make_symbol_tile(_symbols[0]))
 	reel.add_child(track)
+	_reel_tracks.append(track)
+	_reel_orders.append(order)
 
 func _make_symbol_tile(sym: Dictionary) -> Control:
 	var tile: Panel = Panel.new()
@@ -100,7 +146,7 @@ func _make_symbol_tile(sym: Dictionary) -> Control:
 	sb.corner_radius_bottom_right = 16
 	tile.add_theme_stylebox_override("panel", sb)
 	var tex: Texture2D = sym.get("tex", null)
-	if tex != null:
+	if (not use_fallback_color_reels) and tex != null:
 		# Use your provided art; make tile background transparent so color doesn't cover it
 		sb.bg_color = Color(0,0,0,0)
 		var tr: TextureRect = TextureRect.new()
@@ -112,34 +158,207 @@ func _make_symbol_tile(sym: Dictionary) -> Control:
 		tr.size_flags_vertical = Control.SIZE_EXPAND_FILL
 		tile.add_child(tr)
 	else:
-		var lbl: Label = Label.new()
-		lbl.text = String(sym.get("name", "?"))
-		lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		lbl.add_theme_font_size_override("font_size", 64)
-		lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		lbl.size_flags_vertical = Control.SIZE_EXPAND_FILL
-		tile.add_child(lbl)
+		if not use_fallback_color_reels:
+			var lbl: Label = Label.new()
+			lbl.text = String(sym.get("name", "?"))
+			lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+			lbl.add_theme_font_size_override("font_size", 64)
+			lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			lbl.size_flags_vertical = Control.SIZE_EXPAND_FILL
+			tile.add_child(lbl)
 	return tile
 
+# Replace the visuals in a reel with the provided textures (order should match the internal symbol order).
+# This only affects the artwork; symbol IDs and payouts remain unchanged.
+func set_reel_symbol_textures(reel_index: int, textures: Array[Texture2D]) -> void:
+	if reel_index < 0 or reel_index >= _reels.size():
+		return
+	var reel: Control = _reels[reel_index]
+	var track: VBoxContainer = reel.get_node_or_null("Track") as VBoxContainer
+	if track == null:
+		return
+	var block: int = _symbols.size()
+	var loops: int = 3
+	var max_count: int = min(track.get_child_count(), loops * block)
+	for loop_i in range(loops):
+		for s_idx in range(block):
+			var idx: int = loop_i * block + s_idx
+			if idx >= max_count:
+				continue
+			var tile: Control = track.get_child(idx) as Control
+			var tex: Texture2D = null
+			if s_idx < textures.size():
+				tex = textures[s_idx]
+			_apply_texture_to_tile(tile, tex)
+	# Also update the last wrap tile to match the first symbol
+	if track.get_child_count() > max_count:
+		var last_tile: Control = track.get_child(max_count) as Control
+		var first_tex: Texture2D = textures[0] if textures.size() > 0 else null
+		_apply_texture_to_tile(last_tile, first_tex)
+
+func _apply_texture_to_tile(tile: Control, tex: Texture2D) -> void:
+	if use_fallback_color_reels:
+		return
+	# Ensure the tile shows a TextureRect with the provided texture; fall back to label if null
+	var tr: TextureRect = null
+	for c in tile.get_children():
+		if c is TextureRect:
+			tr = c
+			break
+	if tr == null and tex != null:
+		# Remove any label child
+		for c in tile.get_children():
+			if c is Label:
+				c.queue_free()
+		tr = TextureRect.new()
+		tile.add_child(tr)
+	if tr != null:
+		tr.texture = tex
+		tr.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		tr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+		tr.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		tr.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	# If we have a texture, make the panel background transparent
+	var sb: StyleBox = tile.get_theme_stylebox("panel")
+	if sb is StyleBoxFlat:
+		var sbf := sb as StyleBoxFlat
+		sbf.bg_color = Color(0,0,0, 0.0 if tex != null else 1.0)
+
+func _apply_manual_textures_from_exports() -> void:
+	if not apply_manual_textures_on_ready or use_fallback_color_reels:
+		return
+	set_reel_symbol_textures(0, reel1_textures)
+	set_reel_symbol_textures(1, reel2_textures)
+	set_reel_symbol_textures(2, reel3_textures)
+
 func _on_SpinButton_pressed() -> void:
+	# If we are waiting for player acknowledgment of the result, treat this as "Continue"
+	if _awaiting_ack and not _spinning and not _finished:
+		_finish_from_player_ack()
+		return
 	if _spinning or _finished:
 		return
-	# Allow up to 3 spin attempts total
-	if _attempts >= 3:
-		_finish_after_delay()
-		return
-	_attempts += 1
 	_spinning = true
+	_reels_stopped = 0
 	_result_label.text = ""
 	_spin_button.disabled = true
 	if AudioManager != null:
 		AudioManager.play_sound("slot_spin")
-	_stops.clear()
-	for _i in range(3):
-		_stops.append(_pick_symbol_index())
-	for idx in range(_reels.size()):
-		_spin_reel(_reels[idx], _stops[idx], 1.2 + 0.15 * float(idx))
+	var runtime := 4.0
+	var speed := 12.0
+	for i in range(_reels.size()):
+		var delay := 0.15 * float(i)
+		var r = _reels[i]
+		if r.has_method("start_spin"):
+			r.call("start_spin", runtime, speed, delay)
+
+func _start_cascade_spin() -> void:
+	# Start each reel with a slight offset for cascade effect
+	for i in range(_reels.size()):
+		_spin_reel_cascade(i)
+		await get_tree().create_timer(0.15).timeout
+
+func _spin_reel_cascade(reel_index: int) -> void:
+	var track: VBoxContainer = _reel_tracks[reel_index]
+	var tile_h: float = float(_symbol_size.y)
+	var total_h: float = tile_h * float(_symbols.size())
+	# Reset to top boundary to begin
+	track.position.y = 0.0
+	# Fast loops
+	var loops := 3 + reel_index
+	var loop_dur := 0.24
+	for _k in range(loops):
+		var t1 := create_tween()
+		t1.tween_property(track, "position:y", -total_h, loop_dur).set_trans(Tween.TRANS_LINEAR)
+		await t1.finished
+		# Wrap back to top for continuous spin
+		track.position.y = 0.0
+	# Decelerate to target stop within [0, -total_h]
+	var target_index: int = _stop_targets[reel_index]
+	var final_y: float = -float(target_index) * tile_h
+	var decel_dur := 0.9 + 0.35 * float(reel_index)
+	var t2 := create_tween()
+	t2.tween_property(track, "position:y", final_y, decel_dur).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	await t2.finished
+	# Snap to exact boundary
+	var snapped_steps: int = int(round(-track.position.y / tile_h))
+	track.position.y = -float(snapped_steps) * tile_h
+	if AudioManager != null:
+		AudioManager.play_sound("slot_stop")
+	_on_reel_stopped(reel_index)
+
+func _on_reel_stopped(_reel_index: int) -> void:
+	_reels_stopped += 1
+	if _reels_stopped >= _reels.size():
+		_spinning = false
+		_spin_button.disabled = false
+		_evaluate_cascade_result()
+
+func _on_slot_reel_finished(index: int) -> void:
+	if AudioManager != null:
+		AudioManager.play_sound("slot_stop")
+	_on_reel_stopped(index)
+
+func _current_top_index(reel_index: int) -> int:
+	var track: VBoxContainer = _reel_tracks[reel_index]
+	var tile_h: float = float(_symbol_size.y)
+	var steps: int = int(round(-track.position.y / tile_h))
+	var block := _symbols.size()
+	return ((steps % block) + block) % block
+
+func _evaluate_cascade_result() -> void:
+	var a := _get_top_from_reel(0)
+	var b := _get_top_from_reel(1)
+	var c := _get_top_from_reel(2)
+	var ids: Array[int] = [a, b, c]
+	var msg: String = ""
+	var mask: Array[bool] = [false, false, false]
+	var wants_spin_again: bool = false
+	if a == b and b == c and a >= 0:
+		# 3 of a kind
+		msg = _apply_payout_3(a)
+		mask = [true, true, true]
+		if AudioManager != null:
+			AudioManager.play_sound("slot_win")
+		_confetti_burst_from([true, true, true], 1.0)
+		# If the symbol is FREE_SPIN, acknowledge then spin again after player input
+		if a == SymbolId.FREE_SPIN:
+			wants_spin_again = true
+		# Achievement: One Win Ever
+		if Engine.has_singleton("AchievementManager") or (typeof(AchievementManager) != TYPE_NIL):
+			AchievementManager.unlock_achievement("one_win_ever")
+	elif a == b or b == c or a == c:
+		# 2 of a kind
+		var sym2: int = _majority_symbol(ids)
+		msg = _apply_payout_2(sym2)
+		for i in range(3):
+			if ids[i] == sym2:
+				mask[i] = true
+		if AudioManager != null:
+			AudioManager.play_sound("slot_win")
+		_confetti_burst_from(mask, 0.6)
+		# Achievement: One Win Ever
+		if Engine.has_singleton("AchievementManager") or (typeof(AchievementManager) != TYPE_NIL):
+			AchievementManager.unlock_achievement("one_win_ever")
+	else:
+		msg = _apply_payout_mixed()
+		if AudioManager != null:
+			AudioManager.play_sound("slot_fail")
+	_result_label.text = msg
+	# Highlight winning reels if applicable
+	_show_reel_glows(mask)
+	# Pause here for player input to acknowledge the result
+	var next_act: String = "spin_again" if wants_spin_again else "close"
+	_enter_result_ack(msg, next_act)
+
+func _get_top_from_reel(i: int) -> int:
+	if i < 0 or i >= _reels.size():
+		return -1
+	var r = _reels[i]
+	if r.has_method("get_top_symbol_index"):
+		return int(r.call("get_top_symbol_index"))
+	return -1
 
 func _pick_symbol_index() -> int:
 	var weights: Array[int] = [25, 20, 10, 8, 8, 12, 5, 12]
@@ -218,26 +437,67 @@ func _evaluate_result() -> void:
 			AudioManager.play_sound("slot_win")
 		_confetti_burst_from(mask, 0.6)
 		success = true
+		# Achievement: One Win Ever
+		if Engine.has_singleton("AchievementManager") or (typeof(AchievementManager) != TYPE_NIL):
+			AchievementManager.unlock_achievement("one_win_ever")
 	else:
 		msg = _apply_payout_mixed()
 		_show_reel_glows([false, false, false])
 		if AudioManager != null:
 			AudioManager.play_sound("slot_fail")
 	_result_label.text = msg
-	# Handle free spin: do not count this attempt; auto-spin again after a short delay
+	# Handle free spin: acknowledge, then spin again on player input
 	if free_spin:
-		if _attempts > 0:
-			_attempts -= 1
-		await get_tree().create_timer(0.6).timeout
+		_enter_result_ack(msg, "spin_again")
+		return
+	# Pause for player acknowledgment instead of auto-closing
+	_enter_result_ack(msg, "close")
+
+func _enter_result_ack(msg: String, next_action: String = "close") -> void:
+	_awaiting_ack = true
+	_post_ack_action = next_action
+	_spinning = false
+	if _spin_button != null:
+		_spin_button.disabled = false
+		# If it's a normal Button, present clear call-to-action
+		var btn: Button = _spin_button as Button
+		if btn != null:
+			btn.text = "CONTINUE"
+	# Add a subtle hint on the label
+	if _result_label != null and msg != "":
+		var hint: String = "\nTap to spin again" if next_action == "spin_again" else "\nTap to continue"
+		_result_label.text = msg + hint
+
+func _finish_from_player_ack() -> void:
+	if _finished:
+		return
+	var action := _post_ack_action
+	_awaiting_ack = false
+	_post_ack_action = "close"
+	if action == "spin_again":
+		# Start a new spin without closing the bonus overlay
+		if _result_label != null:
+			_result_label.text = ""
 		_on_SpinButton_pressed()
 		return
+	# Default: close overlay and return to grid
+	_finished = true
+	if _spin_button != null:
+		_spin_button.disabled = true
+	await _animate_out()
+	emit_signal("finished")
+	queue_free()
 
-	# Finish conditions: any success immediately, or after 3 total attempts
-	if success and not _success_done:
-		_success_done = true
-		_finish_after_delay()
-	elif _attempts >= 3:
-		_finish_after_delay()
+func _unhandled_input(event: InputEvent) -> void:
+	if not _awaiting_ack:
+		return
+	if event is InputEventMouseButton and event.pressed:
+		_finish_from_player_ack()
+		get_viewport().set_input_as_handled()
+		return
+	if event.is_action_pressed("ui_accept"):
+		_finish_from_player_ack()
+		get_viewport().set_input_as_handled()
 
 func _majority_symbol(ids: Array[int]) -> int:
 	if ids[0] == ids[1]:
@@ -424,6 +684,13 @@ func _load_symbol_textures() -> void:
 				_:
 					bases = []
 			tex = _load_first_match_tex(index, bases)
+		if tex == null and use_placeholders_if_missing:
+			var base_col: Color = sym.get("color", Color(0.5,0.5,0.5))
+			var nm: String = _symbol_name_for_sid(sid)
+			var save_path: String = _placeholder_path_for_symbol(nm)
+			# Generate placeholder image and texture
+			var img_tex: Dictionary = _make_placeholder_tex(nm, base_col, save_path)
+			tex = img_tex.get("tex", null)
 		if tex != null:
 			_symbols[i]["tex"] = tex
 
@@ -459,11 +726,24 @@ func _load_first_match_tex(index: Dictionary, bases: Array) -> Texture2D:
 	return null
 
 func _show_reel_glows(mask: Array) -> void:
+	# Center each glow behind the winning result row (top row is the payline for this slot)
+	var row_h: float = float(_symbol_size.y)
+	var row_w: float = float(_symbol_size.x)
+	var result_row_top: float = 0.0  # top row is the evaluated result
 	for i in range(min(3, mask.size())):
 		var g: TextureRect = _glows[i]
 		if g == null:
 			continue
 		var target: float = 0.65 if mask[i] else 0.0
+		# Position and size the glow so it sits directly behind the result tile
+		# Use absolute offsets inside the reel, not full-rect anchors
+		g.anchor_left = 0.0
+		g.anchor_top = 0.0
+		g.anchor_right = 0.0
+		g.anchor_bottom = 0.0
+		g.position = Vector2(0.0, result_row_top)
+		g.size = Vector2(row_w, row_h)
+		g.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 		g.visible = target > 0.0
 		var t: Tween = create_tween()
 		t.tween_property(g, "modulate:a", target, 0.2).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
@@ -485,6 +765,82 @@ func _reel_centers_local() -> Array:
 func _to_local_canvas(global_point: Vector2) -> Vector2:
 	var inv: Transform2D = get_global_transform_with_canvas().affine_inverse()
 	return inv * global_point
+
+func _make_placeholder_tex(label: String, base: Color, save_path: String) -> Dictionary:
+	var w := 250
+	var h := 250
+	var img := Image.create(w, h, false, Image.FORMAT_RGBA8)
+	img.lock()
+	# fill background
+	for y in range(h):
+		for x in range(w):
+			img.set_pixel(x, y, base)
+	# border
+	var border := Color(0,0,0,0.6)
+	for x in range(w):
+		img.set_pixel(x, 0, border)
+		img.set_pixel(x, h-1, border)
+	for y in range(h):
+		img.set_pixel(0, y, border)
+		img.set_pixel(w-1, y, border)
+	# diagonal stripes for contrast
+	var stripe := Color(1,1,1,0.08)
+	for y in range(0, h, 10):
+		for x in range(w):
+			var sx := (x + y) % 20
+			if sx < 2:
+				img.set_pixel(x, y, stripe)
+				if y+1 < h:
+					img.set_pixel(x, y+1, stripe)
+	img.unlock()
+	# Save to disk if requested
+	var saved_path: String = ""
+	if save_path != "":
+		_ensure_placeholder_dir_exists(save_path)
+		if placeholder_overwrite_existing or not FileAccess.file_exists(save_path):
+			var err := img.save_png(save_path)
+			if err == OK:
+				saved_path = save_path
+	var tex := ImageTexture.create_from_image(img)
+	return {"tex": tex, "path": saved_path}
+
+func _ensure_placeholder_dir_exists(path: String) -> void:
+	# Create directories for a user:// path (or any path) as needed
+	var dir_path := path
+	var last_slash := dir_path.rfind("/")
+	if last_slash >= 0:
+		dir_path = dir_path.substr(0, last_slash)
+	if dir_path.begins_with("user://"):
+		var rel := dir_path.replace("user://", "")
+		var d := DirAccess.open("user://")
+		if d != null:
+			d.make_dir_recursive(rel)
+	else:
+		# Try absolute recursive creation if supported
+		var abs := ProjectSettings.globalize_path(dir_path)
+		DirAccess.make_dir_recursive_absolute(abs)
+
+func _symbol_name_for_sid(sid: int) -> String:
+	match sid:
+		SymbolId.COIN: return "symbol_coin"
+		SymbolId.XP: return "symbol_xp"
+		SymbolId.WILDCARD: return "symbol_wildcard"
+		SymbolId.ROW_CLEAR: return "symbol_row_clear"
+		SymbolId.COL_CLEAR: return "symbol_col_clear"
+		SymbolId.MULT2X: return "symbol_multiplier_2x"
+		SymbolId.MULT3X: return "symbol_multiplier_3x"
+		SymbolId.FREE_SPIN:
+			return "symbol_free_spin"
+		_:
+			return "symbol_unknown"
+
+func _placeholder_path_for_symbol(base_name: String) -> String:
+	var dir := placeholder_save_dir
+	if dir == null or dir == "":
+		dir = "user://bonus_slot_placeholders"
+	if not dir.ends_with("/"):
+		dir += "/"
+	return dir + base_name + "_placeholder.png"
 
 func _confetti_burst_from(mask: Array, intensity: float = 1.0) -> void:
 	var centers: Array = _reel_centers_local()
@@ -552,6 +908,7 @@ func _finish_after_delay() -> void:
 	_finished = true
 	_spin_button.disabled = true
 	await get_tree().create_timer(0.6).timeout
+	await _animate_out()
 	emit_signal("finished")
 	queue_free()
 
@@ -590,6 +947,32 @@ func _layout_for_viewport() -> void:
 	target = clamp(target, 140, 320)
 	target = min(target, 250)
 	_symbol_size = Vector2i(target, target)
+
+func _animate_in() -> void:
+	var panel: Control = get_node_or_null("Panel") as Control
+	var dimmer: CanvasItem = get_node_or_null("Dimmer") as CanvasItem
+	if panel != null:
+		panel.modulate.a = 0.0
+		panel.scale = Vector2(0.94, 0.94)
+	var t: Tween = create_tween()
+	if panel != null:
+		t.tween_property(panel, "modulate:a", 1.0, 0.25).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+		t.parallel().tween_property(panel, "scale", Vector2.ONE, 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	if dimmer != null:
+		dimmer.modulate.a = 0.0
+		var td: Tween = create_tween()
+		td.tween_property(dimmer, "modulate:a", 1.0, 0.25).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+
+func _animate_out() -> void:
+	var panel: Control = get_node_or_null("Panel") as Control
+	var dimmer: CanvasItem = get_node_or_null("Dimmer") as CanvasItem
+	var t: Tween = create_tween()
+	if panel != null:
+		t.tween_property(panel, "modulate:a", 0.0, 0.25).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+		t.parallel().tween_property(panel, "scale", Vector2(0.94, 0.94), 0.25).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+	if dimmer != null:
+		t.parallel().tween_property(dimmer, "modulate:a", 0.0, 0.25).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+	await t.finished
 
 func _align_glows_to_reels() -> void:
 	for g in _glows:

@@ -109,18 +109,16 @@ func _ready():
 	# Optionally ensure the initial board always has at least one potential match
 	if AUTO_RESHUFFLE:
 		await ensure_moves_available()
-		# Start idle timer (15s) before triggering a reshuffle
-		if idle_timer != null:
-			idle_timer.start()
+		# Start idle/yawn and inactivity timers
+		_restart_idle_timers()
 
 	# Hook level-up to play celebration animations (wave + dance + banner)
 	# Use a small defer to ensure tree is ready.
 	await get_tree().process_frame
 	if PlayerManager != null:
 		PlayerManager.level_up.connect(_on_level_up)
-	# Kick off the idle hint/yawn timer after initial spawn
-	if idle_timer != null:
-		idle_timer.start()
+	# Kick off the idle/yawn and inactivity timers after initial spawn
+	_restart_idle_timers()
 
 
 
@@ -159,15 +157,23 @@ func setup_timers():
 	
 	idle_timer.connect("timeout", Callable(self, "_on_idle_timer_timeout"))
 	idle_timer.set_one_shot(true)
-	idle_timer.set_wait_time(15.0)
+	# Hint/yawn delay before suggesting a matchable trio
+	idle_timer.set_wait_time(5.0)
 	add_child(idle_timer)
 
-	# Inactivity reshuffle timer (disabled unless AUTO_RESHUFFLE)
+	# Inactivity reshuffle timer (only used when AUTO_RESHUFFLE)
 	if AUTO_RESHUFFLE:
 		inactivity_timer.connect("timeout", Callable(self, "_on_inactivity_timeout"))
 		inactivity_timer.set_one_shot(true)
+		# Longer window before reshuffling the board
 		inactivity_timer.set_wait_time(15.0)
 		add_child(inactivity_timer)
+
+func _restart_idle_timers() -> void:
+	if idle_timer != null:
+		idle_timer.start()
+	if AUTO_RESHUFFLE and inactivity_timer != null:
+		inactivity_timer.start()
 
 func restricted_fill(place):
 	if is_in_array(empty_spaces, place):
@@ -249,8 +255,7 @@ func _input(event):
 
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		if event.is_pressed():
-			if idle_timer != null:
-				idle_timer.start()
+			_restart_idle_timers()
 			idle_hint_count = 0
 			var grid_pos = pixel_to_grid(event.position.x, event.position.y)
 			if is_in_grid(grid_pos) and all_dots[grid_pos.x][grid_pos.y] != null:
@@ -270,7 +275,7 @@ func _input(event):
 				var difference = end_grid_pos - start_grid_pos
 				
 				if difference.length() > 0.5: # Threshold for a swipe
-					idle_timer.start()
+					_restart_idle_timers()
 					var direction = Vector2.ZERO
 					if abs(difference.x) > abs(difference.y):
 						if difference.x > 0:
@@ -291,8 +296,7 @@ func _input(event):
 
 				dragged_dot.set_normal_texture()
 				dragged_dot = null
-				if idle_timer != null:
-					idle_timer.start()
+				_restart_idle_timers()
 				
 func swap_dots(column, row, direction) -> bool:
 	var col: int = int(column)
@@ -376,8 +380,7 @@ func swap_back():
 			if trio.size() >= 3:
 				for d in trio:
 					d.play_idle_animation()
-		if idle_timer != null:
-			idle_timer.start()
+		_restart_idle_timers()
 	
 func _process(_delta):
 	if is_dragging and dragged_dot != null:
@@ -457,6 +460,16 @@ func destroy_matches():
 				all_dots[i][j] = null
 	
 	if points_earned > 0:
+		# Multiplayer: report score delta
+		if (Engine.has_singleton("MultiplayerManager") or (typeof(MultiplayerManager) != TYPE_NIL)) and (Engine.has_singleton("WebSocketClient") or (typeof(WebSocketClient) != TYPE_NIL)):
+			var ng = get_tree().get_current_scene().get_node_or_null("NetGame")
+			if ng != null and ng.has_method("report_local_score"):
+				ng.call("report_local_score", points_earned)
+			else:
+				WebSocketClient.send_game_event("score", {"delta": points_earned})
+		# Achievement: Beginner's Luck (first match)
+		if Engine.has_singleton("AchievementManager") or (typeof(AchievementManager) != TYPE_NIL):
+			AchievementManager.unlock_achievement("beginners_luck")
 		if match_count >= 5:
 			AudioManager.play_sound("match_fanfare")
 		elif match_count == 4:
@@ -479,8 +492,7 @@ func destroy_matches():
 		PlayerManager.update_best_combo(combo_counter)
 		combo_counter += 1
 		_failed_attempts = 0
-		if idle_timer != null:
-			idle_timer.start()
+		_restart_idle_timers()
 		update_score_display()
 		
 		# Instantiate new effects at the center of the match
@@ -628,6 +640,9 @@ func _apply_specials_and_collect(groups: Array) -> Array:
 					d.set_wildcard(true)
 				if AudioManager != null:
 					AudioManager.play_sound("wildcard_spawn")
+			# Achievement: Justify the Means (create wildcard)
+			if Engine.has_singleton("AchievementManager") or (typeof(AchievementManager) != TYPE_NIL):
+				AchievementManager.unlock_achievement("justify_the_means")
 			excluded_positions.append(p)
 			# Match the rest of the run
 			for p2 in pos:
@@ -653,6 +668,9 @@ func _apply_specials_and_collect(groups: Array) -> Array:
 				_spawn_col_sweep(col)
 			if AudioManager != null:
 				AudioManager.play_sound("line_clear")
+			# Achievement: On the Ball (clear a 4-in-a-row)
+			if Engine.has_singleton("AchievementManager") or (typeof(AchievementManager) != TYPE_NIL):
+				AchievementManager.unlock_achievement("on_the_ball")
 		else:
 			# Standard triple (or larger) – match all in this run
 			for p3 in pos:
@@ -840,13 +858,8 @@ func find_matches_after_refill():
 		destroy_timer.start()
 
 func _on_idle_timer_timeout():
-	# After 15 seconds of inactivity, reshuffle (without creating immediate matches),
-	# then highlight a valid move by making that trio yawn together.
-	if not AUTO_RESHUFFLE:
-		return
-	await reshuffle_board()
-	await ensure_moves_available()
-	# Yawn the three dots that would form the next match
+	# After short inactivity, gently hint a valid move by making that trio yawn.
+	# No reshuffle here; this is just a suggestion.
 	var group = find_potential_match_group()
 	if group.size() >= 3:
 		var target_color = group[0].color
@@ -857,16 +870,26 @@ func _on_idle_timer_timeout():
 		if trio.size() >= 3:
 			for d in trio:
 				d.play_idle_animation()
-	# Restart the idle timer for subsequent inactivity windows
-	if idle_timer != null:
-		idle_timer.start()
+	# Restart timers for subsequent inactivity windows
+	_restart_idle_timers()
 
 func _on_inactivity_timeout():
+	# After a longer inactivity window, reshuffle (without immediate matches), then hint a move.
 	if not AUTO_RESHUFFLE:
 		return
-	# Use the unified idle timer flow for reshuffle timing; do nothing here
-	# to avoid double-reshuffling alongside the idle timer.
-	pass
+	await reshuffle_board()
+	await ensure_moves_available()
+	var group = find_potential_match_group()
+	if group.size() >= 3:
+		var target_color = group[0].color
+		var trio = []
+		for d in group:
+			if d != null and d.color == target_color:
+				trio.append(d)
+		if trio.size() >= 3:
+			for d in trio:
+				d.play_idle_animation()
+	_restart_idle_timers()
 
 func find_potential_match():
 	for i in range(width):
@@ -1021,8 +1044,7 @@ func ensure_moves_available(max_attempts := 10):
 	if find_potential_match() == null:
 		push_warning("Unable to find a valid move after reshuffling.")
 
-	if idle_timer != null:
-		idle_timer.start()
+	_restart_idle_timers()
 
 # Returns the current color pool used for spawning/refill
 func _get_color_pool() -> Array:
@@ -1256,6 +1278,8 @@ func play_wave_animation():
 			var tw = get_tree().create_tween()
 			tw.tween_property(dot, "rotation_degrees", 0.0, 0.12)
 
+# Synchronized level-up dances. Cycles through a few variants each level.
+
 func play_dance_animation():
 	# Small wiggle/scale for a short duration
 	var max_duration = 0.6
@@ -1291,7 +1315,7 @@ func show_stage_banner(new_level):
 	root.add_child(banner)
 
 	var text = Label.new()
-	text.text = "Stage " + str(new_level)
+	text.text = "LEVEL UP!"
 	text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	text.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	text.add_theme_font_size_override("font_size", 40)

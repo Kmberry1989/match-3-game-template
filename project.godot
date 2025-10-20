@@ -15,11 +15,9 @@ run/main_scene="res://Scenes/Login.tscn"
 config/quit_on_go_back=false
 config/features=PackedStringArray("4.5")
 boot_splash/bg_color=Color(0, 0, 0, 1)
-boot_splash/fullsize=false
 boot_splash/use_filter=false
-boot_splash/image="res://Assets/Visuals/player_avatar.png"
+boot_splash/image="uid://c1dhu4vva8d8q"
 config/icon="res://icon.png"
-boot_splash/minimum_display_time=10
 
 [autoload]
 
@@ -28,6 +26,9 @@ PlayerManager="*res://Scripts/PlayerManager.gd"
 NetworkManager="*res://Scripts/NetworkManager.gd"
 AudioManager="*res://Scripts/AudioManager.gd"
 SaveManager="*res://Scripts/SaveManager.gd"
+AchievementManager="*res://addons/milestone/autoload/achievement_manager.gd"
+WebSocketClient="*res://addons/SimpleMultiplayer/autoload/websocket_client.gd"
+MultiplayerManager="*res://addons/SimpleMultiplayer/autoload/multiplayer_manager.gd"
 
 [display]
 
@@ -39,7 +40,7 @@ window/handheld/orientation=1
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/godot-firebase/plugin.cfg", "res://addons/http-sse-client/plugin.cfg")
+enabled=PackedStringArray("res://addons/SimpleMultiplayer/plugin.cfg", "res://addons/godot-firebase/plugin.cfg", "res://addons/http-sse-client/plugin.cfg", "res://addons/milestone/plugin.cfg")
 
 [input]
 
@@ -53,6 +54,13 @@ ui_touch={
 
 limits/message_queue/max_size_mb=64
 
+[milestone]
+
+general/achievements_path="res://Assets/Trophies/Achievements"
+debug/print_errors=true
+debug/print_output=true
+general/save_as_json=true
+
 [rendering]
 
 rendering_device/driver="d3d12"
@@ -61,3 +69,7 @@ renderer/rendering_method.mobile="gl_compatibility"
 textures/vram_compression/import_etc2_astc=true
 textures/default_filters/use_nearest_mipmap_filter=true
 environment/defaults/default_environment="res://default_env.tres"
+
+[simple_multiplayer]
+
+server_url="ws://127.0.0.1:9090"

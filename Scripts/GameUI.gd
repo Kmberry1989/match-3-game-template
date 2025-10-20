@@ -212,6 +212,9 @@ func _show_bonus_slot() -> void:
 func _on_bonus_slot_closed() -> void:
 	# Reset the meter after the bonus has been played
 	PlayerManager.reset_meaner_meter()
+	# Track frequent flyer achievement progress
+	if PlayerManager != null and PlayerManager.has_method("increment_bonus_spins"):
+		PlayerManager.increment_bonus_spins()
 
 func _on_meaner_meter_changed(cur: int, mx: int) -> void:
 	if _meaner_bar != null:

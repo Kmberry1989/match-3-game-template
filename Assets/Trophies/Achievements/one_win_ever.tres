@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="Achievement" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://addons/milestone/scripts/achievements/achievement.gd" id="1"]
+[ext_resource type="Texture2D" path="res://Assets/Trophies/trophy_onewinever.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = "one_win_ever"
+icon = ExtResource("2")
+name = "One Win, Ever"
+description = "Win on the bonus slot once."
+progressive = false
+

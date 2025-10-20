@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="Achievement" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://addons/milestone/scripts/achievements/achievement.gd" id="1"]
+[ext_resource type="Texture2D" path="res://Assets/Trophies/trophy_youvefinally.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = "youve_finally"
+icon = ExtResource("2")
+name = "You've Finally..."
+description = "Reach Level 10."
+progressive = true
+progress_goal = 10
+indicate_progress_interval = 1
+

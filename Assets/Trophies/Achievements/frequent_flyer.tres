@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="Achievement" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://addons/milestone/scripts/achievements/achievement.gd" id="1"]
+[ext_resource type="Texture2D" path="res://Assets/Trophies/trophy_frequentflyer.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = "frequent_flyer"
+icon = ExtResource("2")
+name = "Frequent Flyer"
+description = "Play the bonus slot 5 times."
+progressive = true
+progress_goal = 5
+indicate_progress_interval = 1
+

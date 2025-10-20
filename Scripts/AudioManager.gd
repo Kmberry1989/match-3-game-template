@@ -49,7 +49,8 @@ func load_sounds():
 	sounds["game_start"] = load("res://Assets/Sounds/game_start_swoosh.ogg")
 	sounds["yawn"] = load("res://Assets/Sounds/yawn.ogg")
 	sounds["surprised"] = load("res://Assets/Sounds/surprised.ogg")
-	sounds["shuffle"] = load("res://Assets/Sounds/Music_fx_cymbal_rush.ogg")
+	# Use dedicated shuffle SFX
+	sounds["shuffle"] = load("res://Assets/Sounds/shuffle.ogg")
 	# New special match sounds (add these files under Assets/Sounds)
 	sounds["line_clear"] = load("res://Assets/Sounds/line_clear.ogg")
 	sounds["wildcard_spawn"] = load("res://Assets/Sounds/wildcard_spawn.ogg")

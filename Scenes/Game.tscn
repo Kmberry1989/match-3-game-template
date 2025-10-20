@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://1b2c3d4e5f6" path="res://Scenes/TrophyNotification.tscn" id="4"]
 [ext_resource type="Texture2D" uid="uid://cnmisbe00ul5o" path="res://Assets/Visuals/score.png" id="4_fgofq"]
 [ext_resource type="Script" uid="uid://jti4a1wly7tv" path="res://Scripts/Game.gd" id="5"]
+[ext_resource type="Script" path="res://Scripts/NetGame.gd" id="6_net"]
 
 
 [node name="Game" type="Node"]
@@ -61,3 +62,8 @@ visible = false
 position = Vector2(32, 112)
 scale = Vector2(0.25, 0.25)
 texture = ExtResource("4_fgofq")
+
+[node name="PlayerContainer" type="Node2D" parent="."]
+
+[node name="NetGame" type="Node" parent="."]
+script = ExtResource("6_net")

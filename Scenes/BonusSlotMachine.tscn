@@ -1,7 +1,15 @@
-[gd_scene load_steps=3 format=3 uid="uid://dbnhv6pbubsfu"]
+[gd_scene load_steps=11 format=3 uid="uid://dbnhv6pbubsfu"]
 
 [ext_resource type="Script" uid="uid://dusu1b8fqa6ob" path="res://Scripts/BonusSlotMachine.gd" id="1_5p4gk"]
 [ext_resource type="Texture2D" uid="uid://chus8isb6vr6w" path="res://Assets/BonusSlot/slot_frame.png" id="2_ub4sa"]
+[ext_resource type="Texture2D" uid="uid://f7ap1rk0hifm" path="res://Assets/BonusSlot/symbol_coin.png" id="3_coin"]
+[ext_resource type="Texture2D" uid="uid://b7yxi5lkveory" path="res://Assets/BonusSlot/symbol_xp.png" id="4_xp"]
+[ext_resource type="Texture2D" uid="uid://dfw03jy7gmom7" path="res://Assets/BonusSlot/symbol_wildcard.png" id="5_wild"]
+[ext_resource type="Texture2D" uid="uid://d26jscqlbv3bc" path="res://Assets/BonusSlot/symbol_row_clear.png" id="6_row"]
+[ext_resource type="Texture2D" uid="uid://dey41fblmkvqf" path="res://Assets/BonusSlot/symbol_col_clear.png" id="7_col"]
+[ext_resource type="Texture2D" uid="uid://u31503f2s5yv" path="res://Assets/BonusSlot/symbol_multiplier_2x.png" id="8_m2x"]
+[ext_resource type="Texture2D" uid="uid://casxv7k0h5vtd" path="res://Assets/BonusSlot/symbol_multiplier_3x.png" id="9_m3x"]
+[ext_resource type="Texture2D" uid="uid://dqtbme1dawj4h" path="res://Assets/BonusSlot/symbol_free_spin.png" id="10_free"]
 
 [node name="BonusSlotMachine" type="Control"]
 custom_minimum_size = Vector2(1280, 720)
@@ -13,6 +21,11 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("1_5p4gk")
+apply_manual_textures_on_ready = true
+reel1_textures = Array[Texture2D]([ExtResource("3_coin"), ExtResource("4_xp"), ExtResource("5_wild"), ExtResource("6_row"), ExtResource("7_col"), ExtResource("8_m2x"), ExtResource("9_m3x"), ExtResource("10_free")])
+reel2_textures = Array[Texture2D]([ExtResource("3_coin"), ExtResource("4_xp"), ExtResource("5_wild"), ExtResource("6_row"), ExtResource("7_col"), ExtResource("8_m2x"), ExtResource("9_m3x"), ExtResource("10_free")])
+reel3_textures = Array[Texture2D]([ExtResource("3_coin"), ExtResource("4_xp"), ExtResource("5_wild"), ExtResource("6_row"), ExtResource("7_col"), ExtResource("8_m2x"), ExtResource("9_m3x"), ExtResource("10_free")])
+use_fallback_color_reels = false
 
 [node name="Background" type="TextureRect" parent="."]
 layout_mode = 1
@@ -23,17 +36,6 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 stretch_mode = 5
-
-[node name="Frame" type="TextureRect" parent="."]
-visible = false
-z_index = 5
-layout_mode = 0
-offset_left = -346.0
-offset_top = 725.0
-offset_right = 886.0
-offset_bottom = 725.0
-mouse_filter = 2
-stretch_mode = 4
 
 [node name="Dimmer" type="ColorRect" parent="."]
 layout_mode = 1
@@ -59,8 +61,8 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="SlotFrame" type="Sprite2D" parent="Panel"]
-position = Vector2(247.00009, 421.00003)
-scale = Vector2(0.96876854, 1.0310578)
+position = Vector2(246.0001, 421)
+scale = Vector2(0.9603603, 1.0360329)
 texture = ExtResource("2_ub4sa")
 
 [node name="VBox" type="VBoxContainer" parent="Panel"]
@@ -68,13 +70,13 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 28.0
-offset_top = 29.999998
-offset_right = -20.0
-offset_bottom = -18.0
+offset_left = 32.0
+offset_top = 63.0
+offset_right = -16.0
+offset_bottom = 15.0
 grow_horizontal = 2
 grow_vertical = 2
-scale = Vector2(0.98853993, 0.995815)
+scale = Vector2(0.9674298, 0.8857889)
 theme_override_constants/separation = 20
 alignment = 1
 
@@ -95,10 +97,8 @@ mouse_filter = 2
 
 [node name="Glow" type="TextureRect" parent="Panel/VBox/Reels/Reel1"]
 visible = false
-custom_minimum_size = Vector2(320, 320)
 layout_mode = 0
 mouse_filter = 2
-stretch_mode = 3
 
 [node name="Reel2" type="Control" parent="Panel/VBox/Reels"]
 custom_minimum_size = Vector2(320, 320)
@@ -107,10 +107,8 @@ mouse_filter = 2
 
 [node name="Glow" type="TextureRect" parent="Panel/VBox/Reels/Reel2"]
 visible = false
-custom_minimum_size = Vector2(320, 320)
 layout_mode = 0
 mouse_filter = 2
-stretch_mode = 3
 
 [node name="Reel3" type="Control" parent="Panel/VBox/Reels"]
 custom_minimum_size = Vector2(320, 320)
@@ -119,10 +117,8 @@ mouse_filter = 2
 
 [node name="Glow" type="TextureRect" parent="Panel/VBox/Reels/Reel3"]
 visible = false
-custom_minimum_size = Vector2(320, 320)
 layout_mode = 0
 mouse_filter = 2
-stretch_mode = 3
 
 [node name="SpacerBelowReels" type="Control" parent="Panel/VBox"]
 custom_minimum_size = Vector2(0, 40)

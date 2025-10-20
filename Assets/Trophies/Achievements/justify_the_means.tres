@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="Achievement" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://addons/milestone/scripts/achievements/achievement.gd" id="1"]
+[ext_resource type="Texture2D" path="res://Assets/Trophies/trophy_justifythemeans.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = "justify_the_means"
+icon = ExtResource("2")
+name = "Justify the Means"
+description = "Create a wildcard with a 5-in-a-row."
+progressive = false
+

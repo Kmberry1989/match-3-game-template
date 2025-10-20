@@ -19,6 +19,7 @@ var player_data = {
 	"coins": 0,
 	"best_combo": 0,
 	"total_lines_cleared": 0,
+	"bonus_spins": 0,
 	"current_frame": "default",
 	"meaner_meter": {"current": 0, "max": 100},
 	"unlocks": {
@@ -92,6 +93,9 @@ func get_player_name():
 func add_time_played(seconds):
 	player_data["time_played"] += seconds
 	check_objectives()
+	# Progress time-based achievement (First Hour Down)
+	if Engine.has_singleton("AchievementManager") or (typeof(AchievementManager) != TYPE_NIL):
+		AchievementManager.progress_achievement("first_hour_down", int(seconds))
 	save_player_data()
 
 const BASE_XP := 180
@@ -118,15 +122,28 @@ func add_xp(amount):
 			emit_signal("coins_changed", player_data["coins"])
 		_leveled = true
 		emit_signal("level_up", player_data["current_level"])
+		# Achievements for reaching certain levels
+		if (Engine.has_singleton("AchievementManager") or (typeof(AchievementManager) != TYPE_NIL)):
+			if player_data["current_level"] >= 2:
+				AchievementManager.unlock_achievement("first_chapter")
+			if player_data["current_level"] >= 10:
+				AchievementManager.unlock_achievement("youve_finally")
 	save_player_data()
 
 func update_best_combo(new_combo):
 	if new_combo > player_data["best_combo"]:
 		player_data["best_combo"] = new_combo
+		# Achievement: On a Roll (combo 10)
+		if (Engine.has_singleton("AchievementManager") or (typeof(AchievementManager) != TYPE_NIL)) and new_combo >= 10:
+			AchievementManager.progress_achievement("on_a_roll", 1)
+			AchievementManager.unlock_achievement("on_a_roll")
 		save_player_data()
 
 func add_lines_cleared(lines):
 	player_data["total_lines_cleared"] += lines
+	# Progress: On the Board (clear 100 dots)
+	if Engine.has_singleton("AchievementManager") or (typeof(AchievementManager) != TYPE_NIL):
+		AchievementManager.progress_achievement("on_the_board", int(lines))
 	save_player_data()
 
 func get_coins():
@@ -183,6 +200,17 @@ func get_current_level():
 # External callers (e.g., Profile.gd) should call this when avatar image changes
 func notify_avatar_changed() -> void:
 	emit_signal("avatar_changed")
+	# Achievement: I Remember My... (set an avatar)
+	if Engine.has_singleton("AchievementManager") or (typeof(AchievementManager) != TYPE_NIL):
+		AchievementManager.unlock_achievement("i_remember_my")
+
+func increment_bonus_spins() -> void:
+	player_data["bonus_spins"] = int(player_data.get("bonus_spins", 0)) + 1
+	if Engine.has_singleton("AchievementManager") or (typeof(AchievementManager) != TYPE_NIL):
+		AchievementManager.progress_achievement("frequent_flyer", 1)
+		if player_data["bonus_spins"] >= 5:
+			AchievementManager.unlock_achievement("frequent_flyer")
+	save_player_data()
 
 # MEANER METER API
 func get_meaner_meter_current() -> int:

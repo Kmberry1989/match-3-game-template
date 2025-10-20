@@ -6,6 +6,7 @@ var profile_button: TextureButton
 var showcase_button: TextureButton
 var shop_button: TextureButton
 var logout_button: TextureButton
+var multiplayer_button: TextureButton
 @onready var firebase = get_node_or_null("/root/Firebase")
 
 func _ready():
@@ -15,6 +16,7 @@ func _ready():
 	showcase_button = TextureButton.new()
 	shop_button = TextureButton.new()
 	logout_button = TextureButton.new()
+	multiplayer_button = TextureButton.new()
 
 	# Background image (cover)
 	var bg = TextureRect.new()
@@ -117,6 +119,21 @@ func _ready():
 	shop_label.add_theme_font_size_override("font_size", 32)
 	shop_button.add_child(shop_label)
 
+	# Multiplayer Button
+	multiplayer_button.texture_normal = normal_tex
+	multiplayer_button.texture_pressed = pressed_tex
+	multiplayer_button.texture_hover = hover_tex
+	multiplayer_button.connect("pressed", _on_multiplayer_button_pressed)
+	vbox.add_child(multiplayer_button)
+
+	var mp_label = Label.new()
+	mp_label.text = "Multiplayer"
+	mp_label.set_anchors_preset(Control.PRESET_FULL_RECT)
+	mp_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	mp_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	mp_label.add_theme_font_size_override("font_size", 32)
+	multiplayer_button.add_child(mp_label)
+
 	# Logout Button (shown only if Firebase is present and logged in)
 	logout_button.texture_normal = normal_tex
 	logout_button.texture_pressed = pressed_tex
@@ -163,6 +180,10 @@ func _on_showcase_button_pressed():
 func _on_shop_button_pressed():
 	AudioManager.play_sound("ui_click")
 	get_tree().change_scene_to_file("res://Scenes/Shop.tscn")
+
+func _on_multiplayer_button_pressed():
+	AudioManager.play_sound("ui_click")
+	get_tree().change_scene_to_file("res://Scenes/MultiplayerLobby.tscn")
 
 func _start_game():
 	AudioManager.stop_music()
