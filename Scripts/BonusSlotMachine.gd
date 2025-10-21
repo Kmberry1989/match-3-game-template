@@ -341,12 +341,16 @@ func _evaluate_cascade_result() -> void:
 		msg = _apply_payout_mixed()
 		if AudioManager != null:
 			AudioManager.play_sound("slot_fail")
+	
 	_result_label.text = msg
 	# Highlight winning reels if applicable
 	_show_reel_glows(mask)
-	# Pause here for player input to acknowledge the result
-	var next_act: String = "spin_again" if wants_spin_again else "close"
-	_enter_result_ack(msg, next_act)
+
+	if wants_spin_again:
+		# Pause here for player input to acknowledge the result
+		_enter_result_ack(msg, "spin_again")
+	else:
+		_finish_after_delay()
 
 func _get_top_from_reel(i: int) -> int:
 	if i < 0 or i >= _reels.size():
@@ -441,13 +445,14 @@ func _evaluate_result() -> void:
 		_show_reel_glows([false, false, false])
 		if AudioManager != null:
 			AudioManager.play_sound("slot_fail")
+	
 	_result_label.text = msg
 	# Handle free spin: acknowledge, then spin again on player input
 	if free_spin:
 		_enter_result_ack(msg, "spin_again")
 		return
-	# Pause for player acknowledgment instead of auto-closing
-	_enter_result_ack(msg, "close")
+	
+	_finish_after_delay()
 
 func _enter_result_ack(msg: String, next_action: String = "close") -> void:
 	_awaiting_ack = true
@@ -471,23 +476,10 @@ func _finish_from_player_ack() -> void:
 	_awaiting_ack = false
 	_post_ack_action = "close"
 
-	# Reset UI elements after acknowledgment
-	if _result_label != null:
-		_result_label.text = ""
-	_show_reel_glows([false, false, false])
-	if _spin_button != null:
-		var btn: Button = _spin_button as Button
-		if btn != null:
-			btn.text = "SPIN"
-		_spin_button.disabled = false
-
 	if action == "spin_again":
 		# Start a new spin without closing the bonus overlay
 		_on_SpinButton_pressed()
 		return
-
-	# Default: Do nothing, just return to idle state with result on reels.
-	# The player can choose to spin again or close the scene via the close button.
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not _awaiting_ack:
@@ -909,7 +901,7 @@ func _finish_after_delay() -> void:
 		return
 	_finished = true
 	_spin_button.disabled = true
-	await get_tree().create_timer(0.6).timeout
+	await get_tree().create_timer(3.0).timeout
 	await _animate_out()
 	emit_signal("finished")
 	queue_free()

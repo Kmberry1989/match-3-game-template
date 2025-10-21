@@ -103,7 +103,7 @@ const XP_GROWTH := 1.35 # multiplicative growth per level
 const COIN_CONVERSION_RATE := 50 # XP per 1 coin awarded at level-up
 
 func get_xp_for_level(level: int) -> int:
-	return int(round(BASE_XP * pow(XP_GROWTH, max(level - 1, 0))))
+	return int(round(BASE_XP * pow(XP_GROWTH, max(level - 1, 0)))) * 2
 
 func get_xp_for_next_level() -> int:
 	return get_xp_for_level(player_data["current_level"]) 
@@ -120,6 +120,7 @@ func add_xp(amount):
 		if coins_awarded > 0:
 			player_data["coins"] += coins_awarded
 			emit_signal("coins_changed", player_data["coins"])
+			_show_xp_conversion_animation()
 		_leveled = true
 		emit_signal("level_up", player_data["current_level"])
 		# Achievements for reaching certain levels
@@ -129,6 +130,44 @@ func add_xp(amount):
 			if player_data["current_level"] >= 10:
 				AchievementManager.unlock_achievement("youve_finally")
 	save_player_data()
+
+func _show_xp_conversion_animation():
+	var scene = get_tree().current_scene
+	if not is_instance_valid(scene):
+		return
+
+	var layer = CanvasLayer.new()
+	layer.name = "XpToGoldAnim"
+	scene.add_child(layer)
+
+	var icon = TextureRect.new()
+	icon.texture = load("res://Assets/Visuals/xp_gold_convert.png")
+	icon.set_anchors_preset(Control.PRESET_CENTER)
+	icon.modulate.a = 0.0
+	layer.add_child(icon)
+
+	if AudioManager != null:
+		AudioManager.play_sound("coin.ogg")
+
+	var tween = create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(icon, "scale", Vector2(1.2, 1.2), 0.3).from(Vector2.ZERO).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tween.tween_property(icon, "modulate:a", 1.0, 0.2).from(0.0)
+	await tween.finished
+
+	var pulse_tween = create_tween().set_loops(2)
+	pulse_tween.set_parallel(true)
+	pulse_tween.tween_property(icon, "scale", Vector2(1.4, 1.4), 0.4).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	pulse_tween.tween_property(icon, "scale", Vector2(1.2, 1.2), 0.4).set_delay(0.4).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	await pulse_tween.finished
+
+	var end_tween = create_tween()
+	end_tween.set_parallel(true)
+	end_tween.tween_property(icon, "scale", Vector2.ZERO, 0.3).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
+	end_tween.tween_property(icon, "modulate:a", 0.0, 0.3)
+	await end_tween.finished
+
+	layer.queue_free()
 
 func update_best_combo(new_combo):
 	if new_combo > player_data["best_combo"]:

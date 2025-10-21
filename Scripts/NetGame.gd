@@ -15,6 +15,12 @@ func _ready() -> void:
 		mode = String(MultiplayerManager.session_mode)
 		target = int(MultiplayerManager.session_target)
 		seed = int(MultiplayerManager.session_seed)
+
+	# If not in a multiplayer game, do nothing.
+	if mode != "coop" and mode != "vs":
+		print("NetGame: Not in a multiplayer mode ('%s'), disabling." % mode)
+		return
+
 	_build_hud()
 	_connect_net()
 

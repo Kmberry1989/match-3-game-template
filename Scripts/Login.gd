@@ -23,7 +23,7 @@ func _ready():
 	print("[Login.gd] _ready: Local name loaded.")
 
 	# Scale login buttons and input fields to 2x for better readability
-	var scale_factor := 2.0
+	var scale_factor := 4.0
 	var to_scale: Array = [name_edit, login_button, google_login_button, cancel_button, remember_check]
 	for c in to_scale:
 		if c != null:

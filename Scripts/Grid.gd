@@ -1186,10 +1186,10 @@ func can_move_create_match(i, j, direction):
     var other_j: int = j + dj
     if other_i < 0 or other_i >= width or other_j < 0 or other_j >= height:
         return false
-    
+
     var original_color = all_dots[i][j].color
     var other_color = all_dots[other_i][other_j].color
-    
+
     var temp_all_dots = []
     for x in range(width):
         temp_all_dots.append([])
@@ -1198,10 +1198,10 @@ func can_move_create_match(i, j, direction):
                 temp_all_dots[x].append(all_dots[x][y].color)
             else:
                 temp_all_dots[x].append(null)
-    
+
     temp_all_dots[i][j] = other_color
     temp_all_dots[other_i][other_j] = original_color
-    
+
     var is_match = false
     # Check for horizontal match
     if other_i > 0 and other_i < width - 1:

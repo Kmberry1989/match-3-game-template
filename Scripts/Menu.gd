@@ -35,11 +35,12 @@ func _ready():
 
 	# Add a small downward offset so the menu sits ~25px lower than center
 	var offset_container = MarginContainer.new()
-	offset_container.add_theme_constant_override("margin_top", 50)
+	offset_container.add_theme_constant_override("margin_top", 200)
 	center_container.add_child(offset_container)
 
 	# VBoxContainer holds our UI elements vertically
 	var vbox = VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 0)
 	offset_container.add_child(vbox)
 
 	# Title Label
@@ -64,6 +65,7 @@ func _ready():
 	offline_button.texture_pressed = pressed_tex
 	offline_button.texture_hover = hover_tex
 	offline_button.connect("pressed", _on_offline_button_pressed)
+	offline_button.scale = Vector2(0.8, 0.8)
 	vbox.add_child(offline_button)
 
 	var offline_label = Label.new()
@@ -79,6 +81,7 @@ func _ready():
 	profile_button.texture_pressed = pressed_tex
 	profile_button.texture_hover = hover_tex
 	profile_button.connect("pressed", _on_profile_button_pressed)
+	profile_button.scale = Vector2(0.8, 0.8)
 	vbox.add_child(profile_button)
 
 	var profile_label = Label.new()
@@ -94,6 +97,7 @@ func _ready():
 	showcase_button.texture_pressed = pressed_tex
 	showcase_button.texture_hover = hover_tex
 	showcase_button.connect("pressed", _on_showcase_button_pressed)
+	showcase_button.scale = Vector2(0.8, 0.8)
 	vbox.add_child(showcase_button)
 
 	var showcase_label = Label.new()
@@ -109,6 +113,7 @@ func _ready():
 	shop_button.texture_pressed = pressed_tex
 	shop_button.texture_hover = hover_tex
 	shop_button.connect("pressed", _on_shop_button_pressed)
+	shop_button.scale = Vector2(0.8, 0.8)
 	vbox.add_child(shop_button)
 
 	var shop_label = Label.new()
@@ -124,6 +129,7 @@ func _ready():
 	multiplayer_button.texture_pressed = pressed_tex
 	multiplayer_button.texture_hover = hover_tex
 	multiplayer_button.connect("pressed", _on_multiplayer_button_pressed)
+	multiplayer_button.scale = Vector2(0.8, 0.8)
 	vbox.add_child(multiplayer_button)
 
 	var mp_label = Label.new()
@@ -139,6 +145,7 @@ func _ready():
 	logout_button.texture_pressed = pressed_tex
 	logout_button.texture_hover = hover_tex
 	logout_button.connect("pressed", _on_logout_button_pressed)
+	logout_button.scale = Vector2(0.8, 0.8)
 	vbox.add_child(logout_button)
 
 	var logout_label = Label.new()
@@ -190,28 +197,11 @@ func _start_game():
 	print("[Menu.gd] _start_game: Stopping music and playing sound.")
 	AudioManager.stop_music()
 	AudioManager.play_sound("game_start")
-	
-	print("[Menu.gd] _start_game: Creating temporary loading scene with script.")
-	var loading_scene = Node.new()
-	loading_scene.name = "TempLoadingScene"
-	
-	# Add a script to the loading scene to handle the next scene load
-	var loader_script = GDScript.new()
-	loader_script.source_code = """
-extends Node
-func _ready():
-	print("[TempLoadingScene] _ready: Ready to load game scene.")
-	call_deferred("load_the_game")
-
-func load_the_game():
-	print("[TempLoadingScene] load_the_game: Changing scene to Game.tscn.")
-	get_tree().change_scene_to_file("res://Scenes/Game.tscn")
-"""
-	loading_scene.set_script(loader_script)
-	
-	# The old scene will be freed when this is set
-	get_tree().root.add_child(loading_scene)
-	get_tree().current_scene = loading_scene
+	print("[Menu.gd] _start_game: Setting session mode to single-player.")
+	if Engine.has_singleton("MultiplayerManager"):
+		MultiplayerManager.session_mode = "singleplayer"
+	print("[Menu.gd] _start_game: Changing to intermediate Loading scene.")
+	get_tree().change_scene_to_file("res://Scenes/Loading.tscn")
 
 func _update_logout_visibility():
 	var logout_visible = false

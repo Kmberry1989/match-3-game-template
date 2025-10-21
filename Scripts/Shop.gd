@@ -240,7 +240,7 @@ func _make_frame_card(frame_id: String) -> Control:
 					PlayerManager.unlock_frame(frame_id)
 					PlayerManager.set_current_frame(frame_id)
 					if AudioManager != null:
-						AudioManager.play_sound("ui_click")
+						AudioManager.play_sound("purchase")
 					_refresh()
 					# Show a brief purchase/equip toast before returning to menu
 					var root: Node = get_tree().get_current_scene()
@@ -283,7 +283,6 @@ func _make_frame_card(frame_id: String) -> Control:
 		badge_bg.color = Color(1.0, 0.84, 0.0, 0.7)
 
 	return panel
-
 func _refresh():
 	if typeof(PlayerManager) == TYPE_OBJECT and PlayerManager != null:
 		coins_label.text = "Coins: %d" % PlayerManager.get_coins()

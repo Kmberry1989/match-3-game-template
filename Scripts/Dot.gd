@@ -153,6 +153,7 @@ func _on_match_fade_finished():
 func show_flash():
 	var flash = Sprite2D.new()
 	flash.texture = flash_texture
+	flash.centered = true
 	flash.modulate = Color(1,1,1,0.7)
 	add_child(flash)
 	var tween = get_tree().create_tween()

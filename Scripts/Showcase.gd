@@ -77,7 +77,9 @@ func load_trophies():
 					unlocked = unlocked_list.has(id)
 				
 				var unlocked_icon = trophy_res.unlocked_icon
-				var locked_icon = trophy_res.get("locked_icon", null) # Safely get locked_icon
+				var locked_icon = null
+				if "locked_icon" in trophy_res:
+					locked_icon = trophy_res.locked_icon
 
 				var display_icon = unlocked_icon if unlocked else locked_icon
 				if display_icon == null: # Fallback for missing locked_icon
