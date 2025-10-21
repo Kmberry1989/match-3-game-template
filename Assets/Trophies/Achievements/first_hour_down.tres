@@ -1,15 +1,18 @@
-[gd_resource type="Resource" script_class="Achievement" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="Achievement" load_steps=5 format=3 uid="uid://c5kqxdcabctr3"]
 
-[ext_resource type="Script" path="res://addons/milestone/scripts/achievements/achievement.gd" id="1"]
-[ext_resource type="Texture2D" path="res://Assets/Trophies/trophy_firsthourdown.png" id="2"]
+[ext_resource type="Script" uid="uid://dtyojmellf4e5" path="res://addons/milestone/scripts/achievements/achievement.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://cg3b84ak8bsrv" path="res://addons/milestone/icons/hidden_achievement.svg" id="1_j2ioy"]
+[ext_resource type="Texture2D" uid="uid://5vvkpsicrhdd" path="res://Assets/Trophies/trophy_firsthourdown.png" id="2"]
+[ext_resource type="Texture2D" uid="uid://dcs3y3c85rwnx" path="res://Assets/Trophies/trophy_firsthourdown_locked.png" id="4_fkj3g"]
 
 [resource]
 script = ExtResource("1")
 id = "first_hour_down"
 icon = ExtResource("2")
+unachieved_icon = ExtResource("4_fkj3g")
 name = "First Hour Down"
 description = "Play for 1 hour total."
+considered_rare = true
 progressive = true
-progress_goal = 3600
-indicate_progress_interval = 600
-
+progress_goal = 3600.0
+indicate_progress_interval = 600.0

@@ -146,24 +146,23 @@ func _make_symbol_tile(sym: Dictionary) -> Control:
 	if (not use_fallback_color_reels) and tex != null:
 		# Use your provided art; make tile background transparent so color doesn't cover it
 		sb.bg_color = Color(0,0,0,0)
-		var tr: TextureRect = TextureRect.new()
-		tr.texture = tex
+		var tex_rect: TextureRect = TextureRect.new()
+		tex_rect.texture = tex
 		# Fill the available tile while preserving aspect (250x250 assets fit cleanly)
-		tr.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		tr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
-		tr.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		tr.size_flags_vertical = Control.SIZE_EXPAND_FILL
-		tile.add_child(tr)
+		tex_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		tex_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+		tex_rect.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		tex_rect.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		tile.add_child(tex_rect)
 	else:
-		if not use_fallback_color_reels:
-			var lbl: Label = Label.new()
-			lbl.text = String(sym.get("name", "?"))
-			lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-			lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-			lbl.add_theme_font_size_override("font_size", 64)
-			lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			lbl.size_flags_vertical = Control.SIZE_EXPAND_FILL
-			tile.add_child(lbl)
+		var lbl: Label = Label.new()
+		lbl.text = String(sym.get("name", "?"))
+		lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		lbl.add_theme_font_size_override("font_size", 64)
+		lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		lbl.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		tile.add_child(lbl)
 	return tile
 
 # Replace the visuals in a reel with the provided textures (order should match the internal symbol order).
@@ -198,24 +197,24 @@ func _apply_texture_to_tile(tile: Control, tex: Texture2D) -> void:
 	if use_fallback_color_reels:
 		return
 	# Ensure the tile shows a TextureRect with the provided texture; fall back to label if null
-	var tr: TextureRect = null
+	var tex_rect: TextureRect = null
 	for c in tile.get_children():
 		if c is TextureRect:
-			tr = c
+			tex_rect = c
 			break
-	if tr == null and tex != null:
+	if tex_rect == null and tex != null:
 		# Remove any label child
 		for c in tile.get_children():
 			if c is Label:
 				c.queue_free()
-		tr = TextureRect.new()
-		tile.add_child(tr)
-	if tr != null:
-		tr.texture = tex
-		tr.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		tr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
-		tr.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		tr.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		tex_rect = TextureRect.new()
+		tile.add_child(tex_rect)
+	if tex_rect != null:
+		tex_rect.texture = tex
+		tex_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		tex_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+		tex_rect.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		tex_rect.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	# If we have a texture, make the panel background transparent
 	var sb: StyleBox = tile.get_theme_stylebox("panel")
 	if sb is StyleBoxFlat:
@@ -408,7 +407,7 @@ func _evaluate_result() -> void:
 		var idx: int = int(_stops[i])
 		ids.append(int(_symbols[idx]["id"]))
 	var msg: String = ""
-	var success: bool = false
+	var _success: bool = false
 	var free_spin: bool = false
 	if ids[0] == ids[1] and ids[1] == ids[2]:
 		msg = _apply_payout_3(ids[0])
@@ -419,9 +418,9 @@ func _evaluate_result() -> void:
 		# Special case: 3x FREE_SPIN grants an immediate extra spin and should not count against attempts
 		if ids[0] == SymbolId.FREE_SPIN:
 			free_spin = true
-			success = false
+			_success = false
 		else:
-			success = true
+			_success = true
 	elif ids[0] == ids[1] or ids[1] == ids[2] or ids[0] == ids[2]:
 		var sym2: int = _majority_symbol(ids)
 		msg = _apply_payout_2(sym2)
@@ -433,7 +432,7 @@ func _evaluate_result() -> void:
 		if AudioManager != null:
 			AudioManager.play_sound("slot_win")
 		_confetti_burst_from(mask, 0.6)
-		success = true
+		_success = true
 		# Achievement: One Win Ever
 		if Engine.has_singleton("AchievementManager") or (typeof(AchievementManager) != TYPE_NIL):
 			AchievementManager.unlock_achievement("one_win_ever")
@@ -471,19 +470,24 @@ func _finish_from_player_ack() -> void:
 	var action := _post_ack_action
 	_awaiting_ack = false
 	_post_ack_action = "close"
+
+	# Reset UI elements after acknowledgment
+	if _result_label != null:
+		_result_label.text = ""
+	_show_reel_glows([false, false, false])
+	if _spin_button != null:
+		var btn: Button = _spin_button as Button
+		if btn != null:
+			btn.text = "SPIN"
+		_spin_button.disabled = false
+
 	if action == "spin_again":
 		# Start a new spin without closing the bonus overlay
-		if _result_label != null:
-			_result_label.text = ""
 		_on_SpinButton_pressed()
 		return
-	# Default: close overlay and return to grid
-	_finished = true
-	if _spin_button != null:
-		_spin_button.disabled = true
-	await _animate_out()
-	emit_signal("finished")
-	queue_free()
+
+	# Default: Do nothing, just return to idle state with result on reels.
+	# The player can choose to spin again or close the scene via the close button.
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not _awaiting_ack:
@@ -509,27 +513,27 @@ func _apply_payout_3(sym_id: int) -> String:
 			PlayerManager.player_data["coins"] = PlayerManager.get_coins() + 100
 			PlayerManager.emit_signal("coins_changed", PlayerManager.get_coins())
 			PlayerManager.save_player_data()
-			return "+100 Coins!"
+			return "You've won 100 coins, which have been added to your balance."
 		SymbolId.XP:
 			PlayerManager.add_xp(600)
-			return "+600 XP!"
+			return "You've gained 600 experience points."
 		SymbolId.WILDCARD:
 			_set_pending_bonus({"wildcards": 3})
-			return "Next stage: 3 wildcards!"
+			return "You've earned 3 wildcards for the next stage."
 		SymbolId.ROW_CLEAR:
 			_set_pending_bonus({"clear_rows": 2})
-			return "Next stage: clear 2 rows!"
+			return "You've earned 2 row-clearing bonuses for the next stage."
 		SymbolId.COL_CLEAR:
 			_set_pending_bonus({"clear_cols": 2})
-			return "Next stage: clear 2 cols!"
+			return "You've earned 2 column-clearing bonuses for the next stage."
 		SymbolId.MULT2X:
 			_set_pending_bonus({"xp_multiplier": {"mult": 2, "matches": 3}})
-			return "Next 3 matches: 2x XP!"
+			return "For your next 3 matches, you will receive double experience points."
 		SymbolId.MULT3X:
 			_set_pending_bonus({"xp_multiplier": {"mult": 3, "matches": 1}})
-			return "Next match: 3x XP!"
+			return "For your next match, you will receive triple experience points."
 		SymbolId.FREE_SPIN:
-			return "Free spin!"
+			return "You've won a free spin!"
 		_:
 			return ""
 
@@ -539,27 +543,27 @@ func _apply_payout_2(sym_id: int) -> String:
 			PlayerManager.player_data["coins"] = PlayerManager.get_coins() + 20
 			PlayerManager.emit_signal("coins_changed", PlayerManager.get_coins())
 			PlayerManager.save_player_data()
-			return "+20 Coins"
+			return "You've won 20 coins."
 		SymbolId.XP:
 			PlayerManager.add_xp(120)
-			return "+120 XP"
+			return "You've gained 120 experience points."
 		SymbolId.WILDCARD:
 			_set_pending_bonus({"wildcards": 1})
-			return "Next stage: 1 wildcard"
+			return "You've earned a wildcard for the next stage."
 		SymbolId.ROW_CLEAR:
 			_set_pending_bonus({"clear_rows": 1})
-			return "Next stage: clear 1 row"
+			return "You've earned a row-clearing bonus for the next stage."
 		SymbolId.COL_CLEAR:
 			_set_pending_bonus({"clear_cols": 1})
-			return "Next stage: clear 1 col"
+			return "You've earned a column-clearing bonus for the next stage."
 		SymbolId.MULT2X:
 			_set_pending_bonus({"xp_multiplier": {"mult": 2, "matches": 1}})
-			return "Next match: 2x XP"
+			return "For your next match, you will receive double experience points."
 		SymbolId.MULT3X:
 			_set_pending_bonus({"xp_multiplier": {"mult": 3, "matches": 1}})
-			return "Next match: 3x XP"
+			return "For your next match, you will receive triple experience points."
 		SymbolId.FREE_SPIN:
-			return "Free spin chance"
+			return "You've come close to a free spin."
 		_:
 			return ""
 
@@ -567,7 +571,7 @@ func _apply_payout_mixed() -> String:
 	PlayerManager.player_data["coins"] = PlayerManager.get_coins() + 10
 	PlayerManager.emit_signal("coins_changed", PlayerManager.get_coins())
 	PlayerManager.save_player_data()
-	return "+10 Coins"
+	return "You've won a consolation prize of 10 coins."
 
 func _set_pending_bonus(payload: Dictionary) -> void:
 	var pending: Dictionary = {}
@@ -763,7 +767,8 @@ func _to_local_canvas(global_point: Vector2) -> Vector2:
 	var inv: Transform2D = get_global_transform_with_canvas().affine_inverse()
 	return inv * global_point
 
-func _make_placeholder_tex(label: String, base: Color, save_path: String) -> Dictionary:
+func _make_placeholder_tex(_label: String, base: Color, save_path: String) -> Dictionary:
+	# _label intentionally unused; rename to silence UNUSED_PARAMETER warning
 	var w := 250
 	var h := 250
 	var img := Image.create(w, h, false, Image.FORMAT_RGBA8)
@@ -814,8 +819,8 @@ func _ensure_placeholder_dir_exists(path: String) -> void:
 			d.make_dir_recursive(rel)
 	else:
 		# Try absolute recursive creation if supported
-		var abs := ProjectSettings.globalize_path(dir_path)
-		DirAccess.make_dir_recursive_absolute(abs)
+		var abs_path := ProjectSettings.globalize_path(dir_path)
+		DirAccess.make_dir_recursive_absolute(abs_path)
 
 func _symbol_name_for_sid(sid: int) -> String:
 	match sid:

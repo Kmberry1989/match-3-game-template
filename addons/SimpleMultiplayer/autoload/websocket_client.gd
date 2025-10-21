@@ -32,6 +32,10 @@ func _connect_to_server() -> void:
 func is_ws_connected() -> bool:
 	return _connected and _peer != null and _peer.get_ready_state() == WebSocketPeer.STATE_OPEN
 
+func disconnect_from_server() -> void:
+    if _peer != null and _peer.get_ready_state() != WebSocketPeer.STATE_CLOSED:
+        _peer.close()
+
 func _process(_delta: float) -> void:
 	if _peer == null:
 		return

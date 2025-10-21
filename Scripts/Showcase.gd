@@ -9,7 +9,7 @@ var viewer_desc: Label = null
 
 const TROPHY_DIR := "res://Assets/Trophies"
 
-var trophies: Array = [] # [{id, path, texture, name, unlocked}]
+var trophies: Array = [] # [{id, path, unlocked_icon, locked_icon, name, unlocked, description}]
 var current_index: int = -1
 
 var _drag_active := false
@@ -71,15 +71,22 @@ func load_trophies():
 				# Expect a Trophy resource with fields: id, trophy_name, description, unlocked_icon
 				var id: String = str(trophy_res.id) if str(trophy_res.id) != "" else file_name.get_basename()
 				var display: String = str(trophy_res.trophy_name) if str(trophy_res.trophy_name) != "" else id.replace("_", " ").capitalize()
-				var tex: Texture2D = trophy_res.unlocked_icon
 				var unlocked := false
 				if typeof(PlayerManager.player_data) == TYPE_DICTIONARY:
 					var unlocked_list: Array = PlayerManager.player_data.get("unlocks", {}).get("trophies", [])
 					unlocked = unlocked_list.has(id)
-				var item = {"id": id, "path": path, "texture": tex, "name": display, "unlocked": unlocked, "description": str(trophy_res.description)}
+				
+				var unlocked_icon = trophy_res.unlocked_icon
+				var locked_icon = trophy_res.get("locked_icon", null) # Safely get locked_icon
+
+				var display_icon = unlocked_icon if unlocked else locked_icon
+				if display_icon == null: # Fallback for missing locked_icon
+					display_icon = unlocked_icon
+
+				var item = {"id": id, "path": path, "unlocked_icon": unlocked_icon, "locked_icon": locked_icon, "name": display, "unlocked": unlocked, "description": str(trophy_res.description)}
 				var idx = trophies.size()
 				trophies.append(item)
-				_add_thumbnail(trophy_grid, tex, display, unlocked, func():
+				_add_thumbnail(trophy_grid, display_icon, display, unlocked, func():
 					_open_viewer(idx)
 				)
 		file_name = dir.get_next()
@@ -96,8 +103,6 @@ func _add_thumbnail(container: GridContainer, tex: Texture2D, label_text: String
 	thumb.custom_minimum_size = Vector2(128, 128)
 	thumb.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	thumb.mouse_filter = Control.MOUSE_FILTER_STOP
-	if not unlocked:
-		thumb.modulate = Color(0.6, 0.6, 0.6, 1.0)
 	thumb.gui_input.connect(func(event):
 		if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 			on_click.call()
@@ -126,8 +131,13 @@ func _update_viewer():
 		return
 	if current_index >= 0 and current_index < trophies.size():
 		var item = trophies[current_index]
-		viewer_image.texture = item["texture"]
 		var unlocked := bool(item.get("unlocked", false))
+		
+		var display_icon = item["unlocked_icon"] if unlocked else item["locked_icon"]
+		if display_icon == null:
+			display_icon = item["unlocked_icon"]
+		
+		viewer_image.texture = display_icon
 		var status_text := ("UNLOCKED" if unlocked else "LOCKED")
 		viewer_label.text = item["name"]
 		if viewer_desc != null:

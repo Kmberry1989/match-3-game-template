@@ -1,13 +1,16 @@
-[gd_resource type="Resource" script_class="Achievement" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="Achievement" load_steps=5 format=3 uid="uid://dhsf8gxntoj38"]
 
-[ext_resource type="Script" path="res://addons/milestone/scripts/achievements/achievement.gd" id="1"]
-[ext_resource type="Texture2D" path="res://Assets/Trophies/trophy_firstchapter.png" id="2"]
+[ext_resource type="Script" uid="uid://dtyojmellf4e5" path="res://addons/milestone/scripts/achievements/achievement.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://cg3b84ak8bsrv" path="res://addons/milestone/icons/hidden_achievement.svg" id="1_xfdrr"]
+[ext_resource type="Texture2D" uid="uid://bbqgvxygeuxj7" path="res://Assets/Trophies/trophy_firstchapter.png" id="2"]
+[ext_resource type="Texture2D" uid="uid://dwydcqyn5n86f" path="res://Assets/Trophies/trophy_firstchapter_locked.png" id="4_npu7j"]
 
 [resource]
 script = ExtResource("1")
 id = "first_chapter"
 icon = ExtResource("2")
+unachieved_icon = ExtResource("4_npu7j")
 name = "First Chapter"
 description = "Reach Level 2."
-progressive = false
-
+considered_rare = true
+progress_goal = 1.0

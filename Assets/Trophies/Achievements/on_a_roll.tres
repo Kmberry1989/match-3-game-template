@@ -1,15 +1,17 @@
-[gd_resource type="Resource" script_class="Achievement" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="Achievement" load_steps=5 format=3 uid="uid://cxhfsmfplsnjw"]
 
-[ext_resource type="Script" path="res://addons/milestone/scripts/achievements/achievement.gd" id="1"]
-[ext_resource type="Texture2D" path="res://Assets/Trophies/trophy_onaroll.png" id="2"]
+[ext_resource type="Script" uid="uid://dtyojmellf4e5" path="res://addons/milestone/scripts/achievements/achievement.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://cg3b84ak8bsrv" path="res://addons/milestone/icons/hidden_achievement.svg" id="1_1sn1p"]
+[ext_resource type="Texture2D" uid="uid://bc1b53jlgp6n0" path="res://Assets/Trophies/trophy_onaroll.png" id="2"]
+[ext_resource type="Texture2D" uid="uid://lu7paaygusqb" path="res://Assets/Trophies/trophy_onaroll_locked.png" id="4_8p4gg"]
 
 [resource]
 script = ExtResource("1")
 id = "on_a_roll"
 icon = ExtResource("2")
+unachieved_icon = ExtResource("4_8p4gg")
 name = "On a Roll"
 description = "Reach a combo of 10."
+considered_rare = true
 progressive = true
-progress_goal = 10
-indicate_progress_interval = 1
-
+progress_goal = 10.0

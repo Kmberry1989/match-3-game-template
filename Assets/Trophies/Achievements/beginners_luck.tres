@@ -1,13 +1,16 @@
-[gd_resource type="Resource" script_class="Achievement" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="Achievement" load_steps=5 format=3 uid="uid://e0rgp2fmmsao"]
 
-[ext_resource type="Script" path="res://addons/milestone/scripts/achievements/achievement.gd" id="1"]
-[ext_resource type="Texture2D" path="res://Assets/Trophies/trophy_beginnersluck.png" id="2"]
+[ext_resource type="Script" uid="uid://dtyojmellf4e5" path="res://addons/milestone/scripts/achievements/achievement.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://cg3b84ak8bsrv" path="res://addons/milestone/icons/hidden_achievement.svg" id="1_ppx3q"]
+[ext_resource type="Texture2D" uid="uid://b0na5vsa43atw" path="res://Assets/Trophies/trophy_beginnersluck.png" id="2"]
+[ext_resource type="Texture2D" uid="uid://0weatd134msa" path="res://Assets/Trophies/trophy_beginnersluck_locked.png" id="4_n3x74"]
 
 [resource]
 script = ExtResource("1")
 id = "beginners_luck"
 icon = ExtResource("2")
+unachieved_icon = ExtResource("4_n3x74")
 name = "Beginner's Luck"
 description = "Complete your first match."
-progressive = false
-
+considered_rare = true
+progress_goal = 1.0

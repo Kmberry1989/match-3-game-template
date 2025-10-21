@@ -1,15 +1,17 @@
-[gd_resource type="Resource" script_class="Achievement" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="Achievement" load_steps=5 format=3 uid="uid://cw3puhl315vqr"]
 
-[ext_resource type="Script" path="res://addons/milestone/scripts/achievements/achievement.gd" id="1"]
-[ext_resource type="Texture2D" path="res://Assets/Trophies/trophy_frequentflyer.png" id="2"]
+[ext_resource type="Script" uid="uid://dtyojmellf4e5" path="res://addons/milestone/scripts/achievements/achievement.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://cg3b84ak8bsrv" path="res://addons/milestone/icons/hidden_achievement.svg" id="1_fpegy"]
+[ext_resource type="Texture2D" uid="uid://bby8l674u7rpg" path="res://Assets/Trophies/trophy_frequentflyer.png" id="2"]
+[ext_resource type="Texture2D" uid="uid://dpk075p2p1u2" path="res://Assets/Trophies/trophy_frequentflyer_locked.png" id="4_gtuee"]
 
 [resource]
 script = ExtResource("1")
 id = "frequent_flyer"
 icon = ExtResource("2")
+unachieved_icon = ExtResource("4_gtuee")
 name = "Frequent Flyer"
-description = "Play the bonus slot 5 times."
+description = "Play the Meaner Matcher Machine 5 times."
+considered_rare = true
 progressive = true
-progress_goal = 5
-indicate_progress_interval = 1
-
+progress_goal = 5.0

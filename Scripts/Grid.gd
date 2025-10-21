@@ -632,7 +632,7 @@ func _apply_specials_and_collect(groups: Array) -> Array:
         var orient: String = g["orientation"]
         if pos.size() >= 5:
             # Create a wildcard in the center of the run; exclude it from matching now
-            var mid_index: int = int(pos.size() / 2)
+            var mid_index: int = pos.size() >> 1
             var p: Vector2i = pos[mid_index]
             var d = all_dots[p.x][p.y]
             if d != null:
@@ -858,7 +858,7 @@ func find_matches_after_refill():
         destroy_timer.start()
 
 func _on_idle_timer_timeout():
-    # After short inactivity, gently hint a valid move by making that trio yawn.
+    # After short inactivity, gently hint a valid move by making that
     # No reshuffle here; this is just a suggestion.
     var group = find_potential_match_group()
     if group.size() >= 3:

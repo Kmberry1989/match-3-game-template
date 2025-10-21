@@ -1,15 +1,18 @@
-[gd_resource type="Resource" script_class="Achievement" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="Achievement" load_steps=5 format=3 uid="uid://c7iasu1dqitet"]
 
-[ext_resource type="Script" path="res://addons/milestone/scripts/achievements/achievement.gd" id="1"]
-[ext_resource type="Texture2D" path="res://Assets/Trophies/trophy_ontheboard.png" id="2"]
+[ext_resource type="Script" uid="uid://dtyojmellf4e5" path="res://addons/milestone/scripts/achievements/achievement.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://cg3b84ak8bsrv" path="res://addons/milestone/icons/hidden_achievement.svg" id="1_qn1a5"]
+[ext_resource type="Texture2D" uid="uid://cmj8vycdbri7l" path="res://Assets/Trophies/trophy_ontheboard.png" id="2"]
+[ext_resource type="Texture2D" uid="uid://t2irbakde2f7" path="res://Assets/Trophies/trophy_ontheboard_locked.png" id="4_btso8"]
 
 [resource]
 script = ExtResource("1")
 id = "on_the_board"
 icon = ExtResource("2")
+unachieved_icon = ExtResource("4_btso8")
 name = "On the Board"
 description = "Clear 100 dots."
+considered_rare = true
 progressive = true
-progress_goal = 100
-indicate_progress_interval = 10
-
+progress_goal = 100.0
+indicate_progress_interval = 10.0

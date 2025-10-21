@@ -26,6 +26,20 @@ func _ready() -> void:
         WebSocketClient.room_joined.connect(_on_room_joined)
         WebSocketClient.start_game.connect(_on_start_game)
 
+    var return_button = Button.new()
+    return_button.text = "Return to Main Menu"
+    $Panel/VBox.add_child(return_button)
+    return_button.pressed.connect(_on_return_to_menu_pressed)
+
+func _on_return_to_menu_pressed():
+    if _joined:
+        WebSocketClient.leave_room()
+    
+    if WebSocketClient.is_ws_connected():
+        WebSocketClient.disconnect_from_server()
+
+    get_tree().change_scene_to_file("res://Scenes/Menu.tscn")
+
 func _wire_buttons() -> void:
     btn_create.pressed.connect(_on_create)
     btn_join.pressed.connect(_on_join)
@@ -78,8 +92,8 @@ func _on_start() -> void:
     var m := mode_opt.get_selected_id()
     var mode := ("vs" if m == 1 else "coop")
     var target := int(target_spin.value)
-    var seed := int(Time.get_unix_time_from_system())
-    WebSocketClient.request_start_game({"mode": mode, "target": target, "seed": seed})
+    var seed_value := int(Time.get_unix_time_from_system())
+    WebSocketClient.request_start_game({"mode": mode, "target": target, "seed": seed_value})
     status_label.text = "Starting (" + mode + ")..."
 
 func _on_room_created(code: String) -> void:

@@ -166,6 +166,7 @@ func _ready():
 		firebase.Auth.logged_out.connect(Callable(self, "_update_logout_visibility"))
 
 func _on_offline_button_pressed():
+	print("[Menu.gd] Play button pressed.")
 	AudioManager.play_sound("ui_click")
 	_start_game()
 
@@ -186,9 +187,31 @@ func _on_multiplayer_button_pressed():
 	get_tree().change_scene_to_file("res://Scenes/MultiplayerLobby.tscn")
 
 func _start_game():
+	print("[Menu.gd] _start_game: Stopping music and playing sound.")
 	AudioManager.stop_music()
 	AudioManager.play_sound("game_start")
+	
+	print("[Menu.gd] _start_game: Creating temporary loading scene with script.")
+	var loading_scene = Node.new()
+	loading_scene.name = "TempLoadingScene"
+	
+	# Add a script to the loading scene to handle the next scene load
+	var loader_script = GDScript.new()
+	loader_script.source_code = """
+extends Node
+func _ready():
+	print("[TempLoadingScene] _ready: Ready to load game scene.")
+	call_deferred("load_the_game")
+
+func load_the_game():
+	print("[TempLoadingScene] load_the_game: Changing scene to Game.tscn.")
 	get_tree().change_scene_to_file("res://Scenes/Game.tscn")
+"""
+	loading_scene.set_script(loader_script)
+	
+	# The old scene will be freed when this is set
+	get_tree().root.add_child(loading_scene)
+	get_tree().current_scene = loading_scene
 
 func _update_logout_visibility():
 	var logout_visible = false
