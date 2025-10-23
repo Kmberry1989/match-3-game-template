@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://dqxg1qtahm5my"]
 
-[ext_resource type="PackedScene" path="res://Scenes/Dot.tscn" id="2"]
-[ext_resource type="Texture2D" path="res://Assets/Dots/kyleavatar.png" id="2_vvr5v"]
+[ext_resource type="PackedScene" uid="uid://d0bsiknlebs18" path="res://Scenes/Dot.tscn" id="2"]
+[ext_resource type="Texture2D" uid="uid://we5cv67ql8pn" path="res://Assets/Dots/kyleavatar.png" id="2_vvr5v"]
 
 [node name="green_dot" instance=ExtResource("2")]
 position = Vector2(1, 0)

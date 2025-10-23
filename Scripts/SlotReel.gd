@@ -1,6 +1,7 @@
 extends Control
 
 signal spin_finished
+signal spin_ready
 
 @export var images: Array[Texture2D] = []
 @export var rows_visible: int = 3
@@ -14,6 +15,7 @@ var _anim: AnimationPlayer
 var _tiles: Array = []
 var _extra_tiles: int = 0
 var _height: int = 0
+var _finishing: bool = false
 
 func setup_reel(p_images: Array, p_rows_visible: int, p_tile_size: Vector2i, p_spin_up: float) -> void:
 	images = p_images
@@ -61,7 +63,8 @@ func _assign_random_texture(spr: Sprite2D) -> void:
 	spr.set_meta("idx", idx)
 	spr.scale = Vector2(float(tile_size.x) / max(1.0, float(spr.texture.get_width())), float(tile_size.y) / max(1.0, float(spr.texture.get_height())))
 
-func start_spin(runtime_s: float, speed_tiles_per_sec: float, delay_s: float = 0.0) -> void:
+func start_spin(runtime_s: float, speed_tiles_per_sec: float, delay_s: float = 0.0, fast_stop: bool = false, pause_before_stop: bool = false) -> void:
+	# delay before starting this reel (staggering)
 	await get_tree().create_timer(max(delay_s, 0.0)).timeout
 	await _spin_up()
 	var moves: int = int(round(runtime_s * speed_tiles_per_sec))
@@ -69,7 +72,28 @@ func start_spin(runtime_s: float, speed_tiles_per_sec: float, delay_s: float = 0
 	for _i in range(moves):
 		await _step_down(step_time)
 		_wrap_and_randomize_if_needed()
-	await _spin_down()
+	# If requested, pause at the final frame and signal readiness to finish.
+	if pause_before_stop:
+		# Leave the reel visually at its last frame and notify controller to finish
+		print("SlotReel: pausing before final frame, emitting spin_ready")
+		emit_signal("spin_ready")
+		return
+	# Otherwise, perform a normal spin down to stop and emit finished
+	if fast_stop:
+		await _spin_down_fast()
+	else:
+		await _spin_down()
+	emit_signal("spin_finished")
+
+func finish_stop(fast_stop: bool = false) -> void:
+	# Perform the final stopping animation (idempotent)
+	if _finishing:
+		return
+	_finishing = true
+	if fast_stop:
+		await _spin_down_fast()
+	else:
+		await _spin_down()
 	emit_signal("spin_finished")
 
 func _spin_up() -> void:
@@ -112,6 +136,27 @@ func _spin_down() -> void:
 		lib.remove_animation("spin_down")
 	lib.add_animation("spin_down", anim)
 	_anim.play("spin_down")
+	await _anim.animation_finished
+	_canvas.position.y = 0.0
+
+func _spin_down_fast() -> void:
+	# Shorter, snappier stop animation for immediate-feel stops
+	var anim := Animation.new()
+	anim.resource_name = "spin_down_fast"
+	var t := anim.add_track(Animation.TYPE_VALUE)
+	anim.track_set_path(t, NodePath("Canvas:position:y"))
+	var y0 := _canvas.position.y
+	anim.track_insert_key(t, 0.0, y0)
+	anim.track_insert_key(t, 0.12, y0 + 20.0)
+	anim.track_insert_key(t, 0.25, 0.0)
+	var lib: AnimationLibrary = _anim.get_animation_library("")
+	if lib == null:
+		lib = AnimationLibrary.new()
+		_anim.add_animation_library("", lib)
+	if lib.has_animation("spin_down_fast"):
+		lib.remove_animation("spin_down_fast")
+	lib.add_animation("spin_down_fast", anim)
+	_anim.play("spin_down_fast")
 	await _anim.animation_finished
 	_canvas.position.y = 0.0
 

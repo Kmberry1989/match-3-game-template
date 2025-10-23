@@ -1,8 +1,13 @@
 extends Node
 
 @onready var trophy_notification = $CanvasLayer/TrophyNotification
+var dot_pool
 
 func _ready():
+	dot_pool = load("res://Scripts/DotPool.gd").new()
+	dot_pool.name = "DotPool"
+	add_child(dot_pool)
+
 	print("[Game.gd] _ready: Starting.")
 	PlayerManager.trophy_unlocked.connect(_on_trophy_unlocked)
 	# Autoload singletons are available as globals; no Engine.has_singleton check needed

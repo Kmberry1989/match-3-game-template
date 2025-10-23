@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://cfton0l441d1y"]
 
-[ext_resource type="PackedScene" path="res://Scenes/Dot.tscn" id="2"]
-[ext_resource type="Texture2D" path="res://Assets/Dots/bethanyavatar.png" id="2_mfcef"]
+[ext_resource type="PackedScene" uid="uid://d0bsiknlebs18" path="res://Scenes/Dot.tscn" id="2"]
+[ext_resource type="Texture2D" uid="uid://c65javtrmx01k" path="res://Assets/Dots/bethanyavatar.png" id="2_mfcef"]
 
 [node name="yellow_dot" instance=ExtResource("2")]
 color = "yellow"

@@ -40,7 +40,17 @@ func _ready():
 			var local = SaveManager.load_player()
 			if typeof(local) == TYPE_DICTIONARY and local.size() > 0:
 				player_data = local
+		# Continue: wire AchievementManager if present so achievements forward to trophy unlocks
+		if Engine.has_singleton("AchievementManager") or (typeof(AchievementManager) != TYPE_NIL):
+			# Connect achievement_unlocked -> unlock_trophy using a small wrapper to avoid signature mismatch
+			if not AchievementManager.is_connected("achievement_unlocked", Callable(self, "_on_achievement_unlocked")):
+				AchievementManager.connect("achievement_unlocked", Callable(self, "_on_achievement_unlocked"))
 		return
+
+func _on_achievement_unlocked(achievement_id: String) -> void:
+	# Forward achievement id to trophy system. PlayerManager.unlock_trophy will attempt to resolve
+	# a matching trophy resource (either in Assets/Trophies or the milestone achievements path)
+	unlock_trophy(achievement_id)
 
 func load_player_data(user_info):
 	if firebase == null:
@@ -147,7 +157,9 @@ func _show_xp_conversion_animation():
 	layer.add_child(icon)
 
 	if AudioManager != null:
-		AudioManager.play_sound("coin.ogg")
+		# Use the coin key registered by AudioManager (fallback handled there)
+		if AudioManager.has_method("play_sound"):
+			AudioManager.play_sound("coin")
 
 	var tween = create_tween()
 	tween.set_parallel(true)
@@ -210,8 +222,21 @@ signal trophy_unlocked(trophy_resource)
 func unlock_trophy(trophy_id):
 	if not trophy_id in player_data["unlocks"]["trophies"]:
 		player_data["unlocks"]["trophies"].append(trophy_id)
+		# Try loading a trophy resource from the standard trophies folder first.
 		var trophy_resource = load("res://Assets/Trophies/" + trophy_id + ".tres")
-		emit_signal("trophy_unlocked", trophy_resource)
+		# Fallback: some achievement resources live under the milestone achievements path
+		if trophy_resource == null and ProjectSettings.has_setting("milestone/general/achievements_path"):
+			var alt_path = ProjectSettings.get_setting("milestone/general/achievements_path").path_join(trophy_id + ".tres")
+			trophy_resource = load(alt_path)
+		if trophy_resource == null:
+			# Resource couldn't be found; log (debug only) and still emit signal with null so listeners can handle it.
+			if ProjectSettings.get_setting("milestone/debug/print_errors") == true and OS.is_debug_build():
+				push_error("[PlayerManager] Could not find trophy resource for '%s'" % trophy_id)
+			emit_signal("trophy_unlocked", null)
+		else:
+			emit_signal("trophy_unlocked", trophy_resource)
+		# Persist the unlock immediately
+		save_player_data()
 
 func set_current_frame(frame_name):
 	player_data["current_frame"] = frame_name

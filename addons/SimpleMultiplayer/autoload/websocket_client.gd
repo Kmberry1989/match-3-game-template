@@ -4,13 +4,14 @@ signal connection_succeeded
 signal connection_failed
 signal disconnected
 signal room_created(code)
-signal room_joined(code, player_id)
+signal room_joined(code, player_id, is_host)
 signal room_state(players)
 signal player_joined(player_id)
 signal player_left(player_id)
 signal start_game(payload)
 signal message_received(msg)
 signal game_event(payload)
+signal waiting_for_match
 
 var url: String = ""
 var _peer: WebSocketPeer
@@ -68,7 +69,10 @@ func _handle_message(msg: Dictionary) -> void:
 		"room_joined":
 			_room_code = String(msg.get("code", ""))
 			_player_id = String(msg.get("id", _player_id))
-			emit_signal("room_joined", _room_code, _player_id)
+			var is_host := bool(msg.get("is_host", false))
+			emit_signal("room_joined", _room_code, _player_id, is_host)
+		"waiting_for_match":
+			emit_signal("waiting_for_match")
 		"room_state":
 			var players = msg.get("players", [])
 			emit_signal("room_state", players)
@@ -97,6 +101,9 @@ func create_room(code: String = "") -> void:
 
 func join_room(code: String) -> void:
 	_send({"type": "join_room", "code": code})
+
+func find_match() -> void:
+	_send({"type": "find_match"})
 
 func leave_room() -> void:
 	_send({"type": "leave_room"})

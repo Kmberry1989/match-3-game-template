@@ -16,7 +16,7 @@ signal match_faded(global_pos, color_name)
 
 var pulse_tween: Tween = null
 var float_tween: Tween = null
-var shadow: Sprite2D = null
+var shadow: Sprite2D = null # Godot 4
 
 # Whether an XP orb has already been spawned for this dot in the current match.
 var orb_spawned: bool = false
@@ -69,6 +69,20 @@ var color_to_pulse_duration = {
 
 var mouse_inside = false
 
+# --- FIX for "zombie" async functions ---
+var _is_active: bool = true
+
+var _tweens: Array[Tween] = []
+
+func create_tracked_tween() -> Tween:
+	var tween := create_tween()
+	tween.finished.connect(func():
+		if _tweens.has(tween):
+			_tweens.erase(tween)
+	)
+	_tweens.append(tween)
+	return tween
+
 func _ready():
 	load_textures()
 	# Adjust dot scale based on texture size so in-game size stays consistent
@@ -81,27 +95,89 @@ func _ready():
 	create_shadow()
 	setup_blink_timer()
 	setup_wildcard_timer()
-	start_floating()
-	start_pulsing()
 	
-	var area = Area2D.new()
-	add_child(area)
-	area.connect("mouse_entered", Callable(self, "_on_mouse_entered"))
-	area.connect("mouse_exited", Callable(self, "_on_mouse_exited"))
+	# Set initial scale
+	sprite.scale = PULSE_SCALE_MIN * scale_multiplier
+	
+	# Start animations
+	activate_animations()
+	
+	# Create input detection area only in the editor for debugging overlays.
+	if Engine.is_editor_hint():
+		var area = Area2D.new()
+		add_child(area)
+		area.mouse_entered.connect(_on_mouse_entered) # Godot 4
+		area.mouse_exited.connect(_on_mouse_exited) # Godot 4
 
 	# Wait for the sprite texture to be loaded
 	await get_tree().process_frame
 
 	var texture = sprite.texture
-	if texture:
+	if texture and Engine.is_editor_hint():
 		var collision_shape = CollisionShape2D.new()
 		var square_shape = RectangleShape2D.new()
 		var max_dimension = max(texture.get_width(), texture.get_height())
 		var target_scale = max(PULSE_SCALE_MAX.x, PULSE_SCALE_MAX.y) * scale_multiplier
 		var side_length = max_dimension * target_scale
-		square_shape.size = Vector2(side_length, side_length)
+		square_shape.size = Vector2(side_length, side_length) # Godot 4
 		collision_shape.shape = square_shape
-		area.add_child(collision_shape)
+		# `area` exists only in editor hint branch above
+		if has_node("Area2D"):
+			get_node("Area2D").add_child(collision_shape)
+
+# This function is called by DotPool.gd when the dot is returned to the pool
+func reset():
+	_is_active = false
+	
+	# --- FIX for "Zombie" Tweens (Godot 4) ---
+	# This kills all tweens bound to this node, solving the scale bug
+	for tween in _tweens:
+		if is_instance_valid(tween):
+			tween.kill()
+	_tweens.clear()
+	# ----------------------------------------
+	
+	# Stop timers
+	blink_timer.stop()
+	wildcard_timer.stop()
+
+	# Null out refs
+	pulse_tween = null
+	float_tween = null
+
+	# Reset state variables
+	matched = false
+	orb_spawned = false
+	is_wildcard = false
+	set_normal_texture()
+	
+	# Reset visual properties
+	self.modulate = Color(1, 1, 1, 1)
+	self.scale = Vector2(1, 1) # CRITICAL: Reset Node2D scale
+	sprite.scale = PULSE_SCALE_MIN * scale_multiplier # Reset sprite scale
+	sprite.position = Vector2.ZERO
+	mouse_inside = false
+	self.visible = false # Hide for the pool
+
+# This function is called by Grid.gd *after* add_child()
+func activate_animations():
+	_is_active = true
+	
+	# Ensure we are in the tree before creating tweens
+	if not is_inside_tree():
+		await get_tree().process_frame
+		if not is_inside_tree():
+			push_error("Dot: Cannot activate animations, node is not in scene tree.")
+			return
+			
+	# Start fresh animations
+	start_floating()
+	start_pulsing()
+	
+	# Start timers
+	if is_inside_tree():
+		blink_timer.start(randf_range(4.0, 12.0))
+
 
 func _process(_delta):
 	if mouse_inside:
@@ -109,8 +185,8 @@ func _process(_delta):
 
 func _on_mouse_entered():
 	mouse_inside = true
-	if pulse_tween:
-		pulse_tween.kill()
+	if is_instance_valid(pulse_tween): 
+		pulse_tween.kill() 
 	
 	# Set scale to the largest size from the pulse animation
 	sprite.scale = PULSE_SCALE_MAX * scale_multiplier
@@ -124,7 +200,8 @@ func _on_mouse_exited():
 
 func play_surprised_animation():
 	if animation_state == "normal":
-		AudioManager.play_sound("surprised")
+		if typeof(AudioManager) != TYPE_NIL:
+			AudioManager.play_sound("surprised")
 		animation_state = "surprised"
 		sprite.texture = surprised_texture
 
@@ -133,17 +210,28 @@ func play_drag_sad_animation():
 	sprite.texture = sad_texture
 
 func move(new_position, duration := 0.2):
-	var tween = get_tree().create_tween()
+	if not is_inside_tree():
+		return
+	var tween = create_tracked_tween() # <-- FIX: Use node-bound tween
+	if not is_instance_valid(tween): return
+	
 	tween.tween_property(self, "position", new_position, duration).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	return tween
 
 func play_match_animation(delay):
-	var tween = get_tree().create_tween()
+	if not is_inside_tree():
+		return
+	var tween = create_tracked_tween() # <-- FIX: Use node-bound tween
+	if not is_instance_valid(tween): return
+
 	tween.tween_interval(delay)
-	tween.tween_callback(Callable(self, "show_flash"))
-	tween.parallel().tween_property(self, "scale", scale * 1.5, 0.3).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	tween.tween_callback(show_flash) # Godot 4
+	
+	# Use explicit scale
+	tween.parallel().tween_property(self, "scale", Vector2(1.5, 1.5), 0.3).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	
 	tween.parallel().tween_property(self, "modulate:a", 0.0, 0.3).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	tween.finished.connect(Callable(self, "_on_match_fade_finished"))
+	tween.finished.connect(_on_match_fade_finished) # Godot 4
 
 func _on_match_fade_finished():
 	if not orb_spawned:
@@ -151,37 +239,49 @@ func _on_match_fade_finished():
 		emit_signal("match_faded", global_position, color)
 
 func show_flash():
-	var flash = Sprite2D.new()
+	if not is_inside_tree():
+		return
+	var flash = Sprite2D.new() # Godot 4
 	flash.texture = flash_texture
 	flash.centered = true
 	flash.modulate = Color(1,1,1,0.7)
 	add_child(flash)
-	var tween = get_tree().create_tween()
+	
+	# This tween is OK, as it's self-contained
+	var tween = create_tracked_tween() 
 	tween.tween_property(flash, "scale", Vector2(2,2), 0.3).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	tween.parallel().tween_property(flash, "modulate:a", 0.0, 0.3).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	tween.tween_callback(Callable(flash, "queue_free"))
+	await tween.finished
+	flash.queue_free() # Godot 4
 
 func play_sad_animation():
 	animation_state = "sad"
 	sprite.texture = sad_texture
 
 func play_surprised_for_a_second():
+	if not is_inside_tree():
+		return
 	if animation_state == "normal":
-		AudioManager.play_sound("surprised")
+		if typeof(AudioManager) != TYPE_NIL:
+			AudioManager.play_sound("surprised")
 		animation_state = "surprised"
 		sprite.texture = surprised_texture
 		var timer = get_tree().create_timer(1.0)
 		await timer.timeout
+		
+		# Check if we were pooled
+		if not _is_active: return
+		
 		if animation_state == "surprised":
 			set_normal_texture()
 
 func create_shadow():
-	shadow = Sprite2D.new()
+	shadow = Sprite2D.new() # Godot 4
 	var gradient = Gradient.new()
 	gradient.colors = [Color(0,0,0,0.4), Color(0,0,0,0)] # Black center, transparent edge
-	var gradient_tex = GradientTexture2D.new()
+	var gradient_tex = GradientTexture2D.new() # Godot 4
 	gradient_tex.gradient = gradient
-	gradient_tex.fill = GradientTexture2D.FILL_RADIAL
+	gradient_tex.fill = GradientTexture2D.FILL_RADIAL # Godot 4
 	gradient_tex.width = 64
 	gradient_tex.height = 64
 	shadow.texture = gradient_tex
@@ -219,16 +319,15 @@ func reset_to_normal_state():
 	set_normal_texture()
 
 func setup_blink_timer():
-	blink_timer.connect("timeout", Callable(self, "_on_blink_timer_timeout"))
-	blink_timer.set_one_shot(true)
+	blink_timer.timeout.connect(_on_blink_timer_timeout) # Godot 4
+	blink_timer.one_shot = true
 	add_child(blink_timer)
-	blink_timer.start(randf_range(4.0, 12.0))
 
 func setup_wildcard_timer():
 	add_child(wildcard_timer)
 	wildcard_timer.one_shot = false
 	wildcard_timer.wait_time = 0.12
-	wildcard_timer.connect("timeout", Callable(self, "_on_wildcard_tick"))
+	wildcard_timer.timeout.connect(_on_wildcard_tick) # Godot 4
 
 func _on_wildcard_tick():
 	if not is_wildcard:
@@ -264,36 +363,61 @@ func set_wildcard(enable: bool = true):
 		set_normal_texture()
 
 func start_floating():
-	if float_tween:
+	if is_instance_valid(float_tween): 
 		float_tween.kill()
-	float_tween = get_tree().create_tween()
+	
+	if not is_inside_tree():
+		return
+		
+	float_tween = create_tracked_tween() # <-- FIX: Use node-bound tween
+	if not is_instance_valid(float_tween): return
+	
+	float_tween.set_loops() 
 	float_tween.tween_property(sprite, "position:y", -5, 1.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	float_tween.tween_property(sprite, "position:y", 5, 1.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	float_tween.finished.connect(Callable(self, "start_floating"))
 
 func start_pulsing():
-	if pulse_tween:
+	if is_instance_valid(pulse_tween): 
 		pulse_tween.kill()
 
-	var pulse_duration = color_to_pulse_duration.get(color, 1.5) # Default to 1.5 if color not found
+	if not is_inside_tree():
+		return
 
-	pulse_tween = get_tree().create_tween()
+	var pulse_duration = color_to_pulse_duration.get(color, 1.5)
+
+	pulse_tween = create_tracked_tween() # <-- FIX: Use node-bound tween
+	if not is_instance_valid(pulse_tween): return
+	
+	pulse_tween.set_loops()
 	pulse_tween.tween_property(sprite, "scale", PULSE_SCALE_MAX * scale_multiplier, pulse_duration).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	pulse_tween.tween_property(sprite, "scale", PULSE_SCALE_MIN * scale_multiplier, pulse_duration).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	pulse_tween.finished.connect(Callable(self, "start_pulsing"))
 
 func _on_blink_timer_timeout():
+	# Check if we are still active and in the tree
+	if not is_inside_tree() or not _is_active:
+		return
+		
 	if animation_state == "normal":
 		animation_state = "blinking"
 		sprite.texture = blink_texture
 		await get_tree().create_timer(0.15).timeout
-		if animation_state == "blinking": # Ensure state wasn't changed by a higher priority animation
+		
+		# Check again after await
+		if not is_inside_tree() or not _is_active: 
+			return
+			
+		if animation_state == "blinking": # Ensure state wasn't changed
 			set_normal_texture()
 	
-	blink_timer.start(randf_range(4.0, 12.0))
+	# Restart timer
+	if is_inside_tree():
+		blink_timer.start(randf_range(4.0, 12.0))
 
 func play_idle_animation():
-	var current_time = Time.get_ticks_msec()
+	if not is_inside_tree():
+		return
+		
+	var current_time = Time.get_ticks_msec() # Godot 4
 	if current_time - last_yawn_time < YAWN_COOLDOWN:
 		return # Cooldown is active, so we do nothing.
 
@@ -305,33 +429,127 @@ func play_idle_animation():
 	sprite.texture = sleepy_texture
 	await get_tree().create_timer(0.5).timeout
 	
-	if animation_state == "idle": # Make sure we weren't interrupted
-		sprite.texture = yawn_texture
+	# Check if we were pooled or interrupted
+	if not is_inside_tree() or not _is_active or animation_state != "idle":
+		return
+		
+	sprite.texture = yawn_texture
+	if typeof(AudioManager) != TYPE_NIL:
 		AudioManager.play_sound("yawn")
+	
+	var original_pos = self.position
+	var original_shadow_scale = shadow.scale
+	var original_shadow_opacity = shadow.modulate.a
+	
+	# Stop looping animations
+	if is_instance_valid(pulse_tween): 
+		pulse_tween.kill()
+	if is_instance_valid(float_tween): 
+		float_tween.kill()
 		
-		var original_pos = self.position
-		var original_shadow_scale = shadow.scale
-		var original_shadow_opacity = shadow.modulate.a
-		
-		if pulse_tween:
-			pulse_tween.kill()
-		if float_tween:
-			float_tween.kill()
-			
-		var tween = get_tree().create_tween()
-		# Lift and inflate over 2 seconds
-		tween.parallel().tween_property(self, "position", original_pos + Vector2(0, -15), 2.0).set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_OUT)
-		tween.parallel().tween_property(sprite, "scale", (PULSE_SCALE_MIN * 1.5) * scale_multiplier, 2.0).set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_OUT)
-		tween.parallel().tween_property(shadow, "scale", original_shadow_scale * 2.5, 2.0).set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_OUT)
-		tween.parallel().tween_property(shadow, "modulate:a", 0.0, 2.0).set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_OUT)
-		await tween.finished
+	var tween = create_tracked_tween() # <-- FIX: Use node-bound tween
+	if not is_instance_valid(tween): return
+	
+	# Lift and inflate over 2 seconds
+	tween.parallel().tween_property(self, "position", original_pos + Vector2(0, -15), 2.0).set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_OUT)
+	tween.parallel().tween_property(sprite, "scale", (PULSE_SCALE_MIN * 1.5) * scale_multiplier, 2.0).set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_OUT)
+	tween.parallel().tween_property(shadow, "scale", original_shadow_scale * 2.5, 2.0).set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_OUT)
+	tween.parallel().tween_property(shadow, "modulate:a", 0.0, 2.0).set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_OUT)
+	await tween.finished
 
-		if animation_state == "idle":
-			var down_tween = get_tree().create_tween()
-			down_tween.parallel().tween_property(self, "position", original_pos, 1.0)
-			down_tween.parallel().tween_property(sprite, "scale", PULSE_SCALE_MIN * scale_multiplier, 1.0)
-			down_tween.parallel().tween_property(shadow, "scale", original_shadow_scale, 1.0)
-			down_tween.parallel().tween_property(shadow, "modulate:a", original_shadow_opacity, 1.0)
-			await down_tween.finished
-			set_normal_texture()
-			start_pulsing()
+	# Check again after await
+	if not is_inside_tree() or not _is_active or animation_state != "idle":
+		return
+
+	var down_tween = create_tracked_tween() # <-- FIX: Use node-bound tween
+	if not is_instance_valid(down_tween): return
+	
+	down_tween.parallel().tween_property(self, "position", original_pos, 1.0)
+	down_tween.parallel().tween_property(sprite, "scale", PULSE_SCALE_MIN * scale_multiplier, 1.0)
+	down_tween.parallel().tween_property(shadow, "scale", original_shadow_scale, 1.0)
+	down_tween.parallel().tween_property(shadow, "modulate:a", original_shadow_opacity, 1.0)
+	await down_tween.finished
+	
+	# Final check
+	if not is_inside_tree() or not _is_active:
+		return
+		
+	set_normal_texture()
+	# Restart looping animations
+	start_pulsing()
+	start_floating() 
+
+
+func start_surprised_jitter(jitter_time: float = 0.6, jitter_px: float = 4.0) -> void:
+	if not is_inside_tree():
+		return
+		
+	if animation_state == "surprised":
+		return
+	animation_state = "surprised"
+	if typeof(AudioManager) != TYPE_NIL:
+		AudioManager.play_sound("surprised")
+	var original_pos := self.position
+	var end_time: int = int(Time.get_ticks_msec() + int(jitter_time * 1000.0)) # Godot 4
+	
+	# Run a looping async jitter until time is up
+	while Time.get_ticks_msec() < end_time and is_inside_tree() and _is_active:
+		var dx := randf_range(-jitter_px, jitter_px)
+		var dy := randf_range(-jitter_px, jitter_px)
+		var t := create_tracked_tween() # <-- FIX: Use node-bound tween
+		if not is_instance_valid(t): break # Exit loop if tween creation fails
+		
+		t.tween_property(self, "position", original_pos + Vector2(dx, dy), 0.06).set_trans(Tween.TRANS_SINE)
+		await t.finished
+		
+		if not is_inside_tree() or not _is_active: return # Check after await
+		
+		var t2 := create_tracked_tween() # <-- FIX: Use node-bound tween
+		if not is_instance_valid(t2): break # Exit loop
+		
+		t2.tween_property(self, "position", original_pos + Vector2(dx * 0.25, dy * 0.25), 0.12).set_trans(Tween.TRANS_SINE)
+		await t2.finished
+		
+		if not is_inside_tree() or not _is_active: return # Check after await
+		
+	if not _is_active: return # Final check
+	
+	# Snap back to original position and remain surprised (eyes closed)
+	self.position = original_pos
+	# Keep surprised texture up; caller will control when to open eyes / reset
+	if sprite and surprised_texture:
+		sprite.texture = surprised_texture
+
+func forced_blink(duration: float = 2.0) -> void:
+	if not is_inside_tree():
+		return
+		
+	# Stop any ongoing blink timer to avoid interference.
+	if blink_timer != null and blink_timer.timeout.is_connected(_on_blink_timer_timeout):
+		blink_timer.stop()
+	
+	var end_time: int = int(Time.get_ticks_msec() + int(duration * 1000.0)) # Godot 4
+	
+	# Use a simple loop to show blink texture for brief moments over the duration
+	while Time.get_ticks_msec() < end_time and is_inside_tree() and _is_active:
+		# Close eyes briefly
+		sprite.texture = blink_texture
+		await get_tree().create_timer(0.12).timeout
+		
+		if not is_inside_tree() or not _is_active: return # Check after await
+		
+		# Open again unless we reached final moment
+		if Time.get_ticks_msec() + 150 < end_time:
+			sprite.texture = surprised_texture if animation_state == "surprised" else normal_texture
+			await get_tree().create_timer(0.28).timeout
+			
+			if not is_inside_tree() or not _is_active: return # Check after await
+			
+	if not _is_active: return # Final check
+	
+	# Final open eyes
+	set_normal_texture()
+	
+	# restart blink timer normally
+	if blink_timer != null and is_inside_tree():
+		blink_timer.start(randf_range(4.0, 12.0))

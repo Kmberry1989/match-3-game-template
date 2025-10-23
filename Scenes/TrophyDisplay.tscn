@@ -1,6 +1,6 @@
-[gd_scene load_steps=3 format=3 uid="uid://d1sp1ayamb02mpln"]
+[gd_scene load_steps=3 format=3 uid="uid://otvkft1b5r00"]
 
-[ext_resource path="res://Scripts/TrophyDisplay.gd" type="Script" id="1_abcde"]
+[ext_resource type="Script" uid="uid://c8bktqwhpmiod" path="res://Scripts/TrophyDisplay.gd" id="1_abcde"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0"]
 bg_color = Color(0.3, 0.3, 0.3, 0.5)

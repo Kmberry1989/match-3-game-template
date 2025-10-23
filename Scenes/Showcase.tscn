@@ -1,6 +1,6 @@
-[gd_scene load_steps=3 format=3 uid="uid://d1e2f3g4h5i6"]
+[gd_scene load_steps=2 format=3 uid="uid://d1e2f3g4h5i6"]
 
-[ext_resource path="res://Scripts/Showcase.gd" type="Script" id="1_abcde"]
+[ext_resource type="Script" uid="uid://1vd4adv6lq08" path="res://Scripts/Showcase.gd" id="1_abcde"]
 
 [node name="Showcase" type="Panel"]
 anchors_preset = 15
@@ -27,12 +27,14 @@ horizontal_alignment = 1
 [node name="TabContainer" type="TabContainer" parent="VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
+current_tab = 0
 
 [node name="Trophies" type="Control" parent="VBoxContainer/TabContainer"]
 layout_mode = 2
+metadata/_tab_index = 0
 
 [node name="Scroll" type="ScrollContainer" parent="VBoxContainer/TabContainer/Trophies"]
-layout_mode = 2
+layout_mode = 0
 size_flags_vertical = 3
 
 [node name="TrophyGrid" type="GridContainer" parent="VBoxContainer/TabContainer/Trophies/Scroll"]
@@ -41,10 +43,12 @@ size_flags_horizontal = 3
 columns = 4
 
 [node name="Frames" type="Control" parent="VBoxContainer/TabContainer"]
+visible = false
 layout_mode = 2
+metadata/_tab_index = 1
 
 [node name="Scroll" type="ScrollContainer" parent="VBoxContainer/TabContainer/Frames"]
-layout_mode = 2
+layout_mode = 0
 size_flags_vertical = 3
 
 [node name="FrameGrid" type="GridContainer" parent="VBoxContainer/TabContainer/Frames/Scroll"]
@@ -58,7 +62,7 @@ text = "Back"
 
 [node name="ViewerOverlay" type="ColorRect" parent="."]
 visible = false
-anchors_preset = 15
+layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
@@ -76,13 +80,13 @@ grow_vertical = 2
 
 [node name="VBox" type="VBoxContainer" parent="ViewerOverlay/Center"]
 layout_mode = 2
-alignment = 1
 size_flags_horizontal = 3
 size_flags_vertical = 3
+alignment = 1
 
 [node name="LargeImage" type="TextureRect" parent="ViewerOverlay/Center/VBox"]
-layout_mode = 2
 custom_minimum_size = Vector2(480, 480)
+layout_mode = 2
 expand_mode = 1
 stretch_mode = 6
 

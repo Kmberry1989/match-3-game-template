@@ -6,6 +6,8 @@ const wss = new WebSocketServer({ port: PORT });
 // Rooms: code -> { clients: Set(ws), ready: Set(ws), ids: Map(ws->id) }
 const rooms = new Map();
 let nextClientId = 1;
+const matchmakingQueue = [];
+const id_map = new Map();
 
 function send(ws, obj) {
   try { ws.send(JSON.stringify(obj)); } catch (_) {}
@@ -36,13 +38,36 @@ function roomOf(ws) {
 
 wss.on('connection', (ws) => {
   const id = String(nextClientId++);
+  id_map.set(ws, id);
   send(ws, { type: 'welcome', id });
 
   ws.on('message', (data) => {
     let msg = {};
     try { msg = JSON.parse(data.toString()); } catch (_) { return; }
     const t = msg.type;
-    if (t === 'create_room') {
+    if (t === 'find_match') {
+        matchmakingQueue.push(ws);
+        if (matchmakingQueue.length >= 2) {
+            const [player1, player2] = matchmakingQueue.splice(0, 2);
+            const code = genCode();
+            rooms.set(code, { clients: new Set([player1, player2]), ready: new Set(), ids: new Map() });
+            const room = rooms.get(code);
+            const id1 = id_map.get(player1);
+            const id2 = id_map.get(player2);
+            room.ids.set(player1, id1);
+            room.ids.set(player2, id2);
+
+            send(player1, { type: 'room_joined', code, id: id1, is_host: true });
+            send(player2, { type: 'room_joined', code, id: id2, is_host: false });
+            
+            const players = Array.from(room.ids.values());
+            send(player1, { type: 'room_state', players });
+            send(player2, { type: 'room_state', players });
+        } else {
+            send(ws, { type: 'waiting_for_match' });
+        }
+    }
+    else if (t === 'create_room') {
       let code = (msg.code || '').toString().toUpperCase();
       if (!code) {
         // generate unique 4-char code
@@ -114,6 +139,11 @@ wss.on('connection', (ws) => {
   });
 
   ws.on('close', () => {
+    const index = matchmakingQueue.indexOf(ws);
+    if (index > -1) {
+        matchmakingQueue.splice(index, 1);
+    }
+
     const [code, room] = roomOf(ws);
     if (!room) return;
     room.clients.delete(ws);

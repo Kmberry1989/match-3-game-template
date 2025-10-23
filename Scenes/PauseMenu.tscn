@@ -1,9 +1,8 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=2 format=3 uid="uid://by8jo7u8f4x2"]
 
-[ext_resource type="Script" path="res://Scripts/PauseMenu.gd" id="1"]
+[ext_resource type="Script" uid="uid://du6kfyrwmbtgm" path="res://Scripts/PauseMenu.gd" id="1"]
 
 [node name="PauseMenu" type="Control"]
-pause_mode = 2
 visible = false
 layout_mode = 3
 anchors_preset = 15
@@ -47,13 +46,12 @@ layout_mode = 2
 text = "Music"
 
 [node name="MusicSlider" type="HSlider" parent="Center/VBox/MusicVolume"]
+custom_minimum_size = Vector2(360, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 min_value = -60.0
 max_value = 0.0
 step = 0.5
-value = 0.0
-custom_minimum_size = Vector2(360, 0)
 
 [node name="MusicPercent" type="Label" parent="Center/VBox/MusicVolume"]
 layout_mode = 2
@@ -68,13 +66,12 @@ layout_mode = 2
 text = "Sound"
 
 [node name="SfxSlider" type="HSlider" parent="Center/VBox/SfxVolume"]
+custom_minimum_size = Vector2(360, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 min_value = -60.0
 max_value = 0.0
 step = 0.5
-value = 0.0
-custom_minimum_size = Vector2(360, 0)
 
 [node name="SfxPercent" type="Label" parent="Center/VBox/SfxVolume"]
 layout_mode = 2
@@ -113,4 +110,3 @@ text = "Buy Background 3 (20)"
 [node name="BuyBG4" type="Button" parent="Center/VBox/Shop"]
 layout_mode = 2
 text = "Buy Background 4 (20)"
-

@@ -45,6 +45,18 @@ func load_sounds():
 	sounds["match_chime"] = load("res://Assets/Sounds/match_chime.ogg")
 	sounds["match_fanfare"] = load("res://Assets/Sounds/match_fanfare.ogg")
 	sounds["dot_land"] = load("res://Assets/Sounds/dot_land.ogg")
+	# Coin SFX (optional in some builds)
+	var coin_path = "res://Assets/Sounds/coin.ogg"
+	if ResourceLoader.exists(coin_path):
+		var coin_res = load(coin_path)
+		if coin_res != null:
+			sounds["coin"] = coin_res
+		else:
+			# fallthrough: don't register if load failed
+			pass
+	else:
+		# no coin sound provided in this build; that's fine
+		pass
 	sounds["ui_click"] = load("res://Assets/Sounds/ui_click.ogg")
 	sounds["game_start"] = load("res://Assets/Sounds/game_start_swoosh.ogg")
 	sounds["yawn"] = load("res://Assets/Sounds/yawn.ogg")

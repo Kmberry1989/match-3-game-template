@@ -34,6 +34,8 @@ var _stop_targets: Array[int] = []
 var _reel_orders: Array = []
 var _awaiting_ack: bool = false
 var _post_ack_action: String = "close"  # "close" or "spin_again"
+var _reel_ready: Array = []
+var _next_to_finish: int = 0
 
 # Optional: manually assign textures per reel from the editor
 @export var apply_manual_textures_on_ready: bool = false
@@ -44,6 +46,12 @@ var _post_ack_action: String = "close"  # "close" or "spin_again"
 @export var use_placeholders_if_missing: bool = true
 @export var placeholder_save_dir: String = "user://bonus_slot_placeholders"
 @export var placeholder_overwrite_existing: bool = false
+@export var reel_stop_times: Array = [1.0, 1.5, 2.0] # seconds for reel 0,1,2 to stop
+@export var require_ack_for_result: bool = true
+
+# UX toggles
+@export var reels_layer_below_frame: bool = true
+@export var spin_button_offset: int = 40
 
 func _ready() -> void:
 	_layout_for_viewport()
@@ -63,23 +71,39 @@ func _ready() -> void:
 		if sid >= 0 and sid < SYMBOL_TEX.size() and SYMBOL_TEX[sid] != null:
 			_symbols[i]["tex"] = SYMBOL_TEX[sid]
 	_result_label = $Panel/VBox/ResultLabel as Label
-	_spin_button = $Panel/VBox/HBox/SpinButton as BaseButton
+	# Locate the spin button flexibly: try a root-level SpinButton first, then the legacy path,
+	# finally fall back to a recursive search by name so small layout edits won't break the script.
+	var found_spin: Node = get_node_or_null("SpinButton")
+	if found_spin == null:
+		found_spin = get_node_or_null("Panel/VBox/HBox/SpinButton")
+	if found_spin == null:
+		# Recursively search children for a node with the given name
+		found_spin = _find_node_by_name("SpinButton")
+	_spin_button = found_spin as BaseButton
+	# Ensure spin button signal is connected (defensive in case scene's saved connection was removed)
+	if _spin_button != null:
+		var btn_cb := Callable(self, "_on_SpinButton_pressed")
+		# Avoid double-connecting the same callable which causes an error
+		if not _spin_button.is_connected("pressed", btn_cb):
+			_spin_button.connect("pressed", btn_cb)
+	# --- initialize reels, glows and assets (must run in _ready) ---
 	_reels = [
-		$Panel/VBox/Reels/Reel1 as Control,
-		$Panel/VBox/Reels/Reel2 as Control,
-		$Panel/VBox/Reels/Reel3 as Control
+		get_node_or_null("Panel/ReelsLayer/Reels/Reel1") as Control,
+		get_node_or_null("Panel/ReelsLayer/Reels/Reel2") as Control,
+		get_node_or_null("Panel/ReelsLayer/Reels/Reel3") as Control
 	]
 	_glows = [
-		$Panel/VBox/Reels/Reel1/Glow as TextureRect,
-		$Panel/VBox/Reels/Reel2/Glow as TextureRect,
-		$Panel/VBox/Reels/Reel3/Glow as TextureRect
+		get_node_or_null("Panel/ReelsLayer/Reels/Reel1/Glow") as TextureRect,
+		get_node_or_null("Panel/ReelsLayer/Reels/Reel2/Glow") as TextureRect,
+		get_node_or_null("Panel/ReelsLayer/Reels/Reel3/Glow") as TextureRect
 	]
 	# Ensure glows overlay exactly the reel window
 	_align_glows_to_reels()
 	# Load any provided symbol_* textures before building reels so tiles use your art
 	_load_symbol_textures()
 	for r in _reels:
-		_build_reel(r)
+		if r != null:
+			_build_reel(r)
 	# Attach SlotReel behavior to each reel and configure textures
 	var reel_script = load("res://Scripts/SlotReel.gd")
 	var imgs: Array[Texture2D] = []
@@ -89,43 +113,51 @@ func _ready() -> void:
 			imgs.append(tex)
 	for i in range(_reels.size()):
 		var r = _reels[i]
+		if r == null:
+			continue
 		if r.get_script() == null:
 			r.set_script(reel_script)
 		if r.has_method("setup_reel"):
 			r.call("setup_reel", imgs, 3, _symbol_size, 180.0)
+		# Ensure the reel emits spin_finished and that we receive it. Some scene edits can remove
+		# saved signal connections so we connect here defensively.
 		if r.has_signal("spin_finished"):
 			var cb := Callable(self, "_on_slot_reel_finished").bind(i)
-			if not r.is_connected("spin_finished", cb):
-				r.connect("spin_finished", cb)
+			r.connect("spin_finished", cb)
+
+		# Connect spin_ready so we can pause before finishing and sequence stops
+		if r.has_signal("spin_ready"):
+			var ready_cb := Callable(self, "_on_slot_reel_ready").bind(i)
+			r.connect("spin_ready", ready_cb)
 	# If requested, apply editor-provided textures per reel (visual only)
 	_apply_manual_textures_from_exports()
 	_apply_assets()
-	_animate_in()
+	# remaining initialization continues below (already done earlier in this function)
 
-func _notification(what):
-	if what == NOTIFICATION_RESIZED:
-		if not is_inside_tree():
-			return
-		_layout_for_viewport()
-		_align_glows_to_reels()
+func _find_node_by_name(target_name: String) -> Node:
+	# Simple recursive search that mirrors the intent of find_node("name", true, false)
+	if target_name == "":
+		return null
+	# Check immediate children first
+	for c in get_children():
+		if typeof(c) == TYPE_OBJECT and c is Node:
+			if c.name == target_name:
+				return c
+			var found := _find_node_recursive(c, target_name)
+			if found != null:
+				return found
+	return null
 
-func _build_reel(reel: Control) -> void:
-	reel.clip_contents = true
-	reel.custom_minimum_size = Vector2(_symbol_size)
-	var track: VBoxContainer = VBoxContainer.new()
-	track.name = "Track"
-	track.position = Vector2.ZERO
-	track.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	track.size_flags_vertical = Control.SIZE_FILL
-	# Each symbol appears only once on the reel
-	var order: Array = _symbols.duplicate()
-	for s_idx in range(order.size()):
-		var tile: Control = _make_symbol_tile(order[s_idx])
-		track.add_child(tile)
-	track.add_child(_make_symbol_tile(_symbols[0]))
-	reel.add_child(track)
-	_reel_tracks.append(track)
-	_reel_orders.append(order)
+func _find_node_recursive(root: Node, target_name: String) -> Node:
+	for c in root.get_children():
+		if typeof(c) == TYPE_OBJECT and c is Node:
+			if c.name == target_name:
+				return c
+			var res := _find_node_recursive(c, target_name)
+			if res != null:
+				return res
+	return null
+
 
 func _make_symbol_tile(sym: Dictionary) -> Control:
 	var tile: Panel = Panel.new()
@@ -237,17 +269,66 @@ func _on_SpinButton_pressed() -> void:
 		return
 	_spinning = true
 	_reels_stopped = 0
+	# Prepare stops array so other code paths can read final indices safely
+	_stops.clear()
+	for i in range(_reels.size()):
+		_stops.append(0)
 	_result_label.text = ""
-	_spin_button.disabled = true
+	# Disable the spin button if we have it
+	if _spin_button != null:
+		_spin_button.disabled = true
+		# Ensure button label reflects active spin state (for plain Button types)
+		var _btn_reset: Button = _spin_button as Button
+		if _btn_reset != null:
+			_btn_reset.text = "SPIN"
 	if AudioManager != null:
 		AudioManager.play_sound("slot_spin")
-	var runtime := 4.0
-	var speed := 12.0
+	# Use exported per-reel stop times. Start all reels immediately (left->right)
+	# but request runtimes that cause them to stop at the desired times.
+	var speed := 14.0
+	# Protect reel_stop_times length
+	var stop_times: Array = reel_stop_times.duplicate()
+	while stop_times.size() < _reels.size():
+		stop_times.append(1.0)
 	for i in range(_reels.size()):
-		var delay := 0.15 * float(i)
 		var r = _reels[i]
-		if r.has_method("start_spin"):
-			r.call("start_spin", runtime, speed, delay)
+		if not r.has_method("start_spin"):
+			continue
+		var target_stop_time: float = float(stop_times[i])
+		# We use target_stop_time as the runtime param which the reel uses to determine
+		# how many tile steps to perform before stopping. fast_stop=true for snappy stops.
+		# pass pause_before_stop=true so the reel will pause at its final frame and emit spin_ready
+		r.call("start_spin", target_stop_time, speed, 0.0, true, true)
+	# Start a fallback timer to evaluate the result in case any reel fails to emit its signal.
+	# Fallback timeout: a bit longer than the longest configured reel stop time.
+	# Compute fallback: take the last configured stop time if possible, otherwise use default
+	var last_stop: float = 1.0
+	if reel_stop_times.size() > 0:
+		last_stop = float(reel_stop_times[reel_stop_times.size() - 1])
+	var fallback_sec: float = max(2.5, last_stop + 3.0)
+	var fb_timer := Timer.new()
+	fb_timer.one_shot = true
+	fb_timer.wait_time = fallback_sec
+	add_child(fb_timer)
+	fb_timer.timeout.connect(Callable(self, "_on_fallback_timer_timeout"))
+	fb_timer.start()
+	print("BonusSlot: started fallback timer (s=" + str(fallback_sec) + ")")
+
+	# Prepare sequencing state: no reel is ready yet, start from leftmost
+	_reel_ready.clear()
+	for i in range(_reels.size()):
+		_reel_ready.append(false)
+	_next_to_finish = 0
+
+func _on_fallback_timer_timeout() -> void:
+	# Called when fallback timer fires. If spin still active, evaluate current top values.
+	print("BonusSlot: fallback timer fired — evaluating result")
+	if _spinning:
+		# Force-stop spinning state so UI is re-enabled
+		_spinning = false
+		if _spin_button != null:
+			_spin_button.disabled = false
+		_evaluate_cascade_result()
 
 func _start_cascade_spin() -> void:
 	# Start each reel with a slight offset for cascade effect
@@ -288,13 +369,34 @@ func _on_reel_stopped(_reel_index: int) -> void:
 	_reels_stopped += 1
 	if _reels_stopped >= _reels.size():
 		_spinning = false
-		_spin_button.disabled = false
+		if _spin_button != null:
+			_spin_button.disabled = false
 		_evaluate_cascade_result()
 
 func _on_slot_reel_finished(index: int) -> void:
 	if AudioManager != null:
 		AudioManager.play_sound("slot_stop")
+	# Record what ended up at the top for this reel so legacy/result paths can use _stops
+	var top_idx: int = _get_top_from_reel(index)
+	if index >= 0 and index < _stops.size():
+		_stops[index] = int(top_idx)
+	print_debug("BonusSlot: reel %d finished, top index=%d" % [index, top_idx])
 	_on_reel_stopped(index)
+
+
+func _on_slot_reel_ready(index: int) -> void:
+	# A reel has paused at its last frame and is ready for the controller to finish it.
+	print_debug("BonusSlot: reel %d ready to finish" % [index])
+	if index < 0 or index >= _reels.size():
+		return
+	_reel_ready[index] = true
+	# If this is the next reel we expect to finish, command it immediately
+	while _next_to_finish < _reel_ready.size() and _reel_ready[_next_to_finish]:
+		# Ask this reel to perform its final stop
+		var r := _reels[_next_to_finish]
+		if r != null and r.has_method("finish_stop"):
+			r.call("finish_stop", true) # snappier final stop
+		_next_to_finish += 1
 
 func _current_top_index(reel_index: int) -> int:
 	var track: VBoxContainer = _reel_tracks[reel_index]
@@ -350,7 +452,10 @@ func _evaluate_cascade_result() -> void:
 		# Pause here for player input to acknowledge the result
 		_enter_result_ack(msg, "spin_again")
 	else:
-		_finish_after_delay()
+		if require_ack_for_result:
+			_enter_result_ack(msg, "close")
+		else:
+			_finish_after_delay()
 
 func _get_top_from_reel(i: int) -> int:
 	if i < 0 or i >= _reels.size():
@@ -405,7 +510,8 @@ func _spin_reel(reel: Control, stop_index: int, duration: float) -> void:
 
 func _evaluate_result() -> void:
 	_spinning = false
-	_spin_button.disabled = false
+	if _spin_button != null:
+		_spin_button.disabled = false
 	var ids: Array[int] = []
 	for i in range(3):
 		var idx: int = int(_stops[i])
@@ -451,8 +557,12 @@ func _evaluate_result() -> void:
 	if free_spin:
 		_enter_result_ack(msg, "spin_again")
 		return
-	
-	_finish_after_delay()
+
+	# If configured, require an explicit player acknowledgment to continue
+	if require_ack_for_result:
+		_enter_result_ack(msg, "close")
+	else:
+		_finish_after_delay()
 
 func _enter_result_ack(msg: String, next_action: String = "close") -> void:
 	_awaiting_ack = true
@@ -480,6 +590,11 @@ func _finish_from_player_ack() -> void:
 		# Start a new spin without closing the bonus overlay
 		_on_SpinButton_pressed()
 		return
+	# If action == "close", close the overlay and signal finished
+	if action == "close":
+		_finished = true
+		emit_signal("finished")
+		queue_free()
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not _awaiting_ack:
@@ -900,11 +1015,34 @@ func _finish_after_delay() -> void:
 	if _finished:
 		return
 	_finished = true
-	_spin_button.disabled = true
+	if _spin_button != null:
+		_spin_button.disabled = true
 	await get_tree().create_timer(3.0).timeout
 	await _animate_out()
 	emit_signal("finished")
 	queue_free()
+
+func _build_reel(reel: Control) -> void:
+	# Create a vertical track container and populate with symbol tiles
+	if reel == null:
+		return
+	reel.clip_contents = true
+	reel.custom_minimum_size = Vector2(_symbol_size)
+	var track: VBoxContainer = VBoxContainer.new()
+	track.name = "Track"
+	track.position = Vector2.ZERO
+	track.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	track.size_flags_vertical = Control.SIZE_FILL
+	# Each symbol appears only once on the reel
+	var order: Array = _symbols.duplicate()
+	for s_idx in range(order.size()):
+		var tile: Control = _make_symbol_tile(order[s_idx])
+		track.add_child(tile)
+	# add wrap tile matching first symbol
+	track.add_child(_make_symbol_tile(_symbols[0]))
+	reel.add_child(track)
+	_reel_tracks.append(track)
+	_reel_orders.append(order)
 
 func _layout_for_viewport() -> void:
 	# Compute responsive panel size and reel window size for portrait/landscape

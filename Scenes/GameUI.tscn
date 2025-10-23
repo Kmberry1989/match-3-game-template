@@ -100,13 +100,13 @@ scale = Vector2(1.1307645, 1.0135452)
 alignment = 1
 
 [node name="Score" type="Sprite2D" parent="MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame/VBox"]
-position = Vector2(46.98523, 32.151325)
+position = Vector2(44.332184, 36.09786)
 scale = Vector2(0.5842003, 0.57487595)
 texture = ExtResource("3_d8tla")
 
 [node name="PlayerAvatar" type="Sprite2D" parent="MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame/VBox"]
-position = Vector2(-90.59485, 31.094536)
-scale = Vector2(0.5622695, 0.5794463)
+position = Vector2(-90.209076, 32.08117)
+scale = Vector2(0.55562204, 0.5794463)
 texture = ExtResource("2_po7eo")
 
 [node name="LevelLabel" type="Label" parent="MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame"]
@@ -114,30 +114,30 @@ layout_mode = 1
 anchors_preset = -1
 anchor_top = 0.003
 anchor_bottom = 0.003
-offset_left = 4.127548
-offset_top = 80.80955
-offset_right = 144.97112
-offset_bottom = 103.80956
+offset_left = 1.1275482
+offset_top = 83.80957
+offset_right = 141.97112
+offset_bottom = 106.809586
 scale = Vector2(0.94435704, 0.79676557)
 text = "Level: 1"
 horizontal_alignment = 1
 
 [node name="XpLabel" type="Label" parent="MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame"]
 layout_mode = 0
-offset_left = -1.872467
-offset_top = 102.5696
-offset_right = 151.53607
-offset_bottom = 125.5696
+offset_left = -4.872467
+offset_top = 106.56961
+offset_right = 148.53607
+offset_bottom = 129.56961
 scale = Vector2(0.94435716, 0.7967657)
 text = "XP: 0/100"
 horizontal_alignment = 1
 
 [node name="CoinsLabel" type="Label" parent="MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame"]
 layout_mode = 0
-offset_left = 2.1275635
-offset_top = 122.56954
-offset_right = 142.9711
-offset_bottom = 145.56955
+offset_left = -0.8724365
+offset_top = 127.569534
+offset_right = 139.9711
+offset_bottom = 150.56955
 scale = Vector2(0.94435716, 0.7967657)
 text = "Coins: 0"
 horizontal_alignment = 1
@@ -145,10 +145,10 @@ horizontal_alignment = 1
 [node name="PlayerNameLabel" type="Label" parent="MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame"]
 top_level = true
 layout_mode = 0
-offset_left = 131.12752
-offset_top = 178.48953
-offset_right = 245.41786
-offset_bottom = 210.89366
+offset_left = 132.12752
+offset_top = 179.48953
+offset_right = 246.41786
+offset_bottom = 211.89366
 scale = Vector2(0.8911085, 0.7486824)
 text = "Player"
 horizontal_alignment = 1

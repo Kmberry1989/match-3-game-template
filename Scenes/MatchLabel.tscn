@@ -1,6 +1,6 @@
-[gd_scene load_steps=2 format=3 uid="uid://c6w2n3f8w2vj1"]
+[gd_scene load_steps=2 format=3 uid="uid://ds15ks10jdi5a"]
 
-[ext_resource type="Script" path="res://Scripts/MatchLabel.gd" id="1_abcde"]
+[ext_resource type="Script" uid="uid://ddigjx4yfhpjw" path="res://Scripts/MatchLabel.gd" id="1_abcde"]
 
 [node name="MatchLabel" type="Label"]
 anchors_preset = 8

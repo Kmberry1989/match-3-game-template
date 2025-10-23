@@ -176,7 +176,16 @@ func _on_shop_pressed() -> void:
 
 # MEANER METER: when filled, show the bonus slot
 func _on_meaner_meter_filled() -> void:
-	_show_bonus_slot()
+	# Instead of showing the BonusSlotMachine, trigger an in-place grid animation for now.
+	var root: Node = get_tree().get_current_scene()
+	if root == null:
+		return
+	var grid: Node = root.get_node_or_null("Grid")
+	if grid != null and grid.has_method("trigger_meaner_animation"):
+		grid.call_deferred("trigger_meaner_animation")
+	else:
+		# Fallback: if grid not found, still try to show the bonus slot
+		_show_bonus_slot()
 
 func _ensure_canvas_layer() -> CanvasLayer:
 	var root: Node = get_tree().get_current_scene()

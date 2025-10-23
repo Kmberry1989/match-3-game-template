@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://dbnhv6pbubsfu"]
+[gd_scene load_steps=15 format=3 uid="uid://dbnhv6pbubsfu"]
 
 [ext_resource type="Script" uid="uid://dusu1b8fqa6ob" path="res://Scripts/BonusSlotMachine.gd" id="1_5p4gk"]
 [ext_resource type="Texture2D" uid="uid://chus8isb6vr6w" path="res://Assets/BonusSlot/slot_frame.png" id="2_ub4sa"]
@@ -9,7 +9,11 @@
 [ext_resource type="Texture2D" uid="uid://dey41fblmkvqf" path="res://Assets/BonusSlot/symbol_col_clear.png" id="7_col"]
 [ext_resource type="Texture2D" uid="uid://u31503f2s5yv" path="res://Assets/BonusSlot/symbol_multiplier_2x.png" id="8_m2x"]
 [ext_resource type="Texture2D" uid="uid://casxv7k0h5vtd" path="res://Assets/BonusSlot/symbol_multiplier_3x.png" id="9_m3x"]
+[ext_resource type="Texture2D" uid="uid://v3xo56fjsnkq" path="res://Assets/BonusSlot/slot_button_spin.png" id="10_5l0bu"]
 [ext_resource type="Texture2D" uid="uid://dqtbme1dawj4h" path="res://Assets/BonusSlot/symbol_free_spin.png" id="10_free"]
+[ext_resource type="Texture2D" uid="uid://c2plt80av18wv" path="res://Assets/BonusSlot/slot_button_spin_pressed.png" id="11_gp3jk"]
+[ext_resource type="Texture2D" uid="uid://veg3ocn20mlj" path="res://Assets/BonusSlot/slot_button_spin_hover.png" id="12_cpu5n"]
+[ext_resource type="Texture2D" uid="uid://cwv7qh8bw12sp" path="res://Assets/BonusSlot/blackcontainer.png" id="13_18jbv"]
 
 [node name="BonusSlotMachine" type="Control"]
 custom_minimum_size = Vector2(1280, 720)
@@ -17,8 +21,6 @@ layout_mode = 3
 anchors_preset = 0
 offset_right = 1280.0
 offset_bottom = 720.0
-grow_horizontal = 2
-grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("1_5p4gk")
 apply_manual_textures_on_ready = true
@@ -28,52 +30,71 @@ reel3_textures = Array[Texture2D]([ExtResource("3_coin"), ExtResource("4_xp"), E
 use_fallback_color_reels = false
 
 [node name="Background" type="TextureRect" parent="."]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = -1140.0001
+offset_top = -323.0
+offset_right = -1140.0001
+offset_bottom = -323.0
 grow_horizontal = 2
 grow_vertical = 2
+scale = Vector2(1.8043941, 1.920015)
 mouse_filter = 2
 stretch_mode = 5
 
 [node name="Dimmer" type="ColorRect" parent="."]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = 34.0
+offset_top = -528.0
+offset_right = 34.0
+offset_bottom = -528.0
 grow_horizontal = 2
 grow_vertical = 2
 color = Color(0, 0, 0, 0.6)
 
+[node name="SpinButton" type="TextureButton" parent="."]
+top_level = true
+layout_mode = 0
+offset_left = 107.00001
+offset_top = 529.00006
+offset_right = 344.00003
+offset_bottom = 676.00006
+scale = Vector2(1.3812921, 1.3812921)
+texture_normal = ExtResource("10_5l0bu")
+texture_pressed = ExtResource("11_gp3jk")
+texture_hover = ExtResource("12_cpu5n")
+
 [node name="Panel" type="Panel" parent="."]
 layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
+anchors_preset = -1
+anchor_left = 0.67300004
 anchor_top = 0.5
-anchor_right = 0.5
+anchor_right = 0.67300004
 anchor_bottom = 0.5
-offset_left = -640.0
-offset_top = -360.0
-offset_right = 640.0
-offset_bottom = 360.0
+offset_left = -1087.4401
+offset_top = -606.0
+offset_right = 192.55994
+offset_bottom = 580.0
 grow_horizontal = 2
 grow_vertical = 2
-
-[node name="SlotFrame" type="Sprite2D" parent="Panel"]
-position = Vector2(246.0001, 421)
-scale = Vector2(0.9603603, 1.0360329)
-texture = ExtResource("2_ub4sa")
+scale = Vector2(1.9220895, 3.3248746)
 
 [node name="VBox" type="VBoxContainer" parent="Panel"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 32.0
-offset_top = 63.0
-offset_right = -16.0
-offset_bottom = 15.0
+offset_left = -211.0
+offset_top = 1078.0
+offset_right = -259.0
+offset_bottom = 690.15845
 grow_horizontal = 2
 grow_vertical = 2
 scale = Vector2(0.9674298, 0.8857889)
@@ -85,41 +106,6 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 40
 horizontal_alignment = 1
 
-[node name="Reels" type="HBoxContainer" parent="Panel/VBox"]
-layout_mode = 2
-theme_override_constants/separation = 24
-alignment = 1
-
-[node name="Reel1" type="Control" parent="Panel/VBox/Reels"]
-custom_minimum_size = Vector2(320, 320)
-layout_mode = 2
-mouse_filter = 2
-
-[node name="Glow" type="TextureRect" parent="Panel/VBox/Reels/Reel1"]
-visible = false
-layout_mode = 0
-mouse_filter = 2
-
-[node name="Reel2" type="Control" parent="Panel/VBox/Reels"]
-custom_minimum_size = Vector2(320, 320)
-layout_mode = 2
-mouse_filter = 2
-
-[node name="Glow" type="TextureRect" parent="Panel/VBox/Reels/Reel2"]
-visible = false
-layout_mode = 0
-mouse_filter = 2
-
-[node name="Reel3" type="Control" parent="Panel/VBox/Reels"]
-custom_minimum_size = Vector2(320, 320)
-layout_mode = 2
-mouse_filter = 2
-
-[node name="Glow" type="TextureRect" parent="Panel/VBox/Reels/Reel3"]
-visible = false
-layout_mode = 0
-mouse_filter = 2
-
 [node name="SpacerBelowReels" type="Control" parent="Panel/VBox"]
 custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
@@ -129,12 +115,63 @@ layout_mode = 2
 theme_override_constants/separation = 24
 alignment = 1
 
-[node name="SpinButton" type="TextureButton" parent="Panel/VBox/HBox"]
-layout_mode = 2
-
 [node name="ResultLabel" type="Label" parent="Panel/VBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 26
 horizontal_alignment = 1
 
-[connection signal="pressed" from="Panel/VBox/HBox/SpinButton" to="." method="_on_SpinButton_pressed"]
+[node name="ReelsLayer" type="CanvasLayer" parent="Panel"]
+layer = 0
+
+[node name="Reels" type="HBoxContainer" parent="Panel/ReelsLayer"]
+offset_left = -236.0
+offset_top = 156.0
+offset_right = 772.0
+offset_bottom = 489.55084
+scale = Vector2(1.0019385, 0.9593494)
+theme_override_constants/separation = 24
+alignment = 1
+
+[node name="Reel1" type="Control" parent="Panel/ReelsLayer/Reels"]
+custom_minimum_size = Vector2(320, 320)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Glow" type="TextureRect" parent="Panel/ReelsLayer/Reels/Reel1"]
+visible = false
+layout_mode = 0
+mouse_filter = 2
+
+[node name="Reel2" type="Control" parent="Panel/ReelsLayer/Reels"]
+custom_minimum_size = Vector2(320, 320)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Glow" type="TextureRect" parent="Panel/ReelsLayer/Reels/Reel2"]
+visible = false
+layout_mode = 0
+mouse_filter = 2
+
+[node name="Reel3" type="Control" parent="Panel/ReelsLayer/Reels"]
+custom_minimum_size = Vector2(320, 320)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Glow" type="TextureRect" parent="Panel/ReelsLayer/Reels/Reel3"]
+visible = false
+layout_mode = 0
+mouse_filter = 2
+
+[node name="Blackcontainer" type="Sprite2D" parent="Panel/ReelsLayer/Reels/Reel3"]
+top_level = true
+position = Vector2(267, 229.69536)
+scale = Vector2(1.0392928, 0.7018606)
+texture = ExtResource("13_18jbv")
+
+[node name="SlotFrame" type="Sprite2D" parent="Panel/ReelsLayer/Reels/Reel3"]
+top_level = true
+position = Vector2(264.00003, 437.99994)
+scale = Vector2(0.99572647, 0.96578896)
+texture = ExtResource("2_ub4sa")
+
+[connection signal="pressed" from="SpinButton" to="." method="_on_SpinButton_pressed"]

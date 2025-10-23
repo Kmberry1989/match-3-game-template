@@ -193,22 +193,20 @@ func _prompt_for_avatar():
 		camera_button.text = "Take Photo"
 		avatar_container.add_child(camera_button)
 		camera_button.pressed.connect(_on_camera_pressed)
-	else: # iOS and Desktop/Web
-		print("[Login.gd] _prompt_for_avatar: iOS or Desktop detected, showing placeholders.")
-		var grid = GridContainer.new()
-		grid.columns = 3
-		avatar_container.add_child(grid)
-
-		var placeholder_paths = _generate_placeholders()
-		for path in placeholder_paths:
-			var button = TextureButton.new()
-			var img = Image.load_from_file(path)
-			var tex = ImageTexture.create_from_image(img)
-			button.texture_normal = tex
-			button.custom_minimum_size = Vector2(150, 150)
-			button.ignore_texture_size = true
-			grid.add_child(button)
-			button.pressed.connect(_on_placeholder_selected.bind(path))
+	else: # iOS and Desktop
+		print("[Login.gd] _prompt_for_avatar: iOS or Desktop detected — placeholder selection is disabled.")
+		# Do not present generated placeholder avatars. Keep the skip option and allow
+		# native picker buttons if the plugin is available.
+		if Engine.has_singleton("GodotGetImage"):
+			print("[Login.gd] _prompt_for_avatar: GodotGetImage plugin available — offering picker buttons.")
+			var gallery_button = Button.new()
+			gallery_button.text = "Select from Gallery"
+			avatar_container.add_child(gallery_button)
+			gallery_button.pressed.connect(_on_gallery_pressed)
+			var camera_button = Button.new()
+			camera_button.text = "Take Photo"
+			avatar_container.add_child(camera_button)
+			camera_button.pressed.connect(_on_camera_pressed)
 
 	var skip_button = Button.new()
 	skip_button.text = "Skip"
@@ -216,25 +214,19 @@ func _prompt_for_avatar():
 	skip_button.pressed.connect(_on_skip_avatar_pressed)
 
 func _generate_placeholders() -> Array:
-	print("[Login.gd] _generate_placeholders: Generating 9 placeholder images.")
-	var placeholder_paths = []
-	var colors = [
-		Color.PALE_VIOLET_RED, Color.SEA_GREEN, Color.STEEL_BLUE,
-		Color.KHAKI, Color.MEDIUM_PURPLE, Color.SALMON,
-		Color.LIGHT_SKY_BLUE, Color.SANDY_BROWN, Color.LIGHT_GREEN
-	]
-	for i in range(9):
-		var img = Image.create(150, 150, false, Image.FORMAT_RGB8)
-		img.fill(colors[i])
-		var path = "user://placeholder_avatar_" + str(i) + ".png"
-		var err = img.save_png(path)
-		if err == OK:
-			placeholder_paths.append(path)
-	return placeholder_paths
+	# Placeholder generation has been removed. Placeholders were disabled for iOS/Desktop
+	# in favor of native pickers and a Skip option. Return an empty array for callers.
+	print("[Login.gd] _generate_placeholders: Placeholder generation disabled.")
+	return []
 
 func _on_placeholder_selected(path: String):
-	print("[Login.gd] _on_placeholder_selected: Placeholder selected: " + path)
-	_on_avatar_processed(path)
+	# Placeholder selection is no longer used on iOS/Desktop. If any external
+	# code calls this, process the avatar path if provided; otherwise ignore.
+	if path != null and str(path) != "":
+		print("[Login.gd] _on_placeholder_selected: Placeholder selected: " + path)
+		_on_avatar_processed(path)
+	else:
+		print("[Login.gd] _on_placeholder_selected: Called but placeholders are disabled.")
 
 func _on_gallery_pressed():
 	print("[Login.gd] _on_gallery_pressed: Gallery button pressed.")

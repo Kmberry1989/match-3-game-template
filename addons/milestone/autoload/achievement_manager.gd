@@ -30,6 +30,8 @@ func _ready() -> void:
 	achievements_list = get_achievements()
 	achievements_number = achievements_list.size()
 	hidden_achievements_number = get_hidden_achievements().size()
+	# AchievementManager does not assume where trophies are handled. Game code (PlayerManager)
+	# will listen for achievement_unlocked and act accordingly. This keeps the addon decoupled.
 
 	if ProjectSettings.get_setting("milestone/debug/print_output") == true and OS.is_debug_build():
 		print("[Milestone] Loaded %s achievements!" % achievements_number)
