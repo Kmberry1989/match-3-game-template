@@ -69,7 +69,6 @@ var score: int = 0
 var combo_counter: int = 1
 
 var possible_colors: Array = []
-var active_colors: Array = []
 var _color_rotation_index: int = 0
 const MAX_ACTIVE_COLORS := 6
 var idle_hint_count: int = 0
@@ -93,12 +92,6 @@ func _ready():
 		var dot_instance = dot_scene.instantiate()
 		possible_colors.append(dot_instance.color)
 		dot_instance.queue_free()
-	# Start with a random set of 6 active colors
-	var shuffled = possible_colors.duplicate()
-	shuffled.shuffle()
-	active_colors = []
-	for k in range(min(6, shuffled.size())):
-		active_colors.append(shuffled[k])
 	
 	# Compute centered start based on current viewport and new offset
 	_recalc_start()
@@ -166,7 +159,7 @@ func setup_timers():
 		inactivity_timer.connect("timeout", Callable(self, "_on_inactivity_timeout"))
 		inactivity_timer.set_one_shot(true)
 		# Longer window before reshuffling the board
-		inactivity_timer.set_wait_time(15.0)
+		inactivity_timer.set_wait_time(25.0)
 		add_child(inactivity_timer)
 
 func _restart_idle_timers() -> void:
@@ -198,7 +191,7 @@ func spawn_dots():
 	for i in range(width):
 		for j in range(height):
 			if !restricted_fill(Vector2(i, j)):
-				var pool = _get_color_pool()
+				var pool = possible_colors
 				var rand = floor(randf_range(0, pool.size()))
 				var color = pool[rand]
 				var loops = 0
@@ -783,7 +776,7 @@ func refill_columns():
 		for j in range(height):
 			if all_dots[i][j] == null and not restricted_fill(Vector2(i,j)):
 				# Choose color from active pool then instantiate matching scene
-				var pool = _get_color_pool()
+				var pool = possible_colors
 				var rand = floor(randf_range(0, pool.size()))
 				var desired_color = pool[rand]
 				var dot_scene_to_use = null
@@ -860,18 +853,12 @@ func find_matches_after_refill():
 func _on_idle_timer_timeout():
 	# After short inactivity, gently hint a valid move by making that
 	# No reshuffle here; this is just a suggestion.
-	var group = find_potential_match_group()
-	if group.size() >= 3:
-		var target_color = group[0].color
-		var trio = []
-		for d in group:
-			if d != null and d.color == target_color:
-				trio.append(d)
-		if trio.size() >= 3:
-			for d in trio:
-				d.play_idle_animation()
-	# Restart timers for subsequent inactivity windows
-	_restart_idle_timers()
+	var dot_to_yawn = find_potential_match()
+	if dot_to_yawn != null:
+		dot_to_yawn.play_idle_animation()
+	# Restart only the idle timer
+	if idle_timer != null:
+		idle_timer.start()
 
 func _on_inactivity_timeout():
 	# After a longer inactivity window, reshuffle (without immediate matches), then hint a move.
@@ -898,13 +885,21 @@ func find_potential_match():
 			
 			# Test swap right
 			if i < width - 1 and all_dots[i+1][j] != null:
-				if can_move_create_match(i, j, Vector2.RIGHT):
-					return all_dots[i][j]
+				var match_color = can_move_create_match(i, j, Vector2.RIGHT)
+				if match_color != null:
+					if all_dots[i][j].color == match_color:
+						return all_dots[i][j]
+					else:
+						return all_dots[i+1][j]
 		
 			# Test swap down
 			if j < height - 1 and all_dots[i][j+1] != null:
-				if can_move_create_match(i, j, Vector2.DOWN):
-					return all_dots[i][j]
+				var match_color = can_move_create_match(i, j, Vector2.DOWN)
+				if match_color != null:
+					if all_dots[i][j].color == match_color:
+						return all_dots[i][j]
+					else:
+						return all_dots[i][j+1]
 	return null
 
 # Returns an array of Dot nodes (size >= 3) that would form a match if a single swap is made.
@@ -1046,26 +1041,6 @@ func ensure_moves_available(max_attempts := 10):
 
 	_restart_idle_timers()
 
-# Returns the current color pool used for spawning/refill
-func _get_color_pool() -> Array:
-	return active_colors if active_colors.size() > 0 else possible_colors
-
-
-# Rotate stage colors: swap the 3 inactive colors in, and remove 3 random active colors to keep 6 total
-func _rotate_stage_colors():
-	var all = possible_colors.duplicate()
-	if all.size() <= 6:
-		active_colors = all
-		return
-	_color_rotation_index = (_color_rotation_index + 3) % all.size()
-	var new_active: Array = []
-	for k in range(6):
-		var idx = (_color_rotation_index + k) % all.size()
-		var c = all[idx]
-		if new_active.find(c) == -1:
-			new_active.append(c)
-	active_colors = new_active
-
 # Returns true if the provided matrix of Dot nodes contains any immediate
 # horizontal or vertical 3-in-a-row matches.
 func _matrix_has_immediate_match(matrix: Array) -> bool:
@@ -1108,8 +1083,7 @@ func reshuffle_board() -> bool:
 	if AudioManager != null:
 		AudioManager.play_sound("shuffle")
 
-	# Rotate the active color selection on every reshuffle
-	_rotate_stage_colors()
+
 
 	var valid_matrix: Array = []
 	var target_cells: Array
@@ -1185,7 +1159,10 @@ func can_move_create_match(i, j, direction):
 	var other_i: int = i + di
 	var other_j: int = j + dj
 	if other_i < 0 or other_i >= width or other_j < 0 or other_j >= height:
-		return false
+		return null
+
+	if all_dots[i][j] == null or all_dots[other_i][other_j] == null:
+		return null
 
 	var original_color = all_dots[i][j].color
 	var other_color = all_dots[other_i][other_j].color
@@ -1202,33 +1179,24 @@ func can_move_create_match(i, j, direction):
 	temp_all_dots[i][j] = other_color
 	temp_all_dots[other_i][other_j] = original_color
 
-	var is_match = false
-	# Check for horizontal match
-	if other_i > 0 and other_i < width - 1:
-		if temp_all_dots[other_i - 1][other_j] == other_color and temp_all_dots[other_i + 1][other_j] == other_color:
-			is_match = true
-	# Check for vertical match
-	if not is_match and other_j > 0 and other_j < height - 1:
-		if temp_all_dots[other_i][other_j - 1] == other_color and temp_all_dots[other_i][other_j + 1] == other_color:
-			is_match = true
-
-	# Check for horizontal match for the original dot
-	if not is_match and i > 0 and i < width - 1:
-		if temp_all_dots[i - 1][j] == original_color and temp_all_dots[i + 1][j] == original_color:
-			is_match = true
-	# Check for vertical match for the original dot
-	if not is_match and j > 0 and j < height - 1:
-		if temp_all_dots[i][j - 1] == original_color and temp_all_dots[i][j + 1] == original_color:
-			is_match = true
-
-	return is_match
+	# Check for matches
+	for x in range(width):
+		for y in range(height):
+			var color = temp_all_dots[x][y]
+			if color == null: continue
+			# Horizontal
+			if x < width - 2 and temp_all_dots[x+1][y] == color and temp_all_dots[x+2][y] == color:
+				return color
+			# Vertical
+			if y < height - 2 and temp_all_dots[x][y+1] == color and temp_all_dots[x][y+2] == color:
+				return color
+	return null
 
 func _on_level_up(new_level):
 	print("Level up to: " + str(new_level))
 	await celebrate_stage_transition(new_level)
 	# Clear and respawn for next stage
-	# Rotate color set: bring in the 3 inactive colors and drop 3 random actives
-	_rotate_stage_colors()
+
 	for i in range(width):
 		for j in range(height):
 			if all_dots[i][j] != null:

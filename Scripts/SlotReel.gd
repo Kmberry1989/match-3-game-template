@@ -37,6 +37,8 @@ func _ensure_built() -> void:
 	_anim = AnimationPlayer.new()
 	_anim.name = "AnimationPlayer"
 	add_child(_anim)
+	var lib = AnimationLibrary.new()
+	_anim.add_animation_library("", lib)
 	# Build tiles with extra buffer above/below
 	# Add a small safety margin so spin-up wiggle never exposes blanks
 	var extra_each_side := int(ceil(spin_up_distance / float(tile_size.y))) + 1

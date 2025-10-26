@@ -7,17 +7,15 @@ extends Panel
 @onready var viewer_label := $ViewerOverlay/Center/VBox/ItemLabel
 var viewer_desc: Label = null
 
-const TROPHY_DIR := "res://Assets/Trophies"
-
-var trophies: Array = [] # [{id, path, unlocked_icon, locked_icon, name, unlocked, description}]
+var achievements: Array = [] # [{id, path, unlocked_icon, locked_icon, name, unlocked, description}]
 var current_index: int = -1
 
 var _drag_active := false
 var _drag_start := Vector2.ZERO
 
 func _ready():
-	# Only show trophies in the showcase
-	load_trophies()
+	# Only show achievements in the showcase
+	load_achievements()
 	# Hide/disable any Frames tab if present in the scene
 	var frames_tab := tab_container.get_node_or_null("Frames")
 	if frames_tab:
@@ -53,46 +51,36 @@ func _ready():
 				viewer_desc.add_theme_font_size_override("font_size", 18)
 				vb.add_child(viewer_desc)
 
-func load_trophies():
-	# Populate from trophy resources in res://Assets/Trophies
-	trophies.clear()
+func load_achievements():
+	# Populate from achievement resources from AchievementManager
+	achievements.clear()
 	for child in trophy_grid.get_children():
 		child.queue_free()
-	var dir = DirAccess.open(TROPHY_DIR)
-	if dir == null:
+	
+	if not Engine.has_singleton("AchievementManager"):
 		return
-	dir.list_dir_begin()
-	var file_name = dir.get_next()
-	while file_name != "":
-		if not dir.current_is_dir() and file_name.to_lower().ends_with(".tres"):
-			var path = TROPHY_DIR.path_join(file_name)
-			var trophy_res = load(path)
-			if typeof(trophy_res) == TYPE_OBJECT and trophy_res != null:
-				# Expect a Trophy resource with fields: id, trophy_name, description, unlocked_icon
-				var id: String = str(trophy_res.id) if str(trophy_res.id) != "" else file_name.get_basename()
-				var display: String = str(trophy_res.trophy_name) if str(trophy_res.trophy_name) != "" else id.replace("_", " ").capitalize()
-				var unlocked := false
-				if typeof(PlayerManager.player_data) == TYPE_DICTIONARY:
-					var unlocked_list: Array = PlayerManager.player_data.get("unlocks", {}).get("trophies", [])
-					unlocked = unlocked_list.has(id)
-				
-				var unlocked_icon = trophy_res.unlocked_icon
-				var locked_icon = null
-				if "locked_icon" in trophy_res:
-					locked_icon = trophy_res.locked_icon
 
-				var display_icon = unlocked_icon if unlocked else locked_icon
-				if display_icon == null: # Fallback for missing locked_icon
-					display_icon = unlocked_icon
+	var achievement_list = AchievementManager.get_achievements()
+	for achievement_id in achievement_list:
+		var achievement_res = AchievementManager.get_achievement_resource(achievement_id)
+		if typeof(achievement_res) == TYPE_OBJECT and achievement_res != null:
+			var id: String = achievement_res.id
+			var display: String = achievement_res.trophy_name
+			var unlocked := AchievementManager.is_unlocked(id)
+			
+			var unlocked_icon = achievement_res.unlocked_icon
+			var locked_icon = achievement_res.locked_icon
 
-				var item = {"id": id, "path": path, "unlocked_icon": unlocked_icon, "locked_icon": locked_icon, "name": display, "unlocked": unlocked, "description": str(trophy_res.description)}
-				var idx = trophies.size()
-				trophies.append(item)
-				_add_thumbnail(trophy_grid, display_icon, display, unlocked, func():
-					_open_viewer(idx)
-				)
-		file_name = dir.get_next()
-	dir.list_dir_end()
+			var display_icon = unlocked_icon if unlocked else locked_icon
+			if display_icon == null: # Fallback for missing locked_icon
+				display_icon = unlocked_icon
+
+			var item = {"id": id, "unlocked_icon": unlocked_icon, "locked_icon": locked_icon, "name": display, "unlocked": unlocked, "description": achievement_res.description}
+			var idx = achievements.size()
+			achievements.append(item)
+			_add_thumbnail(trophy_grid, display_icon, display, unlocked, func():
+				_open_viewer(idx)
+			)
 
 # Frames are no longer shown here; Showcase is trophy-only
 
@@ -131,8 +119,8 @@ func _close_viewer():
 func _update_viewer():
 	if current_index < 0:
 		return
-	if current_index >= 0 and current_index < trophies.size():
-		var item = trophies[current_index]
+	if current_index >= 0 and current_index < achievements.size():
+		var item = achievements[current_index]
 		var unlocked := bool(item.get("unlocked", false))
 		
 		var display_icon = item["unlocked_icon"] if unlocked else item["locked_icon"]
@@ -149,15 +137,15 @@ func _update_viewer():
 		viewer_image.tooltip_text = status_text
 
 func _viewer_next():
-	if trophies.size() == 0:
+	if achievements.size() == 0:
 		return
-	current_index = (current_index + 1) % trophies.size()
+	current_index = (current_index + 1) % achievements.size()
 	_update_viewer()
 
 func _viewer_prev():
-	if trophies.size() == 0:
+	if achievements.size() == 0:
 		return
-	current_index = (current_index - 1 + trophies.size()) % trophies.size()
+	current_index = (current_index - 1 + achievements.size()) % achievements.size()
 	_update_viewer()
 
 func _input(event):

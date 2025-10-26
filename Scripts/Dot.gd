@@ -303,7 +303,7 @@ func play_idle_animation():
 	last_yawn_time = current_time
 	animation_state = "idle"
 	sprite.texture = sleepy_texture
-	await get_tree().create_timer(0.5).timeout
+	await get_tree().create_timer(2.5).timeout
 	
 	if animation_state == "idle": # Make sure we weren't interrupted
 		sprite.texture = yawn_texture
@@ -319,11 +319,11 @@ func play_idle_animation():
 			float_tween.kill()
 			
 		var tween = get_tree().create_tween()
-		# Lift and inflate over 2 seconds
-		tween.parallel().tween_property(self, "position", original_pos + Vector2(0, -15), 2.0).set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_OUT)
-		tween.parallel().tween_property(sprite, "scale", (PULSE_SCALE_MIN * 1.5) * scale_multiplier, 2.0).set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_OUT)
-		tween.parallel().tween_property(shadow, "scale", original_shadow_scale * 2.5, 2.0).set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_OUT)
-		tween.parallel().tween_property(shadow, "modulate:a", 0.0, 2.0).set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_OUT)
+		# Lift and inflate over 1.5 seconds
+		tween.parallel().tween_property(self, "position", original_pos + Vector2(0, -15), 1.5).set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_OUT)
+		tween.parallel().tween_property(sprite, "scale", (PULSE_SCALE_MIN * 1.5) * scale_multiplier, 1.5).set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_OUT)
+		tween.parallel().tween_property(shadow, "scale", original_shadow_scale * 2.5, 1.5).set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_OUT)
+		tween.parallel().tween_property(shadow, "modulate:a", 0.0, 1.5).set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_OUT)
 		await tween.finished
 
 		if animation_state == "idle":

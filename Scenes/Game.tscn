@@ -28,8 +28,7 @@ offset = 80
 grid_scale = 0.9
 y_offset = -2
 
-[node name="DotPool" type="Node" parent="."]
-script = ExtResource("7")
+
 
 [node name="Background" type="TextureRect" parent="."]
 anchors_preset = 15
