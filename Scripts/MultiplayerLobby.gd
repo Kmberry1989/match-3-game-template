@@ -97,9 +97,8 @@ func _on_start() -> void:
 	WebSocketClient.request_start_game({"mode": mode, "target": target, "seed": seed_value})
 	status_label.text = "Starting (" + mode + ")..."
 
-func _on_match_found(data: Dictionary) -> void:
-	var code = data.get("code", "")
-	_on_room_joined(code, "")
+func _on_match_found(code: String, player_id: String) -> void:
+	_on_room_joined(code, player_id)
 
 func _on_room_joined(code: String, _id: String) -> void:
 	status_label.text = "Joined room: " + code

@@ -11,6 +11,7 @@ signal player_left(player_id)
 signal start_game(payload)
 signal message_received(msg)
 signal game_event(payload)
+signal match_found(code, player_id)
 
 var url: String = ""
 var _peer: WebSocketPeer
@@ -69,6 +70,10 @@ func _handle_message(msg: Dictionary) -> void:
 			_room_code = String(msg.get("code", ""))
 			_player_id = String(msg.get("id", _player_id))
 			emit_signal("room_joined", _room_code, _player_id)
+		"match_found":
+			_room_code = String(msg.get("code", ""))
+			_player_id = String(msg.get("id", _player_id))
+			emit_signal("match_found", _room_code, _player_id)
 		"room_state":
 			var players = msg.get("players", [])
 			emit_signal("room_state", players)
@@ -100,6 +105,12 @@ func join_room(code: String) -> void:
 
 func leave_room() -> void:
 	_send({"type": "leave_room"})
+
+func find_match(data: Dictionary) -> void:
+	_send({"type": "find_match", "mode": data.mode})
+
+func cancel_match() -> void:
+	_send({"type": "cancel_match"})
 
 func send_ready() -> void:
 	_send({"type": "ready"})
