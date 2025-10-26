@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c4nj3y03i2555"
-path="res://.godot/imported/IMG_2503.png-7eb628f7bb64c50176410560efe322c8.ctex"
+uid="uid://dn6hqudtn4yj4"
+path="res://.godot/imported/mrmr4.png-c622d3e1570cb40f92a9218299e70cf8.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Dots/IMG_2503.png"
-dest_files=["res://.godot/imported/IMG_2503.png-7eb628f7bb64c50176410560efe322c8.ctex"]
+source_file="res://Assets/Visuals/Mister Meaner/mrmr4.png"
+dest_files=["res://.godot/imported/mrmr4.png-c622d3e1570cb40f92a9218299e70cf8.ctex"]
 
 [params]
 
