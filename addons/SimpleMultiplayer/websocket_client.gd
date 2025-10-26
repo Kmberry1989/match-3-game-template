@@ -7,7 +7,8 @@ signal connection_closed
 signal room_created(data)
 signal room_joined(data)
 signal server_error(data)
-signal start_game 
+signal start_game
+signal match_found(data)
 
 # --- Sinais para gameplay ---
 signal spawn_local_player(player_data)
@@ -62,6 +63,12 @@ func send_message(command: String, content: Dictionary):
 
 	_peer.send_text(JSON.stringify({"cmd": command, "content": content}))
 
+func find_match(data: Dictionary):
+	send_message("find_match", data)
+
+func cancel_match():
+	send_message("cancel_match", {})
+
 func handle_incoming_data(data: Dictionary):
 	# Lida com mensagens recebidas do servidor
 	var cmd = data.get("cmd", "")
@@ -75,6 +82,8 @@ func handle_incoming_data(data: Dictionary):
 			emit_signal("room_created", content)
 		"room_joined":
 			emit_signal("room_joined", content)
+		"match_found":
+			emit_signal("match_found", content)
 		"start_game":
 			emit_signal("start_game") 
 		"spawn_local_player":

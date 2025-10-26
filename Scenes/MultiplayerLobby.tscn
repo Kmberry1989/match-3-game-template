@@ -43,33 +43,18 @@ layout_mode = 2
 text = "Server: ws://127.0.0.1:9090"
 horizontal_alignment = 1
 
-[node name="CodeHBox" type="HBoxContainer" parent="Panel/VBox"]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="Label" type="Label" parent="Panel/VBox/CodeHBox"]
-layout_mode = 2
-text = "Room Code"
-
-[node name="Code" type="LineEdit" parent="Panel/VBox/CodeHBox"]
-layout_mode = 2
-custom_minimum_size = Vector2(120, 0)
-placeholder_text = "ABCD"
-max_length = 8
-align = 1
-
 [node name="Buttons" type="HBoxContainer" parent="Panel/VBox"]
 layout_mode = 2
 theme_override_constants/separation = 12
 alignment = 1
 
-[node name="Create" type="Button" parent="Panel/VBox/Buttons"]
+[node name="FindMatch" type="Button" parent="Panel/VBox/Buttons"]
 layout_mode = 2
-text = "Create"
+text = "Find Match"
 
-[node name="Join" type="Button" parent="Panel/VBox/Buttons"]
+[node name="CancelMatch" type="Button" parent="Panel/VBox/Buttons"]
 layout_mode = 2
-text = "Join"
+text = "Cancel"
 
 [node name="Leave" type="Button" parent="Panel/VBox/Buttons"]
 layout_mode = 2

@@ -5,6 +5,7 @@ const wss = new WebSocketServer({ port: PORT });
 
 // Rooms: code -> { clients: Set(ws), ready: Set(ws), ids: Map(ws->id) }
 const rooms = new Map();
+const matchmakingQueues = new Map(); // mode -> [ws]
 let nextClientId = 1;
 
 function send(ws, obj) {
@@ -34,6 +35,15 @@ function roomOf(ws) {
   return [null, null];
 }
 
+function removeFromQueues(ws) {
+  for (const queue of matchmakingQueues.values()) {
+    const index = queue.indexOf(ws);
+    if (index > -1) {
+      queue.splice(index, 1);
+    }
+  }
+}
+
 wss.on('connection', (ws) => {
   const id = String(nextClientId++);
   send(ws, { type: 'welcome', id });
@@ -42,23 +52,29 @@ wss.on('connection', (ws) => {
     let msg = {};
     try { msg = JSON.parse(data.toString()); } catch (_) { return; }
     const t = msg.type;
-    if (t === 'create_room') {
-      let code = (msg.code || '').toString().toUpperCase();
-      if (!code) {
-        // generate unique 4-char code
+    if (t === 'find_match') {
+      const mode = msg.mode || 'coop';
+      if (!matchmakingQueues.has(mode)) {
+        matchmakingQueues.set(mode, []);
+      }
+      const queue = matchmakingQueues.get(mode);
+      queue.push(ws);
+      if (queue.length >= 2) {
+        const [p1, p2] = queue.splice(0, 2);
+        let code;
         do { code = genCode(); } while (rooms.has(code));
-      }
-      if (!rooms.has(code)) {
         rooms.set(code, { clients: new Set(), ready: new Set(), ids: new Map() });
+        const room = rooms.get(code);
+        room.clients.add(p1);
+        room.clients.add(p2);
+        room.ids.set(p1, String(nextClientId++));
+        room.ids.set(p2, String(nextClientId++));
+        send(p1, { type: 'match_found', code });
+        send(p2, { type: 'match_found', code });
       }
-      const room = rooms.get(code);
-      room.clients.add(ws);
-      room.ids.set(ws, id);
-      send(ws, { type: 'room_created', code });
-      // Send current state (players) to creator
-      const players = Array.from(room.ids.values());
-      send(ws, { type: 'room_state', players });
-      broadcast(room, { type: 'player_joined', id }, ws);
+    }
+    else if (t === 'cancel_match') {
+      removeFromQueues(ws);
     }
     else if (t === 'join_room') {
       const code = (msg.code || '').toString().toUpperCase();
@@ -114,6 +130,7 @@ wss.on('connection', (ws) => {
   });
 
   ws.on('close', () => {
+    removeFromQueues(ws);
     const [code, room] = roomOf(ws);
     if (!room) return;
     room.clients.delete(ws);
