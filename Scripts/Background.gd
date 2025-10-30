@@ -1,34 +1,43 @@
 extends TextureRect
 
-@export var textures: Array[Texture] = [
+export(Array, Texture) var textures = [
 	preload("res://Assets/bg1.jpg"),
 	preload("res://Assets/bg2.jpg"),
 	preload("res://Assets/bg3.jpg"),
 	preload("res://Assets/bg4.jpg")
 ]
 
-@export var fade_duration: float = 1.0
-@export var hold_duration: float = 5.0
-@export var hue_shift_speed: float = 0.05
+export(float) var fade_duration = 1.0
+export(float) var hold_duration = 5.0
+export(float) var hue_shift_speed = 0.05
 
 var current_texture_index = 0
-var tween: Tween = null
+var tween = null
 var time = 0.0
 
 func _ready():
 	texture = textures[current_texture_index]
+	modulate = Color(1, 1, 1, 0) # Start transparent for the first fade-in
 	cycle_background()
 
 func cycle_background():
 	if tween:
-		tween.kill()
+		tween.queue_free()
 	
-	tween = get_tree().create_tween()
-	tween.tween_callback(Callable(self, "change_texture"))
-	tween.tween_property(self, "modulate", Color(1, 1, 1, 1), fade_duration)
-	tween.tween_interval(hold_duration)
-	tween.tween_property(self, "modulate", Color(1, 1, 1, 0), fade_duration)
-	tween.finished.connect(Callable(self, "cycle_background"))
+	tween = Tween.new()
+	add_child(tween)
+
+	change_texture()
+
+	# Fade in
+	tween.interpolate_property(self, "modulate", Color(1, 1, 1, 0), Color(1, 1, 1, 1), fade_duration, Tween.TRANS_LINEAR, Tween.EASE_IN_OUT)
+
+	# Fade out (with delay)
+	var fade_out_delay = fade_duration + hold_duration
+	tween.interpolate_property(self, "modulate", Color(1, 1, 1, 1), Color(1, 1, 1, 0), fade_duration, Tween.TRANS_LINEAR, Tween.EASE_IN_OUT, fade_out_delay)
+
+	tween.start()
+	tween.connect("tween_all_completed", self, "cycle_background")
 
 func change_texture():
 	current_texture_index = (current_texture_index + 1) % textures.size()
@@ -42,5 +51,5 @@ func _process(_delta):
 
 func _exit_tree():
 	if tween:
-		tween.kill()
+		tween.queue_free()
 		tween = null
