@@ -1,6 +1,6 @@
 extends Node
 
-# This manager handles all sound and music playback.
+# This manager handles all the sound and music playback.
 
 var sfx_players = []
 var music_player: AudioStreamPlayer = null
