@@ -5,14 +5,8 @@ const GAME_SCENE_PATH := "res://Scenes/Game.tscn"
 var _is_thread_load_active := false
 
 func _ready():
-    print("[Loading.gd] _ready: Intermediate loading scene is ready.")
-    var err := ResourceLoader.load_threaded_request(GAME_SCENE_PATH)
-    if err != OK:
-        push_warning("[Loading.gd] _ready: Threaded load request failed, falling back to synchronous load.")
-        _load_scene_sync()
-        return
-    _is_thread_load_active = true
-    set_process(true)
+    print("[Loading.gd] _ready: Intermediate loading scene is ready. Forcing synchronous load.")
+    _load_scene_sync()
 
 func _process(_delta):
     if !_is_thread_load_active:
