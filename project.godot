@@ -16,7 +16,7 @@ config/quit_on_go_back=false
 config/features=PackedStringArray("4.5")
 boot_splash/bg_color=Color(0, 0, 0, 1)
 boot_splash/use_filter=false
-boot_splash/image="uid://c1dhu4vva8d8q"
+boot_splash/image="uid://b440dkkbqcucs"
 config/icon="res://icon.png"
 
 [autoload]
@@ -30,6 +30,11 @@ AchievementManager="*res://addons/milestone/autoload/achievement_manager.gd"
 WebSocketClient="*res://addons/SimpleMultiplayer/autoload/websocket_client.gd"
 MultiplayerManager="*res://addons/SimpleMultiplayer/autoload/multiplayer_manager.gd"
 
+[compression]
+
+formats/zlib/compression_level=2
+formats/gzip/compression_level=2
+
 [display]
 
 window/size/viewport_width=540
@@ -37,6 +42,11 @@ window/size/viewport_height=960
 window/size/resizable=false
 window/stretch/mode="canvas_items"
 window/handheld/orientation=1
+
+[editor]
+
+import/use_multiple_threads=false
+export/convert_text_resources_to_binary=false
 
 [editor_plugins]
 
@@ -61,9 +71,14 @@ debug/print_errors=true
 debug/print_output=true
 general/save_as_json=true
 
+[navigation]
+
+pathfinding/max_threads=1
+baking/thread_model/baking_use_multiple_threads=false
+baking/thread_model/baking_use_high_priority_threads=false
+
 [rendering]
 
-rendering_device/driver="d3d12"
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
 textures/vram_compression/import_etc2_astc=true
@@ -73,3 +88,7 @@ environment/defaults/default_environment="res://default_env.tres"
 [simple_multiplayer]
 
 server_url="wss://servidorwebsocketgodot-bvmj.onrender.com"
+
+[threading]
+
+worker_pool/max_threads=1
