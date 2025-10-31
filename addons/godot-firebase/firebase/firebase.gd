@@ -9,7 +9,7 @@
 ## 	- [code]RemoteConfig[/code]: Gives access to Remote Config functionality; allows you to download your app's configuration from Firebase, do A/B testing, and more.
 ##
 ## @tutorial https://github.com/GodotNuts/GodotFirebase/wiki
-@tool
+tool
 extends Node
 
 const _ENVIRONMENT_VARIABLES : String = "firebase/environment_variables"
@@ -18,33 +18,33 @@ const _AUTH_PROVIDERS : String = "firebase/auth_providers"
 
 ## @type FirebaseAuth
 ## The Firebase Authentication API.
-@onready var Auth := $Auth
+onready var Auth = $Auth
 
 ## @type FirebaseFirestore
 ## The Firebase Firestore API.
-@onready var Firestore := $Firestore
+onready var Firestore = $Firestore
 
 ## @type FirebaseDatabase
 ## The Firebase Realtime Database API.
-@onready var Database := $Database
+onready var Database = $Database
 
 ## @type FirebaseStorage
 ## The Firebase Storage API.
-@onready var Storage := $Storage
+onready var Storage = $Storage
 
 ## @type FirebaseDynamicLinks
 ## The Firebase Dynamic Links API.
-@onready var DynamicLinks := $DynamicLinks
+onready var DynamicLinks = $DynamicLinks
 
 ## @type FirebaseFunctions
 ## The Firebase Cloud Functions API
-@onready var Functions := $Functions
+onready var Functions = $Functions
 
 ## @type FirebaseRemoteConfig
 ## The Firebase Remote Config API
-@onready var RemoteConfigAPI := $RemoteConfig
+onready var RemoteConfigAPI = $RemoteConfig
 
-@export var emulating : bool = false
+export var emulating : bool = false
 
 # Configuration used by all files in this project
 # These values can be found in your Firebase Project
@@ -139,10 +139,10 @@ func _setup_modules() -> void:
 		module._set_config(_config)
 		if not module.has_method("_on_FirebaseAuth_login_succeeded"):
 			continue
-		Auth.login_succeeded.connect(module._on_FirebaseAuth_login_succeeded)
-		Auth.signup_succeeded.connect(module._on_FirebaseAuth_login_succeeded)
-		Auth.token_refresh_succeeded.connect(module._on_FirebaseAuth_token_refresh_succeeded)
-		Auth.logged_out.connect(module._on_FirebaseAuth_logout)
+		Auth.connect("login_succeeded", module, "_on_FirebaseAuth_login_succeeded")
+		Auth.connect("signup_succeeded", module, "_on_FirebaseAuth_login_succeeded")
+		Auth.connect("token_refresh_succeeded", module, "_on_FirebaseAuth_token_refresh_succeeded")
+		Auth.connect("logged_out", module, "_on_FirebaseAuth_logout")
 
 # -------------
 
