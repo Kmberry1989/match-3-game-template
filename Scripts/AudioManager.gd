@@ -1,6 +1,6 @@
 extends Node
 
-# This manager handles all sound and music playback.
+# This manager handles all the sound and music playback.
 
 var sfx_players = []
 var music_player: AudioStreamPlayer = null
@@ -41,19 +41,19 @@ func _ready():
 	load_music()
 
 func load_sounds():
-	sounds["match_pop"] = load("res://Assets/Sounds/pop.ogg")
-	sounds["match_chime"] = load("res://Assets/Sounds/match_chime.ogg")
-	sounds["match_fanfare"] = load("res://Assets/Sounds/match_fanfare.ogg")
-	sounds["dot_land"] = load("res://Assets/Sounds/dot_land.ogg")
-	sounds["ui_click"] = load("res://Assets/Sounds/ui_click.ogg")
-	sounds["game_start"] = load("res://Assets/Sounds/game_start_swoosh.ogg")
-	sounds["yawn"] = load("res://Assets/Sounds/yawn.ogg")
-	sounds["surprised"] = load("res://Assets/Sounds/surprised.ogg")
+	sounds["match_pop"] = "res://Assets/Sounds/pop.ogg"
+	sounds["match_chime"] = "res://Assets/Sounds/match_chime.ogg"
+	sounds["match_fanfare"] = "res://Assets/Sounds/match_fanfare.ogg"
+	sounds["dot_land"] = "res://Assets/Sounds/dot_land.ogg"
+	sounds["ui_click"] = "res://Assets/Sounds/ui_click.ogg"
+	sounds["game_start"] = "res://Assets/Sounds/game_start_swoosh.ogg"
+	sounds["yawn"] = "res://Assets/Sounds/yawn.ogg"
+	sounds["surprised"] = "res://Assets/Sounds/surprised.ogg"
 	# Use dedicated shuffle SFX
-	sounds["shuffle"] = load("res://Assets/Sounds/shuffle.ogg")
+	sounds["shuffle"] = "res://Assets/Sounds/shuffle.ogg"
 	# New special match sounds (add these files under Assets/Sounds)
-	sounds["line_clear"] = load("res://Assets/Sounds/line_clear.ogg")
-	sounds["wildcard_spawn"] = load("res://Assets/Sounds/wildcard_spawn.ogg")
+	sounds["line_clear"] = "res://Assets/Sounds/line_clear.ogg"
+	sounds["wildcard_spawn"] = "res://Assets/Sounds/wildcard_spawn.ogg"
 	# Slot machine SFX (if present)
 	var slot_sounds: Dictionary = {
 		"slot_spin": "res://Assets/Sounds/slot_spin.ogg",
@@ -65,9 +65,7 @@ func load_sounds():
 	for k in slot_sounds.keys():
 		var path: String = slot_sounds[k]
 		if ResourceLoader.exists(path):
-			var res = load(path)
-			if res != null:
-				sounds[k] = res
+			sounds[k] = path
 
 func load_music():
 	_add_music_track("login", "res://Assets/Sounds/music_login.ogg")
@@ -77,11 +75,7 @@ func load_music():
 func _add_music_track(track_name: String, path: String) -> void:
 	# Only register track if file exists and loads successfully
 	if ResourceLoader.exists(path):
-		var res = load(path)
-		if res != null:
-			music_tracks[track_name] = res
-		else:
-			print("Music load failed for '", track_name, "' at ", path)
+		music_tracks[track_name] = path
 	else:
 		# Silent skip to avoid noise when certain tracks are not present in a build
 		pass
@@ -94,14 +88,14 @@ func play_sound(sound_name):
 	# Find an available player and play the sound
 	for player in sfx_players:
 		if not player.playing:
-			player.stream = sounds[sound_name]
+			player.stream = load(sounds[sound_name])
 			player.play()
 			return
 
 func play_music(track_name, loop = true):
 	var stream: AudioStream = null
 	if music_tracks.has(track_name):
-		stream = music_tracks[track_name]
+		stream = load(music_tracks[track_name])
 	else:
 		# Friendly fallback order
 		var fallbacks: Array[String] = []
@@ -117,7 +111,7 @@ func play_music(track_name, loop = true):
 		for alt in fallbacks:
 			if music_tracks.has(alt):
 				print("Music '", track_name, "' not found; falling back to '", alt, "'.")
-				stream = music_tracks[alt]
+				stream = load(music_tracks[alt])
 				break
 		if stream == null:
 			print("Music not found and no fallback available: ", track_name)
@@ -131,7 +125,7 @@ func stop_music():
 	music_player.stop()
 
 func set_music_volume(volume_db):
-	AudioServer.set_bus_volume_db(music_bus_idx, volume_db)
+	AudioServer.set_bus_volume_db(music_bus_.gdidx, volume_db)
 
 func set_sfx_volume(volume_db):
 	AudioServer.set_bus_volume_db(sfx_bus_idx, volume_db)
