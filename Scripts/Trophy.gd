@@ -2,7 +2,7 @@ extends Resource
 
 class_name Trophy
 
-@export var id: String
-@export var trophy_name: String
-@export var description: String
-@export var unlocked_icon: Texture2D
+export(String) var id
+export(String) var trophy_name
+export(String) var description
+export(Texture) var unlocked_icon

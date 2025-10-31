@@ -3,22 +3,22 @@ extends Node2D
 enum {wait, move}
 var state: int
 
-@export var width: int
-@export var height: int
-@export var offset: int
-@export var grid_scale: float = 1.0
-@export var grid_nudge: Vector2 = Vector2.ZERO # pixel offset applied after centering
-@export var y_offset: int
-@export var AUTO_RESHUFFLE: bool = true
+export(int) var width
+export(int) var height
+export(int) var offset
+export(float) var grid_scale = 1.0
+export(Vector2) var grid_nudge = Vector2.ZERO # pixel offset applied after centering
+export(int) var y_offset
+export(bool) var AUTO_RESHUFFLE = true
 
 var x_start: float
 var y_start: float
-@onready var game_ui = get_node("../GameUI")
+onready var game_ui = get_node("../GameUI")
 
-@export var empty_spaces: PackedVector2Array
+export(PoolVector2Array) var empty_spaces
 
 # Preload scenes for dots and new visual effects
-@onready var possible_dots = [
+onready var possible_dots = [
 	preload("res://Scenes/Dots/blue_dot.tscn"),
 	preload("res://Scenes/Dots/green_dot.tscn"),
 	preload("res://Scenes/Dots/pink_dot.tscn"),
@@ -29,10 +29,10 @@ var y_start: float
 	preload("res://Scenes/Dots/brown_dot.tscn"),
 	preload("res://Scenes/Dots/gray_dot.tscn")
 ]
-@onready var match_particles: PackedScene = preload("res://Scenes/MatchParticles.tscn")
-@onready var match_label_scene: PackedScene = preload("res://Scenes/MatchLabel.tscn")
-@onready var xp_orb_texture: Texture2D = preload("res://Assets/Visuals/xp_orb.png")
-@onready var stage_banner_texture: Texture2D = preload("res://Assets/Visuals/stage_banner.png")
+onready var match_particles: PackedScene = preload("res://Scenes/MatchParticles.tscn")
+onready var match_label_scene: PackedScene = preload("res://Scenes/MatchLabel.tscn")
+onready var xp_orb_texture: Texture = preload("res://Assets/Visuals/xp_orb.png")
+onready var stage_banner_texture: Texture = preload("res://Assets/Visuals/stage_banner.png")
 var xp_orb_colors: Dictionary = {
 	"red": Color(1.0, 0.25, 0.25),
 	"orange": Color(1.0, 0.6, 0.2),
@@ -70,7 +70,7 @@ var combo_counter: int = 1
 
 var possible_colors: Array = []
 var _color_rotation_index: int = 0
-const MAX_ACTIVE_COLORS := 6
+const MAX_ACTIVE_COLORS = 6
 var idle_hint_count: int = 0
 
 var _xp_mult_value: int = 1
@@ -89,7 +89,7 @@ func _ready():
 		offset = int(round(offset * clamp(grid_scale, 0.5, 2.0)))
 	
 	for dot_scene in possible_dots:
-		var dot_instance = dot_scene.instantiate()
+		var dot_instance = dot_scene.instance()
 		possible_colors.append(dot_instance.color)
 		dot_instance.queue_free()
 	
@@ -100,16 +100,16 @@ func _ready():
 	# Apply any pending bonus effects at stage start
 	_apply_pending_bonus()
 	# Optionally ensure the initial board always has at least one potential match
-	if AUTO_RESHUFFLE:
-		await ensure_moves_available()
-		# Start idle/yawn and inactivity timers
-		_restart_idle_timers()
+        if AUTO_RESHUFFLE:
+                yield(ensure_moves_available(), "completed")
+                # Start idle/yawn and inactivity timers
+                _restart_idle_timers()
 
-	# Hook level-up to play celebration animations (wave + dance + banner)
-	# Use a small defer to ensure tree is ready.
-	await get_tree().process_frame
-	if PlayerManager != null:
-		PlayerManager.level_up.connect(_on_level_up)
+        # Hook level-up to play celebration animations (wave + dance + banner)
+        # Use a small defer to ensure tree is ready.
+        yield(get_tree(), "idle_frame")
+        if PlayerManager != null and not PlayerManager.is_connected("level_up", self, "_on_level_up"):
+                PlayerManager.connect("level_up", self, "_on_level_up")
 	# Kick off the idle/yawn and inactivity timers after initial spawn
 	_restart_idle_timers()
 
@@ -133,22 +133,22 @@ func update_score_display():
 	game_ui.update_xp_label()
 
 func setup_timers():
-	destroy_timer.connect("timeout", Callable(self, "destroy_matches"))
+        destroy_timer.connect("timeout", self, "destroy_matches")
 	destroy_timer.set_one_shot(true)
 	destroy_timer.set_wait_time(0.6) # Tightened to align with last dot fade
 	add_child(destroy_timer)
 	
-	collapse_timer.connect("timeout", Callable(self, "collapse_columns"))
+        collapse_timer.connect("timeout", self, "collapse_columns")
 	collapse_timer.set_one_shot(true)
 	collapse_timer.set_wait_time(0.2)
 	add_child(collapse_timer)
 
-	refill_timer.connect("timeout", Callable(self, "refill_columns"))
+        refill_timer.connect("timeout", self, "refill_columns")
 	refill_timer.set_one_shot(true)
 	refill_timer.set_wait_time(0.1)
 	add_child(refill_timer)
 	
-	idle_timer.connect("timeout", Callable(self, "_on_idle_timer_timeout"))
+        idle_timer.connect("timeout", self, "_on_idle_timer_timeout")
 	idle_timer.set_one_shot(true)
 	# Hint/yawn delay before suggesting a matchable trio
 	idle_timer.set_wait_time(5.0)
@@ -156,7 +156,7 @@ func setup_timers():
 
 	# Inactivity reshuffle timer (only used when AUTO_RESHUFFLE)
 	if AUTO_RESHUFFLE:
-		inactivity_timer.connect("timeout", Callable(self, "_on_inactivity_timeout"))
+                inactivity_timer.connect("timeout", self, "_on_inactivity_timeout")
 		inactivity_timer.set_one_shot(true)
 		# Longer window before reshuffling the board
 		inactivity_timer.set_wait_time(25.0)
@@ -202,14 +202,14 @@ func spawn_dots():
 				
 				var dot_scene_to_use
 				for dot_scene in possible_dots:
-					var dot_instance = dot_scene.instantiate()
+					var dot_instance = dot_scene.instance()
 					if dot_instance.color == color:
 						dot_scene_to_use = dot_scene
 						dot_instance.queue_free()
 						break
 					dot_instance.queue_free()
 
-				var dot = dot_scene_to_use.instantiate()
+				var dot = dot_scene_to_use.instance()
 				dot.z_index = height - j
 				add_child(dot)
 				dot.position = grid_to_pixel(i, j)
@@ -243,10 +243,10 @@ func is_in_grid(grid_position):
 	return false
 
 func _input(event):
-	if state != move:
-		return
+        if state != move:
+                return
 
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+        if event is InputEventMouseButton and event.button_index == BUTTON_LEFT:
 		if event.is_pressed():
 			_restart_idle_timers()
 			idle_hint_count = 0
@@ -280,7 +280,8 @@ func _input(event):
 							direction = Vector2.DOWN
 						else:
 							direction = Vector2.UP
-					var swapped: bool = await swap_dots(start_grid_pos.x, start_grid_pos.y, direction)
+                                        var swapped_state = swap_dots(start_grid_pos.x, start_grid_pos.y, direction)
+                                        var swapped: bool = yield(swapped_state, "completed")
 					if not swapped:
 						dragged_dot.move(grid_to_pixel(start_grid_pos.x, start_grid_pos.y))
 				else:
@@ -320,7 +321,7 @@ func swap_dots(column, row, direction) -> bool:
 		first_dot.move(grid_to_pixel(nx, ny))
 		other_dot.move(grid_to_pixel(col, r))
 
-		await get_tree().create_timer(0.2).timeout
+                yield(get_tree().create_timer(0.2), "timeout")
 
 		if !move_checked:
 			find_matches()
@@ -357,11 +358,11 @@ func swap_back():
 	combo_counter = 1
 	# Count failed attempts and reshuffle after 3
 	_failed_attempts += 1
-	if AUTO_RESHUFFLE and _failed_attempts >= 3:
-		_failed_attempts = 0
-		await reshuffle_board()
-		# Ensure at least one valid move exists, then yawn the next trio
-		await ensure_moves_available()
+        if AUTO_RESHUFFLE and _failed_attempts >= 3:
+                _failed_attempts = 0
+                yield(reshuffle_board(), "completed")
+                # Ensure at least one valid move exists, then yawn the next trio
+                yield(ensure_moves_available(), "completed")
 		var group = find_potential_match_group()
 		if group.size() >= 3:
 			# Yawn the three same-colored dots that would form the next match
@@ -380,7 +381,7 @@ func _process(_delta):
 		dragged_dot.global_position = get_global_mouse_position()
 		# If the mouse/touch was released over UI and the release event was consumed,
 		# gracefully return the dot to its original cell.
-		if not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) and not Input.is_action_pressed("ui_touch"):
+        if not Input.is_mouse_button_pressed(BUTTON_LEFT) and not Input.is_action_pressed("ui_touch"):
 			var start_grid_pos = pixel_to_grid(drag_start_position.x, drag_start_position.y)
 			dragged_dot.move(grid_to_pixel(start_grid_pos.x, start_grid_pos.y))
 			dragged_dot.set_normal_texture()
@@ -411,8 +412,8 @@ func process_match_animations(dots_in_match):
 		if not dot.matched:
 			dot.matched = true
 			# When each dot finishes fading out, spawn its XP orb immediately via signal
-			if not dot.is_connected("match_faded", Callable(self, "_on_dot_match_faded")):
-				dot.match_faded.connect(Callable(self, "_on_dot_match_faded"))
+                        if not dot.is_connected("match_faded", self, "_on_dot_match_faded"):
+                                dot.connect("match_faded", self, "_on_dot_match_faded")
 			dot.play_match_animation(delay)
 			delay += 0.05
 			if matched_color == "":
@@ -439,7 +440,7 @@ func destroy_matches():
 				match_count += 1
 				
 				# Instantiate original particles
-				var particles = match_particles.instantiate()
+				var particles = match_particles.instance()
 				particles.position = all_dots[i][j].position
 				add_child(particles)
 				# If an orb wasn't already spawned on fade completion, spawn it now as a fallback
@@ -492,7 +493,7 @@ func destroy_matches():
 		if match_count > 0:
 			match_center /= match_count
 
-			var match_label = match_label_scene.instantiate()
+			var match_label = match_label_scene.instance()
 			match_label.text = "+" + str(points_earned)
 			get_parent().get_node("CanvasLayer").add_child(match_label)
 			match_label.global_position = match_center - Vector2(0, 20)
@@ -546,7 +547,7 @@ func _apply_wildcards(count: int) -> void:
 	for i in range(width):
 		for j in range(height):
 			if all_dots[i][j] != null:
-				positions.append(Vector2i(i, j))
+				positions.append(Vector2(i, j))
 	positions.shuffle()
 	var applied: int = 0
 	for p in positions:
@@ -590,10 +591,10 @@ func _compute_match_groups() -> Array:
 			if all_dots[i][j] == null:
 				i += 1
 				continue
-			run.append(Vector2i(i, j))
+			run.append(Vector2(i, j))
 			var k = i + 1
 			while k < width and all_dots[k][j] != null and _dots_match(all_dots[k-1][j], all_dots[k][j]):
-				run.append(Vector2i(k, j))
+				run.append(Vector2(k, j))
 				k += 1
 			if run.size() >= 3:
 				groups.append({"positions": run.duplicate(), "orientation": "h"})
@@ -607,10 +608,10 @@ func _compute_match_groups() -> Array:
 			if all_dots[i][j] == null:
 				j += 1
 				continue
-			run2.append(Vector2i(i, j))
+			run2.append(Vector2(i, j))
 			var k2 = j + 1
 			while k2 < height and all_dots[i][k2] != null and _dots_match(all_dots[i][k2-1], all_dots[i][k2]):
-				run2.append(Vector2i(i, k2))
+				run2.append(Vector2(i, k2))
 				k2 += 1
 			if run2.size() >= 3:
 				groups.append({"positions": run2.duplicate(), "orientation": "v"})
@@ -626,7 +627,7 @@ func _apply_specials_and_collect(groups: Array) -> Array:
 		if pos.size() >= 5:
 			# Create a wildcard in the center of the run; exclude it from matching now
 			var mid_index: int = pos.size() >> 1
-			var p: Vector2i = pos[mid_index]
+			var p: Vector2 = pos[mid_index]
 			var d = all_dots[p.x][p.y]
 			if d != null:
 				if d.has_method("set_wildcard"):
@@ -673,61 +674,61 @@ func _apply_specials_and_collect(groups: Array) -> Array:
 	return to_match
 
 # Visual sweep effects for line clears
-var _white_tex: Texture2D = null
+var _white_tex: Texture = null
 
-func _get_white_tex() -> Texture2D:
+func _get_white_tex() -> Texture:
 	if _white_tex != null:
 		return _white_tex
-	var img := Image.create(1, 1, false, Image.FORMAT_RGBA8)
+	var img = Image.create(1, 1, false, Image.FORMAT_RGBA8)
 	img.fill(Color(1,1,1,1))
 	_white_tex = ImageTexture.create_from_image(img)
 	return _white_tex
 
 func _spawn_row_sweep(row: int) -> void:
-	var tex := _get_white_tex()
-	var sprite := Sprite2D.new()
+	var tex = _get_white_tex()
+        var sprite = Sprite.new()
 	sprite.texture = tex
 	sprite.modulate = Color(1,1,1,0.45)
 	sprite.z_index = 1000
 	# Size
-	var total_w := float(width - 1) * float(offset) + float(offset)
-	var thickness := float(offset) * 0.6
+	var total_w = float(width - 1) * float(offset) + float(offset)
+	var thickness = float(offset) * 0.6
 	# Center position for the row
-	var center_x := x_start + float(offset) * ((float(width) - 1.0) * 0.5)
-	var center_y := y_start + -float(offset) * float(row)
+	var center_x = x_start + float(offset) * ((float(width) - 1.0) * 0.5)
+	var center_y = y_start + -float(offset) * float(row)
 	sprite.position = Vector2(center_x - 40.0, center_y)
 	sprite.scale = Vector2(total_w, thickness)
 	add_child(sprite)
 	# Animate slight slide and fade out
-	var t := get_tree().create_tween()
+	var t = get_tree().create_tween()
 	t.tween_property(sprite, "position:x", center_x + 40.0, 0.22).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	t.parallel().tween_property(sprite, "modulate:a", 0.0, 0.22)
-	t.finished.connect(Callable(sprite, "queue_free"))
+        t.parallel().tween_property(sprite, "modulate:a", 0.0, 0.22)
+        t.connect("finished", sprite, "queue_free")
 
 func _spawn_col_sweep(col: int) -> void:
-	var tex := _get_white_tex()
-	var sprite := Sprite2D.new()
+	var tex = _get_white_tex()
+        var sprite = Sprite.new()
 	sprite.texture = tex
 	sprite.modulate = Color(1,1,1,0.45)
 	sprite.z_index = 1000
 	# Size
-	var total_h := float(height - 1) * float(offset) + float(offset)
-	var thickness := float(offset) * 0.6
+	var total_h = float(height - 1) * float(offset) + float(offset)
+	var thickness = float(offset) * 0.6
 	# Center position for the column
-	var center_x := x_start + float(offset) * float(col)
-	var center_y := y_start + -float(offset) * ((float(height) - 1.0) * 0.5)
+	var center_x = x_start + float(offset) * float(col)
+	var center_y = y_start + -float(offset) * ((float(height) - 1.0) * 0.5)
 	sprite.position = Vector2(center_x, center_y - 40.0)
 	sprite.scale = Vector2(thickness, total_h)
 	add_child(sprite)
 	# Animate slight slide and fade out
-	var t := get_tree().create_tween()
+	var t = get_tree().create_tween()
 	t.tween_property(sprite, "position:y", center_y + 40.0, 0.22).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	t.parallel().tween_property(sprite, "modulate:a", 0.0, 0.22)
-	t.finished.connect(Callable(sprite, "queue_free"))
+        t.parallel().tween_property(sprite, "modulate:a", 0.0, 0.22)
+        t.connect("finished", sprite, "queue_free")
 
 func _spawn_xp_orb(from_global_pos: Vector2, color_name: String = ""):
 	var layer = get_parent().get_node("CanvasLayer")
-	var orb = Sprite2D.new()
+        var orb = Sprite.new()
 	orb.texture = xp_orb_texture
 	orb.scale = Vector2(0.45, 0.45)
 	orb.global_position = from_global_pos
@@ -751,8 +752,8 @@ func _spawn_xp_orb(from_global_pos: Vector2, color_name: String = ""):
 	t.tween_property(orb, "global_position", target, 0.28).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	# Spin and fade near the end
 	t.parallel().tween_property(orb, "rotation_degrees", orb.rotation_degrees + 360.0, 0.5)
-	t.parallel().tween_property(orb, "modulate:a", 0.0, 0.15).set_delay(0.45)
-	t.finished.connect(Callable(orb, "queue_free"))
+        t.parallel().tween_property(orb, "modulate:a", 0.0, 0.15).set_delay(0.45)
+        t.connect("finished", orb, "queue_free")
 
 # Called when a dot finishes its match fade-out; spawns the orb immediately.
 func _on_dot_match_faded(pos: Vector2, color_name: String):
@@ -781,13 +782,13 @@ func refill_columns():
 				var desired_color = pool[rand]
 				var dot_scene_to_use = null
 				for dot_scene in possible_dots:
-					var probe = dot_scene.instantiate()
+					var probe = dot_scene.instance()
 					if probe.color == desired_color:
 						dot_scene_to_use = dot_scene
 						probe.queue_free()
 						break
 					probe.queue_free()
-				var dot = dot_scene_to_use.instantiate()
+				var dot = dot_scene_to_use.instance()
 				var loops = 0
 				while (match_at(i, j, dot.color) && loops < 100):
 					var pr = dot
@@ -797,13 +798,13 @@ func refill_columns():
 					# Find scene for new desired color
 					dot_scene_to_use = null
 					for dot_scene in possible_dots:
-						var probe2 = dot_scene.instantiate()
+						var probe2 = dot_scene.instance()
 						if probe2.color == desired_color:
 							dot_scene_to_use = dot_scene
 							probe2.queue_free()
 							break
 						probe2.queue_free()
-					dot = dot_scene_to_use.instantiate()
+					dot = dot_scene_to_use.instance()
 					loops += 1
 				dot.z_index = height - j
 				add_child(dot)
@@ -811,7 +812,7 @@ func refill_columns():
 				var move_tween = dot.move(grid_to_pixel(i,j), 0.12)
 				all_dots[i][j] = dot
 				
-				await move_tween.finished
+                                yield(move_tween, "finished")
 				AudioManager.play_sound("dot_land")
 	after_refill()
 				
@@ -822,8 +823,8 @@ func after_refill():
 			if all_dots[i][j] != null:
 				all_dots[i][j].start_pulsing()
 
-	state = wait
-	await get_tree().create_timer(0.5).timeout
+        state = wait
+        yield(get_tree().create_timer(0.5), "timeout")
 	
 	var needs_another_pass = false
 	for i in range(width):
@@ -840,7 +841,7 @@ func after_refill():
 	else:
 		state = move
 		move_checked = false
-		await ensure_moves_available()
+                yield(ensure_moves_available(), "completed")
 		state = move
 
 func find_matches_after_refill():
@@ -864,8 +865,8 @@ func _on_inactivity_timeout():
 	# After a longer inactivity window, reshuffle (without immediate matches), then hint a move.
 	if not AUTO_RESHUFFLE:
 		return
-	await reshuffle_board()
-	await ensure_moves_available()
+        yield(reshuffle_board(), "completed")
+        yield(ensure_moves_available(), "completed")
 	var group = find_potential_match_group()
 	if group.size() >= 3:
 		var target_color = group[0].color
@@ -929,7 +930,7 @@ func find_potential_match_group():
 					return nodes2
 	return []
 
-# Internal helper: returns the three board positions (Vector2i) that would match after swapping (i,j) by direction.
+# Internal helper: returns the three board positions (Vector2) that would match after swapping (i,j) by direction.
 func _compute_match_triplet_after_swap(i, j, direction):
 	var di: int = int(direction.x)
 	var dj: int = int(direction.y)
@@ -961,24 +962,24 @@ func _compute_match_triplet_after_swap(i, j, direction):
 	# Horizontal center
 	if other_i > 0 and other_i < width - 1:
 		if temp_all_dots[other_i - 1][other_j] == other_color and temp_all_dots[other_i + 1][other_j] == other_color:
-			return [Vector2i(other_i - 1, other_j), Vector2i(other_i, other_j), Vector2i(other_i + 1, other_j)]
+			return [Vector2(other_i - 1, other_j), Vector2(other_i, other_j), Vector2(other_i + 1, other_j)]
 	# Vertical center
 	if other_j > 0 and other_j < height - 1:
 		if temp_all_dots[other_i][other_j - 1] == other_color and temp_all_dots[other_i][other_j + 1] == other_color:
-			return [Vector2i(other_i, other_j - 1), Vector2i(other_i, other_j), Vector2i(other_i, other_j + 1)]
+			return [Vector2(other_i, other_j - 1), Vector2(other_i, other_j), Vector2(other_i, other_j + 1)]
 
 	# Check for triplets centered on the original position
 	# Note: After swap, original position (i,j) holds 'other_color'
 	if i > 0 and i < width - 1:
 		if temp_all_dots[i - 1][j] == other_color and temp_all_dots[i + 1][j] == other_color:
-			return [Vector2i(i - 1, j), Vector2i(i, j), Vector2i(i + 1, j)]
+			return [Vector2(i - 1, j), Vector2(i, j), Vector2(i + 1, j)]
 	if j > 0 and j < height - 1:
 		if temp_all_dots[i][j - 1] == other_color and temp_all_dots[i][j + 1] == other_color:
-			return [Vector2i(i, j - 1), Vector2i(i, j), Vector2i(i, j + 1)]
+			return [Vector2(i, j - 1), Vector2(i, j), Vector2(i, j + 1)]
 
 	return []
 
-# Internal helper: returns the three board positions (Vector2i) that are the same color pre-swap
+# Internal helper: returns the three board positions (Vector2) that are the same color pre-swap
 # and would be the matched set after swapping (i,j) by direction. This excludes the off-color
 # dot that needs to move when the triplet is centered on the original position.
 func _compute_yawn_group_for_swap(i, j, direction):
@@ -1011,29 +1012,30 @@ func _compute_yawn_group_for_swap(i, j, direction):
 	# Case 1: triplet centered on 'other' position
 	if other_i > 0 and other_i < width - 1:
 		if temp_all_dots[other_i - 1][other_j] == other_color and temp_all_dots[other_i + 1][other_j] == other_color:
-			return [Vector2i(other_i - 1, other_j), Vector2i(other_i, other_j), Vector2i(other_i + 1, other_j)]
+			return [Vector2(other_i - 1, other_j), Vector2(other_i, other_j), Vector2(other_i + 1, other_j)]
 	if other_j > 0 and other_j < height - 1:
 		if temp_all_dots[other_i][other_j - 1] == other_color and temp_all_dots[other_i][other_j + 1] == other_color:
-			return [Vector2i(other_i, other_j - 1), Vector2i(other_i, other_j), Vector2i(other_i, other_j + 1)]
+			return [Vector2(other_i, other_j - 1), Vector2(other_i, other_j), Vector2(other_i, other_j + 1)]
 
 	# Case 2: triplet centered on 'original' position after swap: yaw should include the two like-colored
 	# neighbors around the original position, plus the 'other' dot which shares that color pre-swap.
 	if i > 0 and i < width - 1:
 		if temp_all_dots[i - 1][j] == other_color and temp_all_dots[i + 1][j] == other_color:
-			return [Vector2i(i - 1, j), Vector2i(i + 1, j), Vector2i(other_i, other_j)]
+			return [Vector2(i - 1, j), Vector2(i + 1, j), Vector2(other_i, other_j)]
 	if j > 0 and j < height - 1:
 		if temp_all_dots[i][j - 1] == other_color and temp_all_dots[i][j + 1] == other_color:
-			return [Vector2i(i, j - 1), Vector2i(i, j + 1), Vector2i(other_i, other_j)]
+			return [Vector2(i, j - 1), Vector2(i, j + 1), Vector2(other_i, other_j)]
 
 	return []
 
-func ensure_moves_available(max_attempts := 10):
-	var attempts = 0
-	while find_potential_match() == null and attempts < max_attempts:
-		attempts += 1
-		var shuffled = await reshuffle_board()
-		if not shuffled:
-			break
+func ensure_moves_available(max_attempts = 10):
+        var attempts = 0
+        while find_potential_match() == null and attempts < max_attempts:
+                attempts += 1
+                var reshuffle_state = reshuffle_board()
+                var shuffled = yield(reshuffle_state, "completed")
+                if not shuffled:
+                        break
 
 	# If we still have no move after several reshuffles, just warn; stage rotations will manage variety
 	if find_potential_match() == null:
@@ -1071,7 +1073,7 @@ func reshuffle_board() -> bool:
 		for j in range(height):
 			if all_dots[i][j] != null:
 				dots.append(all_dots[i][j])
-				occupied_cells.append(Vector2i(i, j))
+				occupied_cells.append(Vector2(i, j))
 
 	if dots.size() <= 1:
 		return false
@@ -1097,7 +1099,7 @@ func reshuffle_board() -> bool:
 		var candidate = make_2d_array()
 		for idx in range(dots.size()):
 			var dot = dots[idx]
-			var target_cell: Vector2i = target_cells[idx]
+			var target_cell: Vector2 = target_cells[idx]
 			candidate[target_cell.x][target_cell.y] = dot
 		# If the candidate contains any immediate matches, try again
 		if _matrix_has_immediate_match(candidate):
@@ -1114,7 +1116,7 @@ func reshuffle_board() -> bool:
 		tc.shuffle()
 		for idx in range(dots.size()):
 			var d = dots[idx]
-			var cell: Vector2i = tc[idx]
+			var cell: Vector2 = tc[idx]
 			valid_matrix[cell.x][cell.y] = d
 		final_target_cells = tc
 
@@ -1137,8 +1139,8 @@ func reshuffle_board() -> bool:
 	all_dots = valid_matrix
 	move_checked = false
 
-	if tweens.size() > 0:
-		await tweens.back().finished
+        if tweens.size() > 0:
+                yield(tweens.back(), "finished")
 
 	state = move
 	# Normalize dot animations after reshuffle
@@ -1193,25 +1195,25 @@ func can_move_create_match(i, j, direction):
 	return null
 
 func _on_level_up(new_level):
-	print("Level up to: " + str(new_level))
-	await celebrate_stage_transition(new_level)
-	# Clear and respawn for next stage
+        print("Level up to: " + str(new_level))
+        yield(celebrate_stage_transition(new_level), "completed")
+        # Clear and respawn for next stage
 
-	for i in range(width):
-		for j in range(height):
-			if all_dots[i][j] != null:
-				all_dots[i][j].queue_free()
-	all_dots = make_2d_array()
-	spawn_dots()
+        for i in range(width):
+                for j in range(height):
+                        if all_dots[i][j] != null:
+                                all_dots[i][j].queue_free()
+        all_dots = make_2d_array()
+        spawn_dots()
 
-	await ensure_moves_available()
-	state = move
+        yield(ensure_moves_available(), "completed")
+        state = move
 
 func celebrate_stage_transition(new_level):
-	state = wait
-	await play_wave_animation()
-	await play_dance_animation()
-	await show_stage_banner(new_level)
+        state = wait
+        yield(play_wave_animation(), "completed")
+        yield(play_dance_animation(), "completed")
+        yield(show_stage_banner(new_level), "completed")
 	state = move
 
 func play_wave_animation():
@@ -1236,7 +1238,7 @@ func play_wave_animation():
 			if delay > max_delay:
 				max_delay = delay
 	# Allow final tweens to finish
-	await get_tree().create_timer(max_delay + rise + fall).timeout
+        yield(get_tree().create_timer(max_delay + rise + fall), "timeout")
 	# Smoothly return any rotation to 0 just in case
 	for i in range(width):
 		for j in range(height):
@@ -1261,11 +1263,11 @@ func play_dance_animation():
 			tween.parallel().tween_property(dot, "scale", dot.scale * 1.08, 0.15)
 			tween.tween_property(dot, "rotation_degrees", -8, 0.15)
 			tween.parallel().tween_property(dot, "scale", dot.scale, 0.15)
-	await get_tree().create_timer(max_duration).timeout
+        yield(get_tree().create_timer(max_duration), "timeout")
 
 func show_stage_banner(new_level):
-	var layer = get_parent().get_node("CanvasLayer")
-	var tex: Texture2D = stage_banner_texture
+        var layer = get_parent().get_node("CanvasLayer")
+        var tex: Texture = stage_banner_texture
 	var vp = get_viewport().get_visible_rect().size
 	var size = tex.get_size()
 	var margin_y = 40.0
@@ -1284,23 +1286,22 @@ func show_stage_banner(new_level):
 
 	var text = Label.new()
 	text.text = "LEVEL UP!"
-	text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	text.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	text.add_theme_font_size_override("font_size", 40)
-	text.modulate = Color(1, 1, 1, 0.0)
-	text.set_anchors_preset(Control.PRESET_FULL_RECT)
-	root.add_child(text)
+        text.align = Label.ALIGN_CENTER
+        text.valign = Label.VALIGN_CENTER
+        text.modulate = Color(1, 1, 1, 0.0)
+        text.set_anchors_preset(Control.PRESET_FULL_RECT)
+        root.add_child(text)
 
-	var t = get_tree().create_tween()
-	t.tween_property(banner, "modulate:a", 1.0, 0.25)
-	t.parallel().tween_property(text, "modulate:a", 1.0, 0.25)
-	await t.finished
-	await get_tree().create_timer(0.9).timeout
-	var t2 = get_tree().create_tween()
-	t2.tween_property(banner, "modulate:a", 0.0, 0.3)
-	t2.parallel().tween_property(text, "modulate:a", 0.0, 0.3)
-	await t2.finished
-	root.queue_free()
+        var t = get_tree().create_tween()
+        t.tween_property(banner, "modulate:a", 1.0, 0.25)
+        t.parallel().tween_property(text, "modulate:a", 1.0, 0.25)
+        yield(t, "finished")
+        yield(get_tree().create_timer(0.9), "timeout")
+        var t2 = get_tree().create_tween()
+        t2.tween_property(banner, "modulate:a", 0.0, 0.3)
+        t2.parallel().tween_property(text, "modulate:a", 0.0, 0.3)
+        yield(t2, "finished")
+        root.queue_free()
 
 func _exit_tree():
 	# Stop any running timers to avoid lingering objects at shutdown

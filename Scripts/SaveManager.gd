@@ -1,38 +1,46 @@
 extends Node
 
-const SAVE_PATH := "user://player.json"
+const SAVE_PATH = "user://player.json"
 
-func has_player() -> bool:
-	return FileAccess.file_exists(SAVE_PATH)
+func has_player():
+        var f = File.new()
+        return f.file_exists(SAVE_PATH)
 
-func load_player() -> Dictionary:
-	if not has_player():
-		return {}
-	var text := FileAccess.get_file_as_string(SAVE_PATH)
-	if typeof(text) == TYPE_STRING and text != "":
-		var parsed = JSON.parse_string(text)
-		if typeof(parsed) == TYPE_DICTIONARY:
-			return parsed
-	return {}
+func load_player():
+        if not has_player():
+                return {}
+        var file = File.new()
+        var err = file.open(SAVE_PATH, File.READ)
+        if err != OK:
+                return {}
+        var text = file.get_as_text()
+        file.close()
+        if typeof(text) == TYPE_STRING and text != "":
+                var parsed = JSON.parse(text)
+                if parsed.error == OK and typeof(parsed.result) == TYPE_DICTIONARY:
+                        return parsed.result
+        return {}
 
-func save_player(data: Dictionary) -> bool:
-	var f := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
-	if f == null:
-		return false
-	f.store_string(JSON.stringify(data))
-	f.close()
-	return true
+func save_player(data):
+        var file = File.new()
+        var err = file.open(SAVE_PATH, File.WRITE)
+        if err != OK:
+                return false
+        file.store_string(JSON.print(data))
+        file.close()
+        return true
 
 # Optional lightweight localStorage helpers for Web
-func web_save_json(key: String, data: Variant) -> void:
-	if OS.has_feature("web") and OS.has_feature("JavaScript"):
-		var s := JSON.stringify(data)
-		JavaScriptBridge.eval("localStorage.setItem(" + JSON.stringify(key) + "," + JSON.stringify(s) + ")")
+func web_save_json(key, data):
+        if OS.has_feature("HTML5") and Engine.has_singleton("JavaScript"):
+                var s = JSON.print(data)
+                JavaScript.eval("localStorage.setItem(" + to_json(key) + "," + to_json(s) + ")", true)
 
-func web_load_json(key: String, default := {}) -> Variant:
-	if OS.has_feature("web") and OS.has_feature("JavaScript"):
-		var s = JavaScriptBridge.eval("localStorage.getItem(" + JSON.stringify(key) + ")")
-		if s != null:
-			var parsed = JSON.parse_string(str(s))
-			return parsed if parsed != null else default
-	return default
+func web_load_json(key, default = {}):
+        if OS.has_feature("HTML5") and Engine.has_singleton("JavaScript"):
+                var s = JavaScript.eval("localStorage.getItem(" + to_json(key) + ")", true)
+                if typeof(s) == TYPE_STRING and s != "":
+                        var parsed = JSON.parse(s)
+                        if parsed.error == OK:
+                                return parsed.result
+        return default

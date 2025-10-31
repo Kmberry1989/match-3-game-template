@@ -1,10 +1,8 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=2 format=2]
 
 [ext_resource type="Script" path="res://Scripts/Profile.gd" id="1_abcde"]
 
 [node name="Profile" type="Control"]
-layout_mode = 3
-anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
@@ -12,8 +10,6 @@ grow_vertical = 2
 script = ExtResource("1_abcde")
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
-layout_mode = 1
-anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 theme_override_constants/margin_left = 20
@@ -22,66 +18,48 @@ theme_override_constants/margin_right = 20
 theme_override_constants/margin_bottom = 20
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
-layout_mode = 2
 
 [node name="PlayerNameLabel" type="Label" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
 text = "Name: "
 
 [node name="TimePlayedLabel" type="Label" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
 text = "Time Played: "
 
 [node name="LevelLabel" type="Label" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
 text = "Level: "
 
 [node name="XpLabel" type="Label" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
 text = "XP: "
 
 [node name="BestComboLabel" type="Label" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
 text = "Best Combo: "
 
 [node name="LinesClearedLabel" type="Label" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
 text = "Dots Cleared: "
 
 [node name="HSeparator" type="HSeparator" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
 
 [node name="ObjectivesLabel" type="Label" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
 text = "Objectives:"
 
 [node name="ObjectivesContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
 
 [node name="HSeparator2" type="HSeparator" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
 
 [node name="TrophiesLabel" type="Label" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
 text = "Trophies:"
 
 [node name="TrophiesContainer" type="GridContainer" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
 columns = 1
 
 [node name="HSeparator3" type="HSeparator" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
 
 [node name="AvatarFrame" type="TextureRect" parent="MarginContainer/VBoxContainer/HBoxContainer"]
-layout_mode = 2
 custom_minimum_size = Vector2(150, 150)
 
 [node name="Avatar" type="TextureRect" parent="MarginContainer/VBoxContainer/HBoxContainer/AvatarFrame"]
-layout_mode = 1
-anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -89,22 +67,18 @@ anchor_bottom = 0.5
 grow_horizontal = 2
 grow_vertical = 2
 custom_minimum_size = Vector2(128, 128)
-expand_mode = 1
+expand = true
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer"]
-layout_mode = 2
 
 [node name="ChangeAvatarButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer"]
-layout_mode = 2
 text = "Change Avatar"
 
 [node name="FrameSelection" type="OptionButton" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer"]
-layout_mode = 2
 
 [node name="BackButton" type="Button" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
 text = "Back"
 
 [node name="FileDialog" type="FileDialog" parent="."]
 access = 2
-filters = PackedStringArray("*.png, *.jpg, *.jpeg ; Image Files")
+filters = PoolStringArray("*.png, *.jpg, *.jpeg ; Image Files")
