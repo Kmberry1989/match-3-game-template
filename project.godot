@@ -16,12 +16,11 @@ config/quit_on_go_back=false
 config/features=PackedStringArray("4.5")
 boot_splash/bg_color=Color(0, 0, 0, 1)
 boot_splash/use_filter=false
-boot_splash/image="uid://c1dhu4vva8d8q"
+boot_splash/image="uid://c7ii70vaqwmhr"
 config/icon="res://icon.png"
 
 [autoload]
 
-Firebase="*res://addons/godot-firebase/firebase/firebase.tscn"
 PlayerManager="*res://Scripts/PlayerManager.gd"
 NetworkManager="*res://Scripts/NetworkManager.gd"
 AudioManager="*res://Scripts/AudioManager.gd"
@@ -29,6 +28,13 @@ SaveManager="*res://Scripts/SaveManager.gd"
 AchievementManager="*res://addons/milestone/autoload/achievement_manager.gd"
 WebSocketClient="*res://addons/SimpleMultiplayer/autoload/websocket_client.gd"
 MultiplayerManager="*res://addons/SimpleMultiplayer/autoload/multiplayer_manager.gd"
+Firebase="*res://addons/godot-firebase/firebase/firebase.tscn"
+
+[debug]
+
+file_logging/enable_file_logging=true
+settings/gdscript/always_track_call_stacks=true
+settings/gdscript/always_track_local_variables=true
 
 [display]
 
@@ -37,6 +43,11 @@ window/size/viewport_height=960
 window/size/resizable=false
 window/stretch/mode="canvas_items"
 window/handheld/orientation=1
+
+[editor]
+
+import/use_multiple_threads=false
+export/convert_text_resources_to_binary=false
 
 [editor_plugins]
 
@@ -61,15 +72,34 @@ debug/print_errors=true
 debug/print_output=true
 general/save_as_json=true
 
+[navigation]
+
+avoidance/thread_model/avoidance_use_multiple_threads=false
+avoidance/thread_model/avoidance_use_high_priority_threads=false
+pathfinding/max_threads=1
+baking/thread_model/baking_use_multiple_threads=false
+baking/thread_model/baking_use_high_priority_threads=false
+
 [rendering]
 
-rendering_device/driver="d3d12"
+occlusion_culling/bvh_build_quality=0
+occlusion_culling/jitter_projection=false
+rendering_device/pipeline_cache/save_chunk_size_mb=3.982001
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
+textures/vram_compression/import_s3tc_bptc=true
 textures/vram_compression/import_etc2_astc=true
+textures/webp_compression/compression_method=3
+gl_compatibility/item_buffer_size=10000
 textures/default_filters/use_nearest_mipmap_filter=true
+textures/default_filters/anisotropic_filtering_level=0
+textures/basis_universal/zstd_supercompression_level=22
 environment/defaults/default_environment="res://default_env.tres"
 
 [simple_multiplayer]
 
 server_url="wss://servidorwebsocketgodot-bvmj.onrender.com"
+
+[threading]
+
+worker_pool/max_threads=1
