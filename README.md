@@ -33,3 +33,10 @@ Quick Start
 How it works
 - `WebSocketClient` handles the socket and emits: `connection_succeeded`, `room_created`, `room_joined`, `start_game`, `player_joined`, `player_left`.
 - `MultiplayerManager` listens and spawns `Scenes/NetPlayer.tscn` under `PlayerContainer` (added to `Scenes/Game.tscn`). Local players send positional state; remotes mirror it.
+
+## Web build
+
+The `docs` folder contains the exported web build for the game which can be hosted on any static web server or service.
+
+If you need the iOS WebAssembly memory cap workaround mentioned in the issue tracker, follow the step-by-step instructions in [`docs/web-memory-cap-usage.md`](docs/web-memory-cap-usage.md) to copy the patched loader files into your own export.
+
