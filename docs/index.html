@@ -111,7 +111,204 @@ body {
 		</div>
 
 		<script src="index.js"></script>
-		<script>
+		                <script>
+(function () {
+        const globalObject = typeof globalThis === "object" ? globalThis : window;
+        const patchFlag = "__godotWasmMemoryPatch__";
+        if (globalObject[patchFlag]) {
+                return;
+        }
+        globalObject[patchFlag] = true;
+
+        const WASM_PAGE_SIZE = 65536;
+        const MAX_MEMORY_PAGES = 4096; // 256 MiB.
+
+        function cloneBufferSource(source) {
+                if (source instanceof ArrayBuffer) {
+                        return new Uint8Array(source.slice(0));
+                }
+                if (ArrayBuffer.isView(source)) {
+                        const view = source;
+                        return new Uint8Array(view.buffer.slice(view.byteOffset, view.byteOffset + view.byteLength));
+                }
+                return null;
+        }
+
+        function encodeULEB(value, length) {
+                const bytes = [];
+                let remaining = value >>> 0;
+                do {
+                        let byte = remaining & 0x7f;
+                        remaining >>>= 7;
+                        if (remaining !== 0) {
+                                byte |= 0x80;
+                        }
+                        bytes.push(byte);
+                } while (remaining !== 0);
+                if (bytes.length > length) {
+                        return null;
+                }
+                while (bytes.length < length) {
+                        const lastIndex = bytes.length - 1;
+                        bytes[lastIndex] |= 0x80;
+                        if (bytes.length === length - 1) {
+                                bytes.push(0x00);
+                        } else {
+                                bytes.push(0x80);
+                        }
+                }
+                return bytes;
+        }
+
+        function decodeULEB(view, limit, state) {
+                let result = 0;
+                let shift = 0;
+                const start = state.offset;
+                let length = 0;
+                while (state.offset < limit) {
+                        const byte = view.getUint8(state.offset++);
+                        length += 1;
+                        result |= (byte & 0x7f) << shift;
+                        if ((byte & 0x80) === 0) {
+                                return { value: result >>> 0, start, length };
+                        }
+                        shift += 7;
+                }
+                throw new Error("Unexpected end of ULEB128");
+        }
+
+        function patchMemorySection(bytes) {
+                if (!(bytes instanceof Uint8Array)) {
+                        return bytes;
+                }
+                const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+                if (view.byteLength < 16) {
+                        return bytes;
+                }
+                // Check the wasm binary magic number.
+                if (view.getUint32(0, true) !== 0x6d736100) {
+                        return bytes;
+                }
+                const state = { offset: 8 };
+                const limit = view.byteLength;
+
+                try {
+                        while (state.offset < limit) {
+                                const sectionId = view.getUint8(state.offset++);
+                                const payloadInfo = decodeULEB(view, limit, state);
+                                const payloadEnd = state.offset + payloadInfo.value;
+                                if (payloadEnd > limit) {
+                                        break;
+                                }
+                                if (sectionId !== 5 /* memory section */) {
+                                        state.offset = payloadEnd;
+                                        continue;
+                                }
+
+                                const entryCount = decodeULEB(view, payloadEnd, state);
+                                if (entryCount.value === 0) {
+                                        break;
+                                }
+
+                                const limitsFlags = decodeULEB(view, payloadEnd, state);
+                                if ((limitsFlags.value & 0x1) === 0) {
+                                        break;
+                                }
+
+                                // Initial size is present but we only need to advance past it.
+                                decodeULEB(view, payloadEnd, state);
+                                const maximumInfo = decodeULEB(view, payloadEnd, state);
+                                if (maximumInfo.value <= MAX_MEMORY_PAGES) {
+                                        break;
+                                }
+
+                                const encoded = encodeULEB(MAX_MEMORY_PAGES, maximumInfo.length);
+                                if (!encoded) {
+                                        console.warn("Godot WebAssembly memory patch: failed to encode new limit");
+                                        break;
+                                }
+                                for (let i = 0; i < encoded.length; i += 1) {
+                                        view.setUint8(maximumInfo.start + i, encoded[i]);
+                                }
+                                const maxBytes = MAX_MEMORY_PAGES * WASM_PAGE_SIZE;
+                                console.info(`Godot WebAssembly memory cap set to ${maxBytes / (1024 * 1024)} MiB.`);
+                                break;
+                        }
+                } catch (err) {
+                        console.warn("Godot WebAssembly memory patch failed:", err);
+                }
+                return bytes;
+        }
+
+        function patchBufferSource(source) {
+                const cloned = cloneBufferSource(source);
+                if (!cloned) {
+                        return null;
+                }
+                return patchMemorySection(cloned);
+        }
+
+        async function patchStreamingSource(source) {
+                const resolved = await source;
+                if (typeof Response !== "undefined" && resolved instanceof Response) {
+                        try {
+                                const response = resolved.clone();
+                                const buffer = await response.arrayBuffer();
+                                return { bytes: patchMemorySection(new Uint8Array(buffer)), original: resolved };
+                        } catch (err) {
+                                console.warn("Godot WebAssembly streaming patch failed:", err);
+                                return { bytes: null, original: resolved };
+                        }
+                }
+                return { bytes: null, original: resolved };
+        }
+
+        const originalInstantiate = WebAssembly.instantiate.bind(WebAssembly);
+        WebAssembly.instantiate = function (source, imports) {
+                const patched = patchBufferSource(source);
+                if (patched) {
+                        return originalInstantiate(patched, imports);
+                }
+                return originalInstantiate(source, imports);
+        };
+
+        if (typeof WebAssembly.compile === "function") {
+                const originalCompile = WebAssembly.compile.bind(WebAssembly);
+                WebAssembly.compile = function (source) {
+                        const patched = patchBufferSource(source);
+                        if (patched) {
+                                return originalCompile(patched);
+                        }
+                        return originalCompile(source);
+                };
+        }
+
+        if (typeof WebAssembly.instantiateStreaming === "function") {
+                const originalInstantiateStreaming = WebAssembly.instantiateStreaming.bind(WebAssembly);
+                WebAssembly.instantiateStreaming = function (source, imports) {
+                        return patchStreamingSource(Promise.resolve(source)).then(({ bytes, original }) => {
+                                if (bytes) {
+                                        return originalInstantiate(bytes, imports);
+                                }
+                                return originalInstantiateStreaming(original, imports);
+                        });
+                };
+        }
+
+        if (typeof WebAssembly.compileStreaming === "function") {
+                const originalCompileStreaming = WebAssembly.compileStreaming.bind(WebAssembly);
+                WebAssembly.compileStreaming = function (source) {
+                        return patchStreamingSource(Promise.resolve(source)).then(({ bytes, original }) => {
+                                if (bytes) {
+                                        return WebAssembly.compile(bytes);
+                                }
+                                return originalCompileStreaming(original);
+                        });
+                };
+        }
+})();
+                </script>
+
 const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":38788932,"index.wasm":36160334},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4,"serviceWorker":"index.service.worker.js"};
 const GODOT_THREADS_ENABLED = false;
 const engine = new Engine(GODOT_CONFIG);
