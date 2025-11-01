@@ -1,116 +1,146 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=2 format=2]
 
-[ext_resource type="Script" path="res://Scripts/PauseMenu.gd" id="1"]
+[ext_resource path="res://Scripts/PauseMenu.gd" type="Script" id=1]
 
 [node name="PauseMenu" type="Control"]
 pause_mode = 2
 visible = false
-layout_mode = 3
-anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-script = ExtResource("1")
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="Panel" type="Panel" parent="."]
-layout_mode = 1
-anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="Center" type="CenterContainer" parent="."]
-layout_mode = 1
-anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="VBox" type="VBoxContainer" parent="Center"]
-layout_mode = 2
+margin_left = 212.0
+margin_top = 243.0
+margin_right = 332.0
+margin_bottom = 357.0
 alignment = 1
 
 [node name="Title" type="Label" parent="Center/VBox"]
-layout_mode = 2
+margin_right = 120.0
+margin_bottom = 14.0
 text = "Paused"
-horizontal_alignment = 1
+align = 1
 
 [node name="MusicVolume" type="HBoxContainer" parent="Center/VBox"]
-layout_mode = 2
+margin_top = 18.0
+margin_right = 442.0
+margin_bottom = 38.0
 alignment = 1
 
 [node name="MusicLabel" type="Label" parent="Center/VBox/MusicVolume"]
-layout_mode = 2
+margin_top = 3.0
+margin_right = 38.0
+margin_bottom = 17.0
 text = "Music"
 
 [node name="MusicSlider" type="HSlider" parent="Center/VBox/MusicVolume"]
-layout_mode = 2
-size_flags_horizontal = 3
+margin_left = 42.0
+margin_right = 402.0
+margin_bottom = 20.0
+rect_min_size = Vector2( 360, 0 )
 min_value = -60.0
 max_value = 0.0
 step = 0.5
-value = 0.0
-custom_minimum_size = Vector2(360, 0)
 
 [node name="MusicPercent" type="Label" parent="Center/VBox/MusicVolume"]
-layout_mode = 2
+margin_left = 406.0
+margin_top = 3.0
+margin_right = 442.0
+margin_bottom = 17.0
 text = "100%"
 
 [node name="SfxVolume" type="HBoxContainer" parent="Center/VBox"]
-layout_mode = 2
+margin_top = 42.0
+margin_right = 442.0
+margin_bottom = 62.0
 alignment = 1
 
 [node name="SfxLabel" type="Label" parent="Center/VBox/SfxVolume"]
-layout_mode = 2
+margin_top = 3.0
+margin_right = 38.0
+margin_bottom = 17.0
 text = "Sound"
 
 [node name="SfxSlider" type="HSlider" parent="Center/VBox/SfxVolume"]
-layout_mode = 2
-size_flags_horizontal = 3
+margin_left = 42.0
+margin_right = 402.0
+margin_bottom = 20.0
+rect_min_size = Vector2( 360, 0 )
 min_value = -60.0
 max_value = 0.0
 step = 0.5
-value = 0.0
-custom_minimum_size = Vector2(360, 0)
 
 [node name="SfxPercent" type="Label" parent="Center/VBox/SfxVolume"]
-layout_mode = 2
+margin_left = 406.0
+margin_top = 3.0
+margin_right = 442.0
+margin_bottom = 17.0
 text = "100%"
 
 [node name="ResumeButton" type="Button" parent="Center/VBox"]
-layout_mode = 2
+margin_top = 66.0
+margin_right = 120.0
+margin_bottom = 86.0
 text = "Resume"
 
 [node name="ShopButton" type="Button" parent="Center/VBox"]
-layout_mode = 2
+margin_top = 90.0
+margin_right = 120.0
+margin_bottom = 110.0
 text = "Shop"
 
 [node name="Shop" type="VBoxContainer" parent="Center/VBox"]
 visible = false
-layout_mode = 2
+margin_top = 114.0
+margin_right = 120.0
+margin_bottom = 114.0
 alignment = 1
 
 [node name="Coins" type="Label" parent="Center/VBox/Shop"]
-layout_mode = 2
+margin_right = 120.0
+margin_bottom = 14.0
 text = "Coins: 0"
-horizontal_alignment = 1
+align = 1
 
 [node name="BuyFrame2" type="Button" parent="Center/VBox/Shop"]
-layout_mode = 2
+margin_top = 18.0
+margin_right = 120.0
+margin_bottom = 38.0
 text = "Buy Frame 2 (10)"
 
 [node name="BuyBG2" type="Button" parent="Center/VBox/Shop"]
-layout_mode = 2
+margin_top = 42.0
+margin_right = 120.0
+margin_bottom = 62.0
 text = "Buy Background 2 (20)"
 
 [node name="BuyBG3" type="Button" parent="Center/VBox/Shop"]
-layout_mode = 2
+margin_top = 66.0
+margin_right = 120.0
+margin_bottom = 86.0
 text = "Buy Background 3 (20)"
 
 [node name="BuyBG4" type="Button" parent="Center/VBox/Shop"]
-layout_mode = 2
+margin_top = 90.0
+margin_right = 120.0
+margin_bottom = 110.0
 text = "Buy Background 4 (20)"
 

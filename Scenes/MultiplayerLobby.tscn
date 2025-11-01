@@ -1,106 +1,134 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=2 format=2]
 
-[ext_resource type="Script" path="res://Scripts/MultiplayerLobby.gd" id="1_zzmsn"]
+[ext_resource path="res://Scripts/MultiplayerLobby.gd" type="Script" id=1]
 
 [node name="MultiplayerLobby" type="Control"]
-layout_mode = 3
-anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-script = ExtResource("1_zzmsn")
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="Panel" type="Panel" parent="."]
-anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -240.0
-offset_top = -180.0
-offset_right = 240.0
-offset_bottom = 180.0
+margin_left = -240.0
+margin_top = -180.0
+margin_right = 240.0
+margin_bottom = 180.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="VBox" type="VBoxContainer" parent="Panel"]
-layout_mode = 2
-anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 16.0
-offset_top = 16.0
-offset_right = -16.0
-offset_bottom = -16.0
-theme_override_constants/separation = 10
+margin_left = 16.0
+margin_top = 16.0
+margin_right = -16.0
+margin_bottom = -16.0
+custom_constants/separation = 10
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="Title" type="Label" parent="Panel/VBox"]
-layout_mode = 2
+margin_right = 448.0
+margin_bottom = 14.0
 text = "Simple Multiplayer"
-horizontal_alignment = 1
+align = 1
 
 [node name="Url" type="Label" parent="Panel/VBox"]
-layout_mode = 2
+margin_top = 24.0
+margin_right = 448.0
+margin_bottom = 38.0
 text = "Server: ws://127.0.0.1:9090"
-horizontal_alignment = 1
+align = 1
 
 [node name="Buttons" type="HBoxContainer" parent="Panel/VBox"]
-layout_mode = 2
-theme_override_constants/separation = 12
+margin_top = 48.0
+margin_right = 448.0
+margin_bottom = 68.0
 alignment = 1
+custom_constants/separation = 12
 
 [node name="FindMatch" type="Button" parent="Panel/VBox/Buttons"]
-layout_mode = 2
+margin_left = 98.0
+margin_right = 175.0
+margin_bottom = 20.0
 text = "Find Match"
 
 [node name="CancelMatch" type="Button" parent="Panel/VBox/Buttons"]
-layout_mode = 2
+margin_left = 187.0
+margin_right = 242.0
+margin_bottom = 20.0
 text = "Cancel"
 
 [node name="Leave" type="Button" parent="Panel/VBox/Buttons"]
-layout_mode = 2
+margin_left = 254.0
+margin_right = 301.0
+margin_bottom = 20.0
 text = "Leave"
 
 [node name="Ready" type="Button" parent="Panel/VBox/Buttons"]
-layout_mode = 2
+margin_left = 313.0
+margin_right = 362.0
+margin_bottom = 20.0
 text = "Ready"
 
 [node name="Start" type="Button" parent="Panel/VBox/Buttons"]
-layout_mode = 2
+margin_left = 374.0
+margin_right = 415.0
+margin_bottom = 20.0
 text = "Start"
 
 [node name="ModeHBox" type="HBoxContainer" parent="Panel/VBox"]
-layout_mode = 2
-theme_override_constants/separation = 8
+margin_top = 78.0
+margin_right = 448.0
+margin_bottom = 102.0
+custom_constants/separation = 8
 
 [node name="ModeLabel" type="Label" parent="Panel/VBox/ModeHBox"]
-layout_mode = 2
+margin_top = 5.0
+margin_right = 34.0
+margin_bottom = 19.0
 text = "Mode"
 
 [node name="Mode" type="OptionButton" parent="Panel/VBox/ModeHBox"]
-layout_mode = 2
-item_count = 2
+margin_left = 42.0
+margin_right = 119.0
+margin_bottom = 24.0
+text = "Co-op"
+items = [ "Co-op", null, false, 0, null, "1v1 Race", null, false, 1, null ]
 selected = 0
-popup/item_0/text = "Co-op"
-popup/item_0/id = 0
-popup/item_1/text = "1v1 Race"
-popup/item_1/id = 1
 
 [node name="TargetHBox" type="HBoxContainer" parent="Panel/VBox"]
-layout_mode = 2
-theme_override_constants/separation = 8
+margin_top = 112.0
+margin_right = 448.0
+margin_bottom = 136.0
+custom_constants/separation = 8
 
 [node name="TargetLabel" type="Label" parent="Panel/VBox/TargetHBox"]
-layout_mode = 2
+margin_top = 5.0
+margin_right = 72.0
+margin_bottom = 19.0
 text = "Target Score"
 
 [node name="Target" type="SpinBox" parent="Panel/VBox/TargetHBox"]
-layout_mode = 2
+margin_left = 80.0
+margin_right = 160.0
+margin_bottom = 24.0
 min_value = 10.0
 max_value = 10000.0
 step = 10.0
 value = 500.0
 
 [node name="Status" type="Label" parent="Panel/VBox"]
-layout_mode = 2
-horizontal_alignment = 1
+margin_top = 146.0
+margin_right = 448.0
+margin_bottom = 160.0
 text = "Connecting..."
+align = 1
