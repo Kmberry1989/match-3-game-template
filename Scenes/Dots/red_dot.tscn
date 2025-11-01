@@ -1,11 +1,11 @@
-[gd_scene load_steps=3 format=3 uid="uid://d2edamb02mpln"]
+[gd_scene load_steps=3 format=2]
 
-[ext_resource type="PackedScene" path="res://Scenes/Dot.tscn" id="2"]
-[ext_resource type="Texture2D" path="res://Assets/Dots/rochelleavatar.png" id="2_t8ngr"]
+[ext_resource path="res://Scenes/Dot.tscn" type="PackedScene" id=2]
+[ext_resource path="res://Assets/Dots/rochelleavatar.png" type="Texture" id=3]
 
-[node name="red_dot" instance=ExtResource("2")]
+[node name="red_dot" instance=ExtResource( 2 )]
 color = "red"
 
-[node name="Sprite2D" parent="." index="0"]
-scale = Vector2(0.25, 0.25)
-texture = ExtResource("2_t8ngr")
+[node name="Sprite" parent="." index="0"]
+scale = Vector2( 0.25, 0.25 )
+texture = ExtResource( 3 )

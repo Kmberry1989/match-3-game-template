@@ -1,12 +1,12 @@
 extends Node
 
-onready var trophy_notification = $CanvasLayer/TrophyNotification
+@onready var trophy_notification = $CanvasLayer/TrophyNotification
 
 func _ready():
 	print("[Game.gd] _ready: Starting.")
-	PlayerManager.connect("trophy_unlocked", self, "_on_trophy_unlocked")
+	PlayerManager.trophy_unlocked.connect(self._on_trophy_unlocked)
 	if Engine.has_singleton("AchievementManager"):
-		AchievementManager.connect("achievement_unlocked", self, "_on_achievement_unlocked")
+		AchievementManager.achievement_unlocked.connect(self._on_achievement_unlocked)
 	# Autoload singletons are available as globals; no Engine.has_singleton check needed
 	if AudioManager != null:
 		print("[Game.gd] _ready: Playing in-game music.")

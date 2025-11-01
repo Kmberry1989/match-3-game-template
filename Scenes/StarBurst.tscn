@@ -1,27 +1,27 @@
-[gd_scene load_steps=3 format=3 uid="uid://dpsk2v3i3n1c1"]
+[gd_scene load_steps=3 format=2]
 
-[ext_resource type="Texture2D" path="res://Assets/Visuals/star_particle.png" id="1_abcde"]
+[ext_resource path="res://Assets/Visuals/star_particle.png" type="Texture" id=1]
 
-[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_xyz12"]
-particle_flag_disable_z = true
+[sub_resource type="ParticlesMaterial" id=1]
+flag_disable_z = true
 emission_shape = 1
 emission_sphere_radius = 10.0
 spread = 180.0
-gravity = Vector3(0, 0, 0)
-initial_velocity_min = 120.0
-initial_velocity_max = 180.0
-damping_min = 250.0
-damping_max = 300.0
-scale_min = 0.5
-scale_max = 1.0
-color = Color(1, 0.9, 0.6, 1)
-hue_variation_min = -0.05
-hue_variation_max = 0.05
+gravity = Vector3( 0, 0, 0 )
+initial_velocity = 150.0
+initial_velocity_random = 0.2
+damping = 275.0
+damping_random = 0.1
+scale = 1.0
+scale_random = 0.5
+color = Color( 1, 0.9, 0.6, 1 )
+hue_variation = 0.05
+hue_variation_random = 1.0
 
-[node name="StarBurst" type="GPUParticles2D"]
+[node name="StarBurst" type="Particles2D"]
 emitting = false
 amount = 12
-process_material = SubResource("ParticleProcessMaterial_xyz12")
-texture = ExtResource("1_abcde")
 one_shot = true
 explosiveness = 1.0
+process_material = SubResource( 1 )
+texture = ExtResource( 1 )

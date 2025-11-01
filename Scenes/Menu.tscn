@@ -1,17 +1,17 @@
-[gd_scene load_steps=2 format=2]
+[gd_scene load_steps=2 format=3 uid="uid://r2na44yq4agv"]
 
-[ext_resource path="res://Scripts/Menu.gd" type="Script" id=1]
+[ext_resource type="Script" path="res://Scripts/Menu.gd" id=1]
 
 [node name="Menu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-margin_left = -29.0
-margin_right = 276.619
-margin_bottom = 441.429
-rect_scale = Vector2( 0.719, 0.7 )
+offset_left = -29.0
+offset_right = 276.619
+offset_bottom = 441.429
+scale = Vector2(0.719, 0.7)
 script = ExtResource( 1 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
-[node name="MainMenuBackground" type="Sprite" parent="."]
+[node name="MainMenuBackground" type="TextureRect"]
+layout_mode = 0

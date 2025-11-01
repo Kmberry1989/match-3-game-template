@@ -1,12 +1,12 @@
-[gd_scene load_steps=3 format=3 uid="uid://dqxg1qtahm5my"]
+[gd_scene load_steps=3 format=2]
 
-[ext_resource type="PackedScene" path="res://Scenes/Dot.tscn" id="2"]
-[ext_resource type="Texture2D" path="res://Assets/Dots/kyleavatar.png" id="2_vvr5v"]
+[ext_resource path="res://Scenes/Dot.tscn" type="PackedScene" id=2]
+[ext_resource path="res://Assets/Dots/kyleavatar.png" type="Texture" id=3]
 
-[node name="green_dot" instance=ExtResource("2")]
-position = Vector2(1, 0)
+[node name="green_dot" instance=ExtResource( 2 )]
+position = Vector2( 1, 0 )
 color = "green"
 
-[node name="Sprite2D" parent="." index="0"]
-scale = Vector2(0.25, 0.25)
-texture = ExtResource("2_vvr5v")
+[node name="Sprite" parent="." index="0"]
+scale = Vector2( 0.25, 0.25 )
+texture = ExtResource( 3 )

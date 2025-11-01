@@ -1,93 +1,123 @@
-[gd_scene load_steps=3 format=3 uid="uid://d1e2f3g4h5i6"]
+[gd_scene load_steps=2 format=2]
 
-[ext_resource path="res://Scripts/Showcase.gd" type="Script" id="1_abcde"]
+[ext_resource path="res://Scripts/Showcase.gd" type="Script" id=1]
 
 [node name="Showcase" type="Panel"]
-anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-script = ExtResource("1_abcde")
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
-layout_mode = 1
-anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
 alignment = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="Title" type="Label" parent="VBoxContainer"]
-layout_mode = 2
+margin_top = 339.0
+margin_right = 544.0
+margin_bottom = 353.0
 text = "Showcase"
-horizontal_alignment = 1
+align = 1
 
 [node name="TabContainer" type="TabContainer" parent="VBoxContainer"]
-layout_mode = 2
+margin_top = 357.0
+margin_right = 544.0
+margin_bottom = 661.0
 size_flags_vertical = 3
 
 [node name="Trophies" type="Control" parent="VBoxContainer/TabContainer"]
-layout_mode = 2
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 4.0
+margin_top = 32.0
+margin_right = -4.0
+margin_bottom = -4.0
 
 [node name="Scroll" type="ScrollContainer" parent="VBoxContainer/TabContainer/Trophies"]
-layout_mode = 2
+anchor_right = 1.0
+anchor_bottom = 1.0
 size_flags_vertical = 3
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="TrophyGrid" type="GridContainer" parent="VBoxContainer/TabContainer/Trophies/Scroll"]
-layout_mode = 2
+margin_right = 536.0
 size_flags_horizontal = 3
 columns = 4
 
 [node name="Frames" type="Control" parent="VBoxContainer/TabContainer"]
-layout_mode = 2
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 4.0
+margin_top = 32.0
+margin_right = -4.0
+margin_bottom = -4.0
 
 [node name="Scroll" type="ScrollContainer" parent="VBoxContainer/TabContainer/Frames"]
-layout_mode = 2
+anchor_right = 1.0
+anchor_bottom = 1.0
 size_flags_vertical = 3
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 
 [node name="FrameGrid" type="GridContainer" parent="VBoxContainer/TabContainer/Frames/Scroll"]
-layout_mode = 2
+margin_right = 536.0
 size_flags_horizontal = 3
 columns = 4
 
 [node name="BackButton" type="Button" parent="VBoxContainer"]
-layout_mode = 2
+margin_top = 665.0
+margin_right = 544.0
+margin_bottom = 685.0
 text = "Back"
 
 [node name="ViewerOverlay" type="ColorRect" parent="."]
 visible = false
-anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
 mouse_filter = 1
-color = Color(0, 0, 0, 0.7)
+color = Color( 0, 0, 0, 0.7 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="Center" type="CenterContainer" parent="ViewerOverlay"]
-layout_mode = 1
-anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="VBox" type="VBoxContainer" parent="ViewerOverlay/Center"]
-layout_mode = 2
-alignment = 1
+margin_left = 32.0
+margin_top = 251.0
+margin_right = 512.0
+margin_bottom = 749.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
+alignment = 1
 
 [node name="LargeImage" type="TextureRect" parent="ViewerOverlay/Center/VBox"]
-layout_mode = 2
-custom_minimum_size = Vector2(480, 480)
-expand_mode = 1
+margin_right = 480.0
+margin_bottom = 480.0
+rect_min_size = Vector2( 480, 480 )
+expand = true
 stretch_mode = 6
 
 [node name="ItemLabel" type="Label" parent="ViewerOverlay/Center/VBox"]
-layout_mode = 2
-horizontal_alignment = 1
+margin_top = 484.0
+margin_right = 480.0
+margin_bottom = 498.0
+align = 1
 
 [connection signal="pressed" from="VBoxContainer/BackButton" to="." method="_on_back_button_pressed"]

@@ -1,217 +1,221 @@
-[gd_scene load_steps=10 format=2]
+[gd_scene load_steps=10 format=3 uid="uid://bvyvjkal4jkb5"]
 
-[ext_resource path="res://Scripts/GameUI.gd" type="Script" id=1]
-[ext_resource path="res://Assets/Visuals/longcontainer.png" type="Texture" id=2]
-[ext_resource path="res://Assets/Visuals/container.png" type="Texture" id=3]
-[ext_resource path="res://Assets/Visuals/score.png" type="Texture" id=4]
-[ext_resource path="res://Assets/Visuals/player_avatar.png" type="Texture" id=5]
-[ext_resource path="res://Assets/Visuals/avatar_frame_2.png" type="Texture" id=6]
-[ext_resource path="res://Assets/Visuals/pause_button.png" type="Texture" id=7]
-[ext_resource path="res://Assets/Visuals/home_button.png" type="Texture" id=8]
-[ext_resource path="res://Assets/Visuals/shop_button.png" type="Texture" id=9]
+[ext_resource type="Script" path="res://Scripts/GameUI.gd" id=1]
+[ext_resource type="Texture2D" path="res://Assets/Visuals/longcontainer.png" id=2]
+[ext_resource type="Texture2D" path="res://Assets/Visuals/container.png" id=3]
+[ext_resource type="Texture2D" path="res://Assets/Visuals/score.png" id=4]
+[ext_resource type="Texture2D" path="res://Assets/Visuals/player_avatar.png" id=5]
+[ext_resource type="Texture2D" path="res://Assets/Visuals/avatar_frame_2.png" id=6]
+[ext_resource type="Texture2D" path="res://Assets/Visuals/pause_button.png" id=7]
+[ext_resource type="Texture2D" path="res://Assets/Visuals/home_button.png" id=8]
+[ext_resource type="Texture2D" path="res://Assets/Visuals/shop_button.png" id=9]
 
 [sub_resource type="StyleBoxFlat" id=1]
-bg_color = Color( 0.6, 0.6, 0.6, 0.5 )
+bg_color = Color(0.6, 0.6, 0.6, 0.5)
 corner_radius_top_left = 10
 corner_radius_top_right = 10
 corner_radius_bottom_right = 10
 corner_radius_bottom_left = 10
 
 [node name="GameUI" type="Control"]
+layout_mode = 3
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 script = ExtResource( 1 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
-[node name="Longcontainer" type="Sprite" parent="."]
-position = Vector2( 269.033, 855.5 )
-scale = Vector2( 0.933775, 0.933775 )
+[node name="Longcontainer" type="TextureRect"]
+layout_mode = 0
+offset_left = 269.033
+offset_top = 855.5
+offset_right = 269.033
+offset_bottom = 855.5
+scale = Vector2(0.933775, 0.933775)
 texture = ExtResource( 2 )
 
-[node name="Container" type="Sprite" parent="."]
-position = Vector2( 273.128, 144.796 )
-scale = Vector2( 0.368726, 0.389164 )
+[node name="Container" type="TextureRect"]
+layout_mode = 0
+offset_left = 273.128
+offset_top = 144.796
+offset_right = 273.128
+offset_bottom = 144.796
+scale = Vector2(0.368726, 0.389164)
 texture = ExtResource( 3 )
 
-[node name="MarginContainer" type="MarginContainer" parent="."]
+[node name="MarginContainer" type="MarginContainer"]
+layout_mode = 1
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-margin_top = 1.0
-margin_bottom = 1.0
-custom_constants/margin_right = 20
-custom_constants/margin_top = 20
-custom_constants/margin_left = 20
-custom_constants/margin_bottom = 20
-__meta__ = {
-"_edit_use_anchors_": false
-}
+offset_top = 1.0
+offset_bottom = 1.0
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_bottom = 20
 
-[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer"]
-margin_left = 20.0
-margin_top = 20.0
-margin_right = 524.0
-margin_bottom = 1005.0
+[node name="HBoxContainer" type="HBoxContainer"]
+layout_mode = 2
 alignment = 1
 
-[node name="PlayerInfo" type="PanelContainer" parent="MarginContainer/HBoxContainer"]
-margin_right = 154.0
-margin_bottom = 985.0
-custom_styles/panel = SubResource( 1 )
+[node name="PlayerInfo" type="PanelContainer"]
+layout_mode = 2
+theme_override_styles/panel = SubResource( 1 )
 
-[node name="HBox" type="HBoxContainer" parent="MarginContainer/HBoxContainer/PlayerInfo"]
-margin_left = 7.0
-margin_top = 5.0
-margin_right = 147.0
-margin_bottom = 980.0
+[node name="HBox" type="HBoxContainer"]
+layout_mode = 2
+offset_left = 7.0
+offset_top = 5.0
+offset_right = 147.0
+offset_bottom = 980.0
 
-[node name="AvatarFrame" type="TextureRect" parent="MarginContainer/HBoxContainer/PlayerInfo/HBox"]
-margin_right = 140.0
-margin_bottom = 975.0
-expand = true
+[node name="AvatarFrame" type="TextureRect"]
+layout_mode = 2
 stretch_mode = 2
 
-[node name="Avatar" type="TextureRect" parent="MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame"]
+[node name="Avatar" type="TextureRect"]
+layout_mode = 1
+anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-margin_left = -118.872
-margin_top = -366.51
-margin_right = 5.33636
-margin_bottom = -240.562
-rect_scale = Vector2( 0.666975, 0.522213 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
+offset_left = -118.872
+offset_top = -366.51
+offset_right = 5.33636
+offset_bottom = -240.562
+scale = Vector2(0.666975, 0.522213)
 
-[node name="VBox" type="VBoxContainer" parent="MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame"]
+[node name="VBox" type="VBoxContainer"]
+layout_mode = 1
+anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-margin_left = 14.8844
-margin_top = -376.43
-margin_right = 103.256
-margin_bottom = -299.43
-rect_scale = Vector2( 1.13076, 1.01355 )
+offset_left = 14.8844
+offset_top = -376.43
+offset_right = 103.256
+offset_bottom = -299.43
+scale = Vector2(1.13076, 1.01355)
 alignment = 1
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
-[node name="Score" type="Sprite" parent="MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame/VBox"]
-position = Vector2( 46.9852, 32.1513 )
-scale = Vector2( 0.5842, 0.574876 )
+[node name="Score" type="TextureRect"]
+layout_mode = 0
+offset_left = 46.9852
+offset_top = 32.1513
+offset_right = 46.9852
+offset_bottom = 32.1513
+scale = Vector2(0.5842, 0.574876)
 texture = ExtResource( 4 )
 
-[node name="PlayerAvatar" type="Sprite" parent="MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame/VBox"]
-position = Vector2( -90.5948, 31.0945 )
-scale = Vector2( 0.56227, 0.579446 )
+[node name="PlayerAvatar" type="TextureRect"]
+layout_mode = 0
+offset_left = -90.5948
+offset_top = 31.0945
+offset_right = -90.5948
+offset_bottom = 31.0945
+scale = Vector2(0.56227, 0.579446)
 texture = ExtResource( 5 )
 
-[node name="LevelLabel" type="Label" parent="MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame"]
-anchor_top = 0.003
-anchor_bottom = 0.003
-margin_left = 4.12755
-margin_top = 80.8095
-margin_right = 144.971
-margin_bottom = 103.81
-rect_scale = Vector2( 0.944357, 0.796766 )
+[node name="LevelLabel" type="Label"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -70.4435
+offset_top = 80.8095
+offset_right = 70.4435
+offset_bottom = 103.81
+scale = Vector2(0.944357, 0.796766)
 text = "Level: 1"
-align = 1
-__meta__ = {
-"_edit_use_anchors_": false
-}
+horizontal_alignment = 1
 
-[node name="XpLabel" type="Label" parent="MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame"]
-margin_left = -1.87247
-margin_top = 102.57
-margin_right = 151.536
-margin_bottom = 125.57
-rect_scale = Vector2( 0.944357, 0.796766 )
+[node name="XpLabel" type="Label"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -76.4085
+offset_top = 102.57
+offset_right = 76.4085
+offset_bottom = 125.57
+scale = Vector2(0.944357, 0.796766)
 text = "XP: 0/100"
-align = 1
-__meta__ = {
-"_edit_use_anchors_": false
-}
+horizontal_alignment = 1
 
-[node name="CoinsLabel" type="Label" parent="MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame"]
-margin_left = 2.12756
-margin_top = 122.57
-margin_right = 142.971
-margin_bottom = 145.57
-rect_scale = Vector2( 0.944357, 0.796766 )
+[node name="CoinsLabel" type="Label"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -69.3162
+offset_top = 122.57
+offset_right = 69.3162
+offset_bottom = 145.57
+scale = Vector2(0.944357, 0.796766)
 text = "Coins: 0"
-align = 1
-__meta__ = {
-"_edit_use_anchors_": false
-}
+horizontal_alignment = 1
 
-[node name="PlayerNameLabel" type="Label" parent="MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame"]
-margin_left = 131.128
-margin_top = 178.49
-margin_right = 245.418
-margin_bottom = 210.894
-rect_scale = Vector2( 0.891109, 0.748682 )
+[node name="PlayerNameLabel" type="Label"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -57.1491
+offset_top = 178.49
+offset_right = 57.1491
+offset_bottom = 210.894
+scale = Vector2(0.891109, 0.748682)
 text = "Player"
-align = 1
+horizontal_alignment = 1
 uppercase = true
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
-[node name="AvatarFrame2" type="Sprite" parent="MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame"]
+[node name="AvatarFrame2" type="TextureRect"]
 visible = false
-position = Vector2( -122, 80 )
-scale = Vector2( 0.47613, 0.47613 )
+layout_mode = 0
+offset_left = -122.0
+offset_top = 80.0
+offset_right = -122.0
+offset_bottom = 80.0
+scale = Vector2(0.47613, 0.47613)
 texture = ExtResource( 6 )
 
-[node name="PauseButton" type="Button" parent="MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame"]
+[node name="PauseButton" type="Button"]
+layout_mode = 1
+anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-margin_left = 77.0662
-margin_top = 771.5
-margin_right = 209.825
-margin_bottom = 920.711
-rect_scale = Vector2( 0.867352, 0.86271 )
+offset_left = 77.0662
+offset_top = 771.5
+offset_right = 209.825
+offset_bottom = 920.711
 grow_horizontal = 0
+scale = Vector2(0.867352, 0.86271)
 icon = ExtResource( 7 )
-flat = true
-expand_icon = true
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
-[node name="HomeButton" type="Button" parent="MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame"]
+[node name="HomeButton" type="Button"]
+layout_mode = 1
+anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-margin_left = -57.9338
-margin_top = 771.5
-margin_right = 74.0662
-margin_bottom = 920.5
-rect_scale = Vector2( 0.867352, 0.86271 )
+offset_left = -57.9338
+offset_top = 771.5
+offset_right = 74.0662
+offset_bottom = 920.5
 grow_horizontal = 0
+scale = Vector2(0.867352, 0.86271)
 icon = ExtResource( 8 )
-flat = true
-expand_icon = true
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
-[node name="ShopButton" type="Button" parent="MarginContainer/HBoxContainer/PlayerInfo/HBox/AvatarFrame"]
+[node name="ShopButton" type="Button"]
+layout_mode = 1
+anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-margin_left = -192.934
-margin_top = 771.5
-margin_right = -59.9338
-margin_bottom = 920.5
-rect_scale = Vector2( 0.867352, 0.86271 )
+offset_left = -192.934
+offset_top = 771.5
+offset_right = -59.9338
+offset_bottom = 920.5
 grow_horizontal = 0
+scale = Vector2(0.867352, 0.86271)
 icon = ExtResource( 9 )
-flat = true
-expand_icon = true
-__meta__ = {
-"_edit_use_anchors_": false
-}
